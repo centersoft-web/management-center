@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Contratos Imobiliários</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Mammoth.js para Leitura/Importação de Arquivos Word (.docx) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Courier New', 'Courier', 'monospace']
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            800: '#0c4a6e',
+                            900: '#0a3651',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Quebra de Página no Editor */
+        .quebra-pagina {
+            page-break-after: always;
+            border-top: 2px dashed #0284c7;
+            margin: 40px 0;
+            position: relative;
+            height: 20px;
+            cursor: default;
+            user-select: none;
+        }
+        .quebra-pagina::before {
+            content: "--- QUEBRA DE PÁGINA (NÃO SAI NA IMPRESSÃO) ---";
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Inter', sans-serif;
+            font-size: 10px;
+            color: #0284c7;
+            font-weight: 700;
+        }
+
+        /* Estilos de Impressão */
+        @media print {
+            .no-print, header, footer, .toolbar, .tabs-container, .simulador-container, .card-inputs {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            main {
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+            }
+            #editor {
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                box-shadow: none !important;
+            }
+            @page {
+                margin: 2cm;
+            }
+            .quebra-pagina {
+                border: none !important;
+                height: 0 !important;
+                margin: 0 !important;
+            }
+            .quebra-pagina::before {
+                content: "";
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Header Navbar Sticky -->
+    <header class="bg-gradient-to-r from-slate-900 via-sky-950 to-slate-900 text-white shadow-lg sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-brand-500/20 rounded-xl border border-brand-500/30">
+                    <i class="fa-solid fa-file-contract text-2xl text-brand-500"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2">
+                        Gestão de Contratos Imobiliários
+                    </h1>
+                    <p class="text-xs text-slate-300">Editor e Gerenciador de Contratos por Imóvel</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 flex-wrap justify-center">
+                <button onclick="exportBackup()" class="btn flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg shadow-sm transition">
+                    <i class="fa-solid fa-file-export"></i> Exportar
+                </button>
+                <button onclick="document.getElementById('fileInput').click()" class="btn flex items-center gap-2 bg-amber-700 hover:bg-amber-600 text-white font-semibold text-xs px-3.5 py-2 rounded-lg shadow-sm transition">
+                    <i class="fa-solid fa-file-import"></i> Importar
+                </button>
+                <input type="file" id="fileInput" style="display:none" accept=".json" onchange="importBackup(event)">
+
+                <button onclick="window.print()" class="btn flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg shadow-sm transition border border-emerald-400/30">
+                    <i class="fa-solid fa-print"></i> Imprimir / PDF
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-grow space-y-4">
+
+        <!-- Abas de Navegação -->
+        <div class="no-print">
+            <div class="flex flex-wrap items-center gap-1 pb-1" id="tab-list"></div>
+        </div>
+
+        <!-- Formulário de Dados do Imóvel -->
+        <div class="card-inputs bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 no-print">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Imóvel (Nome Aba):</label>
+                    <input type="text" id="in-imovel" oninput="updateCurrentData()" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white focus:outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Cidade / Bairro:</label>
+                    <input type="text" id="in-pref" oninput="updateCurrentData()" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white focus:outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">IPTU:</label>
+                    <input type="text" id="in-iptu" oninput="updateCurrentData()" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white focus:outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Matrícula:</label>
+                    <input type="text" id="in-mat" oninput="updateCurrentData()" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white focus:outline-none transition">
+                </div>
+            </div>
+        </div>
+
+        <!-- Toolbar de Formatação -->
+        <div class="toolbar no-print bg-slate-800 text-white rounded-xl p-2.5 shadow-md flex flex-wrap gap-2 items-center justify-center text-xs sticky top-20 z-40">
+            
+            <div class="flex items-center gap-1.5 flex-wrap">
+                <!-- Importar Word -->
+                <button onclick="document.getElementById('wordFileInput').click()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-2.5 py-1 rounded shadow flex items-center gap-1" title="Importar arquivo Word (.docx)">
+                    <i class="fa-solid fa-file-word"></i> Importar Word
+                </button>
+                <input type="file" id="wordFileInput" style="display:none" accept=".docx" onchange="importWordDoc(event)">
+
+                <div class="h-4 w-px bg-slate-600 mx-1"></div>
+
+                <!-- Fonte -->
+                <select onchange="document.execCommand('fontName', false, this.value)" class="bg-slate-700 text-white border border-slate-600 rounded px-2 py-1 text-xs focus:outline-none">
+                    <option value="Courier New">Courier</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Arial">Arial</option>
+                </select>
+
+                <!-- Tamanho da Fonte -->
+                <select onchange="changeFontSize(this.value)" class="bg-slate-700 text-white border border-slate-600 rounded px-2 py-1 text-xs focus:outline-none">
+                    <option value="10pt">10pt</option>
+                    <option value="11pt">11pt</option>
+                    <option value="12pt" selected>12pt</option>
+                    <option value="14pt">14pt</option>
+                    <option value="16pt">16pt</option>
+                </select>
+
+                <!-- Espaçamento de Linha -->
+                <select id="lineHeightSelect" onchange="changeLineHeight(this.value)" title="Espaçamento entre linhas" class="bg-slate-700 text-white border border-slate-600 rounded px-2 py-1 text-xs focus:outline-none">
+                    <option value="0.70">Line 0.7</option>
+                    <option value="0.80">Line 0.8</option>
+                    <option value="0.90">Line 0.9</option>
+                    <option value="1.00">Line 1.0</option>
+                    <option value="1.10">Line 1.1</option>
+                    <option value="1.20">Line 1.2</option>
+                    <option value="1.30">Line 1.3</option>
+                    <option value="1.40">Line 1.4</option>
+                    <option value="1.50">Line 1.5</option>
+                    <option value="1.60">Line 1.6</option>
+                    <option value="1.70">Line 1.7</option>
+                    <option value="1.80">Line 1.8</option>
+                    <option value="1.90">Line 1.9</option>
+                    <option value="2.00">Line 2.0</option>
+                </select>
+
+                <!-- Recuo -->
+                <div class="flex items-center gap-1 bg-slate-700 px-2 py-0.5 rounded border border-slate-600">
+                    <span title="Recuo do Parágrafo"><i class="fa-solid fa-indent text-slate-300"></i></span>
+                    <select onchange="ajustarRecuo(this.value)" title="Recuo do Parágrafo (cm)" class="bg-transparent text-white text-xs focus:outline-none">
+                        <option value="0" selected class="bg-slate-800">0cm</option>
+                        <option value="0.25cm" class="bg-slate-800">0.25cm</option>
+                        <option value="0.50cm" class="bg-slate-800">0.50cm</option>
+                        <option value="0.75cm" class="bg-slate-800">0.75cm</option>
+                        <option value="1cm" class="bg-slate-800">1.0cm</option>
+                        <option value="1.25cm" class="bg-slate-800">1.25cm</option>
+                        <option value="1.50cm" class="bg-slate-800">1.50cm</option>
+                        <option value="1.75cm" class="bg-slate-800">1.75cm</option>
+                        <option value="2cm" class="bg-slate-800">2.0cm</option>
+                        <option value="2.25cm" class="bg-slate-800">2.25cm</option>
+                        <option value="2.50cm" class="bg-slate-800">2.50cm</option>
+                        <option value="2.75cm" class="bg-slate-800">2.75cm</option>
+                        <option value="3cm" class="bg-slate-800">3.0cm</option>
+                    </select>
+                </div>
+
+                <div class="h-4 w-px bg-slate-600 mx-1"></div>
+
+                <!-- Botões Estilo de Texto -->
+                <button onclick="document.execCommand('bold')" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded font-bold" title="Negrito">B</button>
+                <button onclick="document.execCommand('italic')" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded italic" title="Itálico">I</button>
+                <button onclick="document.execCommand('underline')" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded underline" title="Sublinhado">U</button>
+
+                <!-- Destaques e Cores -->
+                <button onclick="document.execCommand('hiliteColor', false, 'yellow')" class="bg-yellow-500 text-slate-900 px-2 py-1 rounded font-bold" title="Grifar Amarelo">🖍️</button>
+                <button onclick="document.execCommand('hiliteColor', false, 'transparent')" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded" title="Limpar Grifo">🧼</button>
+
+                <button onclick="document.execCommand('foreColor', false, 'red')" class="bg-slate-700 hover:bg-slate-600 text-red-400 font-bold px-2 py-1 rounded" title="Texto Vermelho">A</button>
+                <button onclick="document.execCommand('foreColor', false, 'blue')" class="bg-slate-700 hover:bg-slate-600 text-blue-400 font-bold px-2 py-1 rounded" title="Texto Azul">A</button>
+                <button onclick="document.execCommand('foreColor', false, 'black')" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold px-2 py-1 rounded" title="Texto Preto">A</button>
+
+                <div class="h-4 w-px bg-slate-600 mx-1"></div>
+
+                <!-- Alinhamentos -->
+                <button onclick="document.execCommand('justifyLeft')" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded" title="Esquerda"><i class="fa-solid fa-align-left"></i></button>
+                <button onclick="document.execCommand('justifyCenter')" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded" title="Centralizar"><i class="fa-solid fa-align-center"></i></button>
+                <button onclick="document.execCommand('justifyRight')" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded" title="Direita"><i class="fa-solid fa-align-right"></i></button>
+                <button onclick="document.execCommand('justifyFull')" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded" title="Justificado"><i class="fa-solid fa-align-justify"></i></button>
+            </div>
+
+                <!-- Utilitários -->
+                <button onclick="insertDate()" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded" title="Inserir Data"><i class="fa-regular fa-calendar-days"></i> Data</button>
+                <button onclick="inserirQuebra()" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-sky-400" title="Quebra de Página"><i class="fa-solid fa-scissors"></i> Quebra</button>
+                <button onclick="copyToClipboard()" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded" title="Copiar Texto HTML"><i class="fa-regular fa-copy"></i> Copiar</button>
+                <button onclick="clearAll()" class="bg-rose-900/60 hover:bg-rose-800 text-rose-200 px-2 py-1 rounded" title="Limpar Editor"><i class="fa-solid fa-trash-can"></i> Limpar</button>
+
+                <!-- Localizar -->                
+                <div class="flex items-center gap-1 bg-slate-700 px-2 py-0.5 rounded border border-slate-600">
+                    <i class="fa-solid fa-magnifying-glass text-slate-400"></i>
+                    <input type="text" id="busca-texto" placeholder="Localizar..." class="bg-transparent text-white px-1 py-0.5 w-96 focus:outline-none text-xs">
+                    <button type="button" id="btn-next" onclick="buscarNoTexto()" class="bg-brand-600 hover:bg-brand-500 text-white font-bold px-2 py-0.5 rounded text-[10px]" title="Procurar Próximo">Next</button>
+
+<div class="h-4 w-px bg-slate-600 mx-1"></div>
+
+                <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="bg-rose-900/60 hover:bg-rose-800 text-rose-200 px-2 py-1 rounded" title="Início da Página">
+  <i class="fa-solid fa-arrow-up"></i>
+</button>
+
+<button onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" class="bg-rose-900/60 hover:bg-rose-800 text-rose-200 px-2 py-1 rounded" title="Fim da Página">
+  <i class="fa-solid fa-arrow-down"></i>
+</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Simulador de Datas e Ações da Aba -->
+        <div class="simulador-container bg-slate-200/80 border border-slate-300 rounded-xl p-3 flex flex-wrap items-center gap-3 text-xs no-print justify-between">
+            <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-semibold text-slate-700 flex items-center gap-1">
+                    <i class="fa-solid fa-calculator text-brand-600"></i> Simular Vencimento:
+                </span>
+                <input type="date" id="s-data" class="px-2 py-1 bg-white border border-slate-300 rounded text-slate-800 font-mono text-xs focus:outline-none">
+                <span class="font-bold">+</span>
+                <input type="number" id="s-mes" value="0" class="w-14 px-2 py-1 bg-white border border-slate-300 rounded text-slate-800 font-mono text-xs focus:outline-none">
+                <span class="font-medium text-slate-600">meses</span>
+                
+                <button class="bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 font-bold px-3 py-1 rounded shadow-sm transition" 
+                    onclick="let d=new Date(document.getElementById('s-data').value+'T12:00:00'); d.setMonth(d.getMonth()+parseInt(document.getElementById('s-mes').value)); document.getElementById('s-res').innerText=d.toLocaleDateString('pt-BR');" 
+                    title="Calcular Data">
+                    Calcular
+                </button>
+                <span id="s-res" class="bg-white border border-slate-300 px-3 py-1 rounded font-mono font-bold text-slate-800">---</span>
+            </div>
+
+            <div>
+                <button onclick="deleteImovel()" title="Excluir Aba" class="bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold px-3 py-1.5 rounded-lg border border-rose-300 transition flex items-center gap-1">
+                    <i class="fa-solid fa-triangle-exclamation text-rose-600"></i> Excluir Aba
+                </button>
+            </div>
+        </div>
+
+        <!-- Folha Editor A4 -->
+        <div class="flex justify-center">
+            <div id="editor" contenteditable="true" oninput="updateCurrentData()" class="w-[210mm] min-h-[297mm] p-[20mm] bg-white border border-slate-300 shadow-xl rounded-sm font-mono text-xs leading-relaxed text-justify outline-none text-slate-900"></div>
+        </div>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 no-print">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>Sistema de Gestão e Elaboração de Contratos Imobiliários.</p>
+            <p class="mt-1 text-slate-400">&copy; Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        let imoveis = [{ nome: 'Imóvel 1', pref: '', iptu: '', mat: '', contrato: '' }];
+        let activeIndex = 0;
+        let dragSrcIndex = null;
+
+        function renderTabs() {
+            const container = document.getElementById('tab-list');
+            container.innerHTML = '';
+            imoveis.forEach((imovel, index) => {
+                const tab = document.createElement('div');
+                const isActive = index === activeIndex;
+                tab.className = `px-4 py-2 text-xs font-bold rounded-t-xl cursor-pointer border transition-all flex items-center gap-2 ${isActive ? 'bg-white text-brand-700 border-slate-300 border-b-transparent shadow-sm -mb-px z-10' : 'bg-slate-200 hover:bg-slate-300 text-slate-600 border-transparent'}`;
+                tab.innerText = imovel.nome || `Imóvel ${index + 1}`;
+                tab.draggable = true;
+                tab.dataset.index = index;
+                tab.onclick = () => switchTab(index);
+                tab.ondragstart = (e) => { dragSrcIndex = index; e.target.classList.add('opacity-40'); };
+                tab.ondragover = (e) => e.preventDefault();
+                tab.ondrop = (e) => {
+                    const targetIndex = parseInt(tab.dataset.index);
+                    if (dragSrcIndex !== targetIndex) {
+                        const item = imoveis.splice(dragSrcIndex, 1)[0];
+                        imoveis.splice(targetIndex, 0, item);
+                        activeIndex = targetIndex;
+                        saveToStorage(); renderTabs(); loadCurrentData();
+                    }
+                };
+                tab.ondragend = (e) => e.target.classList.remove('opacity-40');
+                container.appendChild(tab);
+            });
+            const addBtn = document.createElement('button');
+            addBtn.className = 'px-3 py-2 bg-slate-300 hover:bg-slate-400 text-slate-800 text-xs font-bold rounded-t-xl transition';
+            addBtn.innerText = '+ Nova Aba';
+            addBtn.onclick = addImovel;
+            container.appendChild(addBtn);
+        }
+
+        function switchTab(index) { activeIndex = index; loadCurrentData(); renderTabs(); }
+        function addImovel() {
+            imoveis.push({ nome: `Novo Imóvel`, pref: '', iptu: '', mat: '', contrato: '' });
+            activeIndex = imoveis.length - 1;
+            loadCurrentData(); renderTabs(); saveToStorage();
+        }
+
+        function deleteImovel() {
+            if (imoveis.length === 1) return alert("Você precisa de pelo menos uma aba aberta!");
+            if (confirm(`Excluir a aba "${imoveis[activeIndex].nome}"?`)) {
+                imoveis.splice(activeIndex, 1);
+                if (activeIndex >= imoveis.length) activeIndex = imoveis.length - 1;
+                renderTabs(); loadCurrentData(); saveToStorage();
+            }
+        }
+
+        function loadCurrentData() {
+            const item = imoveis[activeIndex];
+            document.getElementById('in-imovel').value = item.nome || '';
+            document.getElementById('in-pref').value = item.pref || '';
+            document.getElementById('in-iptu').value = item.iptu || '';
+            document.getElementById('in-mat').value = item.mat || '';
+            document.getElementById('editor').innerHTML = item.contrato || '';
+        }
+
+        function updateCurrentData() {
+            imoveis[activeIndex].nome = document.getElementById('in-imovel').value;
+            imoveis[activeIndex].pref = document.getElementById('in-pref').value;
+            imoveis[activeIndex].iptu = document.getElementById('in-iptu').value;
+            imoveis[activeIndex].mat = document.getElementById('in-mat').value;
+            imoveis[activeIndex].contrato = document.getElementById('editor').innerHTML;
+            renderTabs(); saveToStorage();
+        }
+
+        // IndexedDB permite armazenar backups grandes sem o limite reduzido do localStorage.
+        const DB_NAME = 'gestao_contratos_db';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'dados';
+        const DATA_KEY = 'imoveis';
+        let saveTimer = null;
+        function openDatabase() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onupgradeneeded = () => {
+                    const db = request.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME);
+                };
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+        async function persistNow() {
+            const db = await openDatabase();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                tx.objectStore(STORE_NAME).put(imoveis, DATA_KEY);
+                tx.oncomplete = () => { db.close(); resolve(); };
+                tx.onerror = () => { const error = tx.error; db.close(); reject(error); };
+                tx.onabort = () => { const error = tx.error; db.close(); reject(error); };
+            });
+        }
+        function saveToStorage() {
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(() => persistNow().catch(error => {
+                console.error('Falha ao salvar:', error);
+                alert('Não foi possível salvar no navegador. Exporte um backup JSON.');
+            }), 500);
+        }
+        async function loadFromStorage() {
+            const db = await openDatabase();
+            const saved = await new Promise((resolve, reject) => {
+                const request = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).get(DATA_KEY);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+            db.close();
+            return saved;
+        }
+        window.onload = async function() {
+            try {
+                let saved = await loadFromStorage();
+                if (!saved) {
+                    const legacy = localStorage.getItem('alberto_multicontratos');
+                    if (legacy) {
+                        saved = JSON.parse(legacy);
+                        if (Array.isArray(saved)) {
+                            imoveis = saved;
+                            await persistNow();
+                            localStorage.removeItem('alberto_multicontratos');
+                        }
+                    }
+                }
+                if (Array.isArray(saved) && saved.length) imoveis = saved;
+            } catch (error) {
+                console.error('Falha ao carregar:', error);
+                alert('Não foi possível carregar os dados salvos. Você ainda pode importar o backup JSON.');
+            }
+            activeIndex = 0;
+            renderTabs();
+            loadCurrentData();
+        };
+
+        async function copyToClipboard() {
+            const editor = document.getElementById('editor');
+            try {
+                const type = "text/html";
+                const blob = new Blob([editor.innerHTML], { type });
+                const data = [new ClipboardItem({ [type]: blob, ["text/plain"]: new Blob([editor.innerText], {type: "text/plain"}) })];
+                await navigator.clipboard.write(data);
+                alert("Contrato copiado para a área de transferência!");
+            } catch (err) { alert("Erro ao copiar."); }
+        }
+
+        function exportBackup() {
+            const agora = new Date();
+            const ano = agora.getFullYear(); 
+            const dia = String(agora.getDate()).padStart(2, '0');
+            const mes = String(agora.getMonth() + 1).padStart(2, '0');
+            const dataCompleta = `${dia}-${mes}-${ano}`;
+            const horas = String(agora.getHours()).padStart(2, '0');
+            const minutos = String(agora.getMinutes()).padStart(2, '0');
+            const segundos = String(agora.getSeconds()).padStart(2, '0');
+            const horario = `${horas}-${minutos}-${segundos}`;
+
+            const nomeArquivo = `Gestão_de_Contratos_${ano}_${dataCompleta}_${horario}.json`;
+            
+            const blob = new Blob([JSON.stringify(imoveis)], { type: "application/json" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob); 
+            a.download = nomeArquivo; 
+            a.click();
+        }
+
+        async function importBackup(event) {
+            const input = event.target;
+            const file = input.files && input.files[0];
+            if (!file) return;
+            try {
+                const text = await file.text();
+                const parsed = JSON.parse(text.replace(/^\uFEFF/, ''));
+                if (!Array.isArray(parsed) || !parsed.length) throw new Error('O backup não contém uma lista de imóveis.');
+                imoveis = parsed.map((item, index) => {
+                    if (!item || typeof item !== 'object') throw new Error(`Registro ${index + 1} inválido.`);
+                    return {
+                        nome: String(item.nome ?? `Imóvel ${index + 1}`),
+                        pref: String(item.pref ?? ''),
+                        iptu: String(item.iptu ?? ''),
+                        mat: String(item.mat ?? ''),
+                        contrato: typeof item.contrato === 'string' ? item.contrato : String(item.contrato ?? '')
+                    };
+                });
+                activeIndex = 0;
+                await persistNow();
+                renderTabs();
+                loadCurrentData();
+                alert(`Backup importado por completo: ${imoveis.length} aba(s).`);
+            } catch (error) {
+                console.error('Erro ao importar:', error);
+                alert(`Não foi possível importar o backup: ${error.message}`);
+            } finally {
+                input.value = '';
+            }
+        }
+
+        function importWordDoc(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(loadEvent) {
+                const arrayBuffer = loadEvent.target.result;
+                
+                mammoth.convertToHtml({ arrayBuffer: arrayBuffer })
+                    .then(function(result) {
+                        const editor = document.getElementById('editor');
+                        editor.innerHTML = result.value;
+                        
+                        // Garante formatação consistente em parágrafos e linhas vazias
+                        editor.querySelectorAll('p').forEach(p => {
+                            if (!p.innerHTML.trim()) {
+                                p.innerHTML = '<br>';
+                            }
+                            p.style.margin = "0 0 10px 0";
+                        });
+                        
+                        updateCurrentData();
+                        event.target.value = '';
+                    })
+                    .catch(function(err) {
+                        alert("Erro ao ler o arquivo Word: " + err.message);
+                    });
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function changeFontSize(size) {
+            document.execCommand('fontSize', false, '7');
+            const fontSpans = document.getElementsByTagName("font");
+            for (let i = 0; i < fontSpans.length; i++) {
+                if (fontSpans[i].size == "7") {
+                    fontSpans[i].removeAttribute("size");
+                    fontSpans[i].style.fontSize = size;
+                }
+            }
+            updateCurrentData();
+        }
+
+        function changeLineHeight(spacing) {
+            const selection = window.getSelection();
+            if (!selection.rangeCount || selection.isCollapsed) return;
+
+            document.execCommand('foreColor', false, '#000004');
+            const marks = document.querySelectorAll('font[color="#000004"]');
+            
+            marks.forEach(mark => {
+                mark.removeAttribute('color');
+                mark.style.color = 'black';
+                
+                let block = mark.parentElement;
+                while (block && block.id !== 'editor' && !['P', 'DIV', 'LI'].includes(block.tagName)) {
+                    block = block.parentElement;
+                }
+
+                if (block && block.id !== 'editor') {
+                    block.style.lineHeight = spacing;
+                    block.style.margin = "0px 0px 5px 0px"; 
+                    block.style.padding = "0px";
+                } else {
+                    const div = document.createElement('div');
+                    div.style.lineHeight = spacing;
+                    div.style.display = 'block';
+                    div.style.margin = "0px 0px 5px 0px";
+                    mark.parentNode.insertBefore(div, mark);
+                    div.appendChild(mark);
+                }
+            });
+            updateCurrentData();
+        }
+
+        function insertDate() {
+            const d = new Date();
+            const dataF = d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+            document.execCommand('insertText', false, "São Paulo, " + dataF);
+            updateCurrentData();
+        }
+
+        function clearAll() { if(confirm("Limpar o texto deste contrato?")) { document.getElementById('editor').innerHTML = ''; updateCurrentData(); } }
+
+      // Manipulador de colar (paste) garantindo a atualização dos dados
+        document.getElementById('editor').addEventListener('paste', function(e) {
+            e.preventDefault();
+            let html = (e.originalEvent || e).clipboardData.getData('text/html');
+            if (html) {
+                let div = document.createElement('div');
+                div.innerHTML = html;
+                div.querySelectorAll('*').forEach(el => {
+                    el.style.border = 'none'; el.style.boxShadow = 'none'; el.style.background = 'transparent';
+                    el.style.width = '100%'; el.style.maxWidth = '100%'; el.style.boxSizing = 'border-box';
+                    if (['P', 'DIV', 'LI'].includes(el.tagName)) { el.style.display = 'block'; el.style.margin = '0 0 10px 0'; el.style.padding = '0'; }
+                });
+                document.execCommand('insertHTML', false, div.innerHTML);
+            } else {
+                const text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                document.execCommand('insertText', false, text);
+            }
+            document.execCommand('fontName', false, 'Courier New');
+            
+            // Atualiza os dados salvos imediatamente após colar
+            updateCurrentData();
+        });
+
+        function inserirQuebra() {
+            const div = document.createElement('div');
+            div.className = 'quebra-pagina'; div.contentEditable = false; 
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                range.insertNode(div);
+                const br = document.createElement('br'); div.after(br);
+                range.setStartAfter(br); range.setEndAfter(br);
+            }
+            updateCurrentData();
+        }
+
+        function buscarNoTexto() {
+            const termo = document.getElementById('busca-texto').value;
+            if (!termo) return;
+            
+            if (!window.find(termo, false, false, true, false, true, false)) {
+                window.getSelection().removeAllRanges();
+                window.find(termo, false, false, true, false, true, false);
+            }
+        }
+
+        document.addEventListener('keydown', function (e) {
+            const campoBusca = document.getElementById('busca-texto');
+            if (e.key === 'Enter' && campoBusca.value.trim() !== "") {
+                e.preventDefault();
+                buscarNoTexto();
+            }
+        });
+
+        function ajustarRecuo(valor) {
+            document.execCommand('formatBlock', false, 'div');
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                let range = selection.getRangeAt(0);
+                let node = range.commonAncestorContainer;
+                if (node.nodeType === 3) node = node.parentNode;
+                
+                while (node && node.id !== 'editor' && !['DIV', 'P'].includes(node.tagName)) {
+                    node = node.parentNode;
+                }
+                if (node && node.id !== 'editor') {
+                    node.style.textIndent = valor;
+                }
+            }
+            updateCurrentData();
+        }
+
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'hidden') {
+                clearTimeout(saveTimer);
+                persistNow().catch(error => console.error('Falha ao salvar ao ocultar:', error));
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório Trabalhista e Custo Empregador</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#035485',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        emerald: {
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .total-row {
+            font-weight: 700;
+            background-color: #f0fdf4 !important;
+            color: #166534;
+        }
+
+        .employer-row {
+            font-weight: 700;
+            background-color: #f3e8ff !important;
+            color: #6b21a8;
+        }
+
+        .fgts-row {
+            background-color: #f0f9ff;
+            color: #0369a1;
+            font-style: italic;
+        }
+
+        .fgts-total {
+            background-color: #e0f2fe;
+            font-weight: 700;
+            color: #0369a1;
+        }
+
+        .negative { color: #dc2626; font-weight: 600; }
+        .positive { color: #16a34a; font-weight: 600; }
+
+        /* Estilos de Impressão (PDF) */
+        @media print {
+            header, .no-print, button {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            main {
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .shadow-sm, .shadow-xl, .shadow-lg {
+                box-shadow: none !important;
+            }
+            .border {
+                border-color: #e2e8f0 !important;
+            }
+            #results {
+                display: block !important;
+            }
+            input, select {
+                border: none !important;
+                background: transparent !important;
+                appearance: none;
+                -webkit-appearance: none;
+                padding: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Header Navbar -->
+    <header class="bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-brand-500/20 rounded-xl border border-brand-500/30">
+                    <i class="fa-solid fa-calculator text-2xl text-brand-500"></i>
+                </div>
+                <div>
+                    <h1 id="rep-title" class="text-xl sm:text-2xl font-bold tracking-tight">Cálculo de Verbas e Custo Empresa</h1>
+                    <p class="text-xs text-slate-300">Simulador Trabalhista e Encargos Patronais</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="window.print()" class="no-print flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-4 py-2 rounded-lg shadow-md transition border border-emerald-400/30">
+                    <i class="fa-solid fa-print text-sm"></i>
+                    <span>Imprimir (PDF)</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow space-y-6">
+
+        <!-- Formulário de Entrada -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6 no-print">
+            
+            <!-- 1. Identificação -->
+            <div>
+                <h2 class="text-sm font-bold uppercase tracking-wider text-brand-700 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-user text-brand-600"></i> Identificação
+                </h2>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Nome Completo do Funcionário</label>
+                    <input type="text" id="nome" placeholder="Ex: João da Silva" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                </div>
+            </div>
+
+            <hr class="border-slate-100">
+
+            <!-- 2. Dados Financeiros -->
+            <div>
+                <h2 class="text-sm font-bold uppercase tracking-wider text-brand-700 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-sack-dollar text-brand-600"></i> Dados Financeiros
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Salário Bruto (R$)</label>
+                        <input type="number" id="salario" placeholder="Ex: 5000" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Dependentes</label>
+                        <input type="number" id="dependentes" value="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Data de Admissão</label>
+                        <input type="date" id="dataAdmissao" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Data de Desligamento</label>
+                        <input type="date" id="dataDesligamento" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                    </div>
+                </div>
+            </div>
+            <hr class="border-slate-100">
+            <!-- 3. Benefícios & Descontos -->
+            <div>
+                <h2 class="text-sm font-bold uppercase tracking-wider text-brand-700 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-hand-holding-dollar text-brand-600"></i> Benefícios & Descontos
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Custo VT Empresa (R$)</label>
+                        <input type="number" id="vt" value="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Custo VR Empresa (R$)</label>
+                        <input type="number" id="vr" value="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Custo Saúde Empresa (R$)</label>
+                        <input type="number" id="saude" value="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Pensão: valor fixo ou percentual</label>
+                        <input type="number" id="pensao" value="0" min="0" step="0.01" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Desconto VT Empregado (R$)</label>
+                        <input type="number" id="descVt" value="0" min="0" step="0.01" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Desconto VR Empregado (R$)</label>
+                        <input type="number" id="descVr" value="0" min="0" step="0.01" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Desconto Saúde Empregado (R$)</label>
+                        <input type="number" id="descSaude" value="0" min="0" step="0.01" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                    </div>
+                </div>
+            </div>
+            <hr class="border-slate-100">
+            <!-- 4. Situação de Saída -->
+            <div>
+                <h2 class="text-sm font-bold uppercase tracking-wider text-brand-700 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-door-open text-brand-600"></i> Situação de Saída
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Tipo de Rescisão</label>
+                        <select id="tipoSaida" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                            <option value="mensal">Apenas Mensal (Trabalhando)</option>
+                            <option value="pedido">Pedido de Demissão</option>
+                            <option value="semJusta">Demissão sem Justa Causa</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Saldo FGTS informado (R$)</label>
+                        <input type="number" id="fgtsAnterior" value="0" min="0" step="0.01" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Base rescisória FGTS informada (R$)</label>
+                        <input type="number" id="baseMultaFgts" value="0" min="0" step="0.01" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div><label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">INSS Patronal %</label><input type="number" id="aliqPatronal" value="20" min="0" step="0.1" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold text-sm"></div>
+                        <div><label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">RAT %</label><input type="number" id="aliqRat" value="2" min="0" step="0.1" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold text-sm"></div>
+                        <div><label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Terceiros %</label><input type="number" id="aliqTerceiros" value="5.8" min="0" step="0.1" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold text-sm"></div>
+                    </div>
+                </div>
+            </div>
+
+
+            <hr class="border-slate-100">
+            <!-- 5. Parâmetros Rescisórios -->
+            <div>
+                <h2 class="text-sm font-bold uppercase tracking-wider text-brand-700 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-brand-600"></i> Parâmetros Rescisórios
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Modalidade do Aviso</label>
+                        <select id="modoAviso" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold text-sm">
+                            <option value="indenizado">Indenizado</option>
+                            <option value="trabalhado">Trabalhado</option>
+                            <option value="descontado">Descontado do empregado</option>
+                            <option value="naoAplica">Não se aplica</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Férias integrais adquiridas e não gozadas</label>
+                        <input type="number" id="feriasIntegrais" value="0" min="0" step="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Períodos de férias em dobro</label>
+                        <input type="number" id="feriasDobro" value="0" min="0" step="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Modo do FGTS</label>
+                        <select id="modoFgts" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold text-sm">
+                            <option value="informado">Usar saldo e base informados</option>
+                            <option value="projetado">Projetar desde a admissão</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Tipo de pensão</label>
+                        <select id="tipoPensao" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold text-sm">
+                            <option value="fixa">Valor fixo total</option>
+                            <option value="percentual">Percentual das verbas selecionadas</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-1">
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Incidência da pensão</label>
+                        <div class="grid grid-cols-2 gap-2 text-xs text-slate-700">
+                            <label><input type="checkbox" id="pensaoSalario" checked> Salário/saldo</label>
+                            <label><input type="checkbox" id="pensao13"> 13º</label>
+                            <label><input type="checkbox" id="pensaoFerias"> Férias</label>
+                            <label><input type="checkbox" id="pensaoAviso"> Aviso</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="flex flex-wrap gap-3 pt-2">
+                <button onclick="calcular()" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-lg shadow-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-calculator"></i> Calcular Valores
+                </button>
+                <button onclick="limparForm()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg border border-slate-300 transition flex items-center gap-2">
+                    <i class="fa-solid fa-eraser"></i> Limpar Formulário
+                </button>
+                <button onclick="window.print()" class="px-5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold text-xs rounded-lg border border-emerald-200 transition flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf"></i> Imprimir (PDF)
+                </button>
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        <div id="results" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6 hidden">
+            
+            <div id="nomeFuncionarioDiv" class="text-xl font-bold text-brand-900 border-b border-slate-200 pb-3 flex items-center gap-2">
+                <i class="fa-solid fa-user-check text-brand-600"></i> Funcionário: <span id="nomeExibido" class="text-slate-800"></span>
+            </div>
+            
+            <!-- Tabela 1: Demonstrativo do Funcionário -->
+            <div class="space-y-3">
+                <h3 id="res-title" class="text-sm font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                    <i class="fa-solid fa-file-invoice-dollar text-brand-600"></i> 1. Demonstrativo do Funcionário (Líquido)
+                </h3>
+                <div class="overflow-x-auto">
+                    <table id="tableResults" class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100/80 text-slate-700 uppercase tracking-wider font-bold border-b border-slate-200">
+                                <th class="py-3 px-4">Descrição</th>
+                                <th class="py-3 px-4">Proventos (+)</th>
+                                <th class="py-3 px-4">Descontos (-)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultBody" class="divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tabela 2: Resumo de Custo Empregador -->
+            <div class="space-y-3">
+                <h3 id="emp-title" class="text-sm font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                    <i class="fa-solid fa-building-user text-brand-600"></i> 2. Resumo de Custo para o Empregador (Mensal Provisionado)
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100/80 text-slate-700 uppercase tracking-wider font-bold border-b border-slate-200">
+                                <th class="py-3 px-4">Descrição do Encargo Patronal</th>
+                                <th class="py-3 px-4">Valor do Custo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employerBody" class="divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <p class="text-[11px] text-slate-400 italic">
+                * Simulação estimativa com tabelas de INSS e IRRF vigentes desde janeiro de 2026. INSS e IRRF do 13º são apurados separadamente. Férias indenizadas e FGTS ficam discriminados. O modo projetado do FGTS não substitui o extrato nem a base rescisória oficial.
+            </p>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>Relatório Trabalhista e Custo Empregador.</p>
+            <p class="mt-1 text-slate-400">&copy; Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        const arredondar = valor => Math.round((Number(valor) * 100) + 1e-8) / 100;
+        const numero = id => Math.max(0, parseFloat(document.getElementById(id)?.value) || 0);
+        const inteiro = id => Math.max(0, parseInt(document.getElementById(id)?.value) || 0);
+        const marcado = id => Boolean(document.getElementById(id)?.checked);
+        function formatar(valor) { return arredondar(valor).toLocaleString('pt-BR', {style:'currency', currency:'BRL'}); }
+        function dataLocal(valor) { if (!valor) return null; const [a,m,d]=valor.split('-').map(Number); return new Date(a,m-1,d); }
+        function diasNoMes(data) { return new Date(data.getFullYear(), data.getMonth()+1, 0).getDate(); }
+        function adicionarDias(data,dias) { const r=new Date(data); r.setDate(r.getDate()+dias); return r; }
+        function primeiroDiaMes(data) { return new Date(data.getFullYear(),data.getMonth(),1); }
+        function ultimoDiaMes(data) { return new Date(data.getFullYear(),data.getMonth()+1,0); }
+        function anosCompletos(inicio,fim) { let a=fim.getFullYear()-inicio.getFullYear(); const aniv=new Date(fim.getFullYear(),inicio.getMonth(),inicio.getDate()); if(fim<aniv)a--; return Math.max(0,a); }
+        function diasTrabalhadosNoMes(inicio,fim,mesRef) {
+            const ini=new Date(Math.max(inicio.getTime(),primeiroDiaMes(mesRef).getTime()));
+            const ter=new Date(Math.min(fim.getTime(),ultimoDiaMes(mesRef).getTime()));
+            return ter<ini?0:Math.min(30,ter.getDate()-ini.getDate()+1);
+        }
+        function mesesComQuinzeDias(inicio,fim) {
+            let total=0,cursor=primeiroDiaMes(inicio),limite=primeiroDiaMes(fim);
+            while(cursor<=limite){ if(diasTrabalhadosNoMes(inicio,fim,cursor)>=15)total++; cursor=new Date(cursor.getFullYear(),cursor.getMonth()+1,1); }
+            return total;
+        }
+        function avos13(inicio,fim) { const inicioAno=new Date(fim.getFullYear(),0,1), ini=new Date(Math.max(inicio.getTime(),inicioAno.getTime())); return Math.min(12,mesesComQuinzeDias(ini,fim)); }
+        function inicioPeriodoAquisitivo(admissao,fim) { let i=new Date(fim.getFullYear(),admissao.getMonth(),admissao.getDate()); if(i>fim)i.setFullYear(i.getFullYear()-1); return i<admissao?admissao:i; }
+        function avosFeriasProporcionais(admissao,fim) { return Math.min(12,mesesComQuinzeDias(inicioPeriodoAquisitivo(admissao,fim),fim)); }
+        function limparForm() {
+            document.querySelectorAll('input').forEach(input=>{ if(input.type==='checkbox'){input.checked=input.id==='pensaoSalario';return;} const zeros=['dependentes','fgtsAnterior','baseMultaFgts','vt','vr','saude','pensao','descVt','descVr','descSaude','feriasIntegrais','feriasDobro']; input.value=zeros.includes(input.id)?'0':input.id==='aliqPatronal'?'20':input.id==='aliqRat'?'2':input.id==='aliqTerceiros'?'5.8':''; });
+            document.getElementById('tipoSaida').selectedIndex=0; document.getElementById('modoAviso').value='indenizado'; document.getElementById('modoFgts').value='informado'; document.getElementById('tipoPensao').value='fixa'; document.getElementById('results').style.display='none'; window.scrollTo({top:0,behavior:'smooth'});
+        }
+        // Tabelas vigentes a partir de janeiro de 2026.
+        const PARAMETROS_2026 = Object.freeze({
+            inss: Object.freeze([
+                Object.freeze({ limite: 1621.00, aliquota: 0.075 }),
+                Object.freeze({ limite: 2902.84, aliquota: 0.09 }),
+                Object.freeze({ limite: 4354.27, aliquota: 0.12 }),
+                Object.freeze({ limite: 8475.55, aliquota: 0.14 })
+            ]),
+            irrf: Object.freeze({
+                dependente: 189.59,
+                simplificada: 607.20,
+                reducaoIntegralAte: 5000.00,
+                reducaoParcialAte: 7350.00
+            })
+        });
+        function calcularINSS(base) {
+            const salarioContribuicao=Math.min(Math.max(0,Number(base)||0),8475.55);
+            let anterior=0,total=0;
+            for(const faixa of PARAMETROS_2026.inss){
+                const parcela=Math.max(0,Math.min(salarioContribuicao,faixa.limite)-anterior);
+                total+=parcela*faixa.aliquota;
+                if(salarioContribuicao<=faixa.limite)break;
+                anterior=faixa.limite;
+            }
+            return arredondar(total);
+        }
+        function calcularIRRF(rendimento,dependentes,pensaoDedutivel=0) {
+            const bruto=Math.max(0,Number(rendimento)||0);
+            const inss=calcularINSS(bruto);
+            const deducoesLegais=inss+(Math.max(0,Number(dependentes)||0)*PARAMETROS_2026.irrf.dependente)+Math.max(0,Number(pensaoDedutivel)||0);
+            const deducao=Math.max(deducoesLegais,PARAMETROS_2026.irrf.simplificada);
+            const base=Math.max(0,bruto-deducao);
+            let imposto=0;
+            if(base<=2428.80)imposto=0;
+            else if(base<=2826.65)imposto=base*0.075-182.16;
+            else if(base<=3751.05)imposto=base*0.15-394.16;
+            else if(base<=4664.68)imposto=base*0.225-675.49;
+            else imposto=base*0.275-908.73;
+            imposto=Math.max(0,imposto);
+            let reducao=0;
+            if(bruto<=PARAMETROS_2026.irrf.reducaoIntegralAte)reducao=Math.min(imposto,312.89);
+            else if(bruto<=PARAMETROS_2026.irrf.reducaoParcialAte)reducao=Math.max(0,978.62-(0.133145*bruto));
+            return arredondar(Math.max(0,imposto-Math.min(imposto,reducao)));
+        }
+        function calcularPensao(componentes) {
+            const entrada=numero('pensao'), tipo=document.getElementById('tipoPensao').value;
+            const bases={salario:marcado('pensaoSalario')?componentes.salario:0,decimo:marcado('pensao13')?componentes.decimo:0,ferias:marcado('pensaoFerias')?componentes.ferias:0,aviso:marcado('pensaoAviso')?componentes.aviso:0};
+            const soma=Object.values(bases).reduce((a,b)=>a+b,0); if(entrada<=0||soma<=0)return {total:0,salario:0,decimo:0,ferias:0,aviso:0};
+            if(tipo==='percentual'){const f=entrada/100; return {total:arredondar(soma*f),salario:arredondar(bases.salario*f),decimo:arredondar(bases.decimo*f),ferias:arredondar(bases.ferias*f),aviso:arredondar(bases.aviso*f)};}
+            const total=Math.min(entrada,soma); return {total:arredondar(total),salario:arredondar(total*bases.salario/soma),decimo:arredondar(total*bases.decimo/soma),ferias:arredondar(total*bases.ferias/soma),aviso:arredondar(total*bases.aviso/soma)};
+        }
+        function projetarFgts(admissao,fim,salario,decimoRescisao) {
+            let saldo=0,base=0,cursor=primeiroDiaMes(admissao),limite=primeiroDiaMes(fim),anoAnterior=null,avosAno=0;
+            while(cursor<=limite){ const dias=diasTrabalhadosNoMes(admissao,fim,cursor),remuneracao=salario*dias/30,dep=remuneracao*0.08; saldo+=dep;base+=dep; const ano=cursor.getFullYear(); if(anoAnterior!==null&&ano!==anoAnterior){const dep13=salario*(Math.min(12,avosAno)/12)*0.08;saldo+=dep13;base+=dep13;avosAno=0;} if(dias>=15)avosAno++; anoAnterior=ano; cursor=new Date(cursor.getFullYear(),cursor.getMonth()+1,1); }
+            const dep13Final=Math.max(0,decimoRescisao)*0.08; saldo+=dep13Final;base+=dep13Final; return {saldo:arredondar(saldo),base:arredondar(base)};
+        }
+        function linha(desc,provento=null,desconto=null,classe='') { return `<tr class="${classe}"><td class="py-2.5 px-4">${desc}</td><td class="py-2.5 px-4 ${provento!==null?'positive':''}">${provento===null?'-':formatar(provento)}</td><td class="py-2.5 px-4 ${desconto!==null?'negative':''}">${desconto===null?'-':formatar(desconto)}</td></tr>`; }
+        function calcular() {
+            const salario=numero('salario'), dependentes=inteiro('dependentes'), tipo=document.getElementById('tipoSaida').value, admissao=dataLocal(document.getElementById('dataAdmissao').value), desligamento=dataLocal(document.getElementById('dataDesligamento').value), nome=document.getElementById('nome').value||'Não Informado';
+            if(salario<=0){alert('Informe um salário bruto maior que zero.');return;} if(tipo!=='mensal'&&(!admissao||!desligamento||desligamento<admissao)){alert('Para rescisão, informe datas válidas de admissão e desligamento.');return;} if(document.getElementById('tipoPensao').value==='percentual'&&numero('pensao')>100){alert('O percentual de pensão não pode ser maior que 100%.');return;} if(tipo==='semJusta'&&document.getElementById('modoFgts').value==='informado'&&numero('baseMultaFgts')===0){alert('Informe a base rescisória do FGTS ou selecione o modo projetado.');return;}
+            const vt=numero('vt'),vr=numero('vr'),saude=numero('saude'),descBeneficios=numero('descVt')+numero('descVr')+numero('descSaude'); document.getElementById('nomeExibido').innerText=nome;
+            const fgtsMensal=arredondar(salario*0.08),provisao13=salario/12,provisaoFerias=(salario/12)*(4/3),aliqEnc=numero('aliqPatronal')+numero('aliqRat')+numero('aliqTerceiros'),patronal=salario*numero('aliqPatronal')/100,rat=salario*numero('aliqRat')/100,terceiros=salario*numero('aliqTerceiros')/100,fgtsProv=(provisao13+provisaoFerias)*0.08,encProv=(provisao13+provisaoFerias)*aliqEnc/100;
+            const custoBrutoBeneficios=arredondar(vt+vr+saude),participacaoBeneficiosEmpresa=Math.min(descBeneficios,custoBrutoBeneficios),custoLiquidoBeneficios=arredondar(custoBrutoBeneficios-participacaoBeneficiosEmpresa),custoTotal=arredondar(salario+patronal+rat+terceiros+fgtsMensal+provisao13+provisaoFerias+fgtsProv+encProv+custoLiquidoBeneficios);
+            let html='',totalDireto=0,totalDescontos=0;
+            if(tipo==='mensal'){
+                const pensao=calcularPensao({salario,decimo:0,ferias:0,aviso:0}),inss=calcularINSS(salario),irrf=calcularIRRF(salario,dependentes,pensao.salario); totalDireto=salario; totalDescontos=inss+irrf+pensao.total+descBeneficios;
+                html+=linha('Salário mensal bruto',salario)+linha('INSS',null,inss)+linha('IRRF',null,irrf)+linha('Pensão alimentícia',null,pensao.total)+linha('Coparticipações VT/VR/Saúde',null,descBeneficios);
+            } else {
+                const modoAviso=document.getElementById('modoAviso').value,anos=anosCompletos(admissao,desligamento),diasAviso=Math.min(90,30+3*anos),avisoIndenizado=tipo==='semJusta'&&modoAviso==='indenizado'?arredondar(salario*diasAviso/30):0,avisoDescontado=tipo==='pedido'&&modoAviso==='descontado'?arredondar(salario):0,fimProjetado=tipo==='semJusta'&&modoAviso==='indenizado'?adicionarDias(desligamento,diasAviso):desligamento;
+                const diasSaldo=diasTrabalhadosNoMes(admissao,desligamento,desligamento),saldo=arredondar(salario*diasSaldo/30),avos13Valor=avos13(admissao,fimProjetado),decimo=arredondar(salario*avos13Valor/12),avosFerias=avosFeriasProporcionais(admissao,fimProjetado),feriasProp=arredondar(salario*avosFerias/12),tercoProp=arredondar(feriasProp/3),feriasIntegrais=arredondar(salario*inteiro('feriasIntegrais')),tercoIntegrais=arredondar(feriasIntegrais/3),feriasDobro=arredondar(salario*2*inteiro('feriasDobro')),tercoDobro=arredondar(feriasDobro/3),totalFerias=feriasProp+tercoProp+feriasIntegrais+tercoIntegrais+feriasDobro+tercoDobro;
+                const pensao=calcularPensao({salario:saldo,decimo,ferias:totalFerias,aviso:avisoIndenizado}),inssSaldo=calcularINSS(saldo),inss13=calcularINSS(decimo),irrfSaldo=calcularIRRF(saldo,dependentes,pensao.salario),irrf13=calcularIRRF(decimo,dependentes,pensao.decimo);
+                totalDireto=saldo+decimo+totalFerias+avisoIndenizado; totalDescontos=inssSaldo+inss13+irrfSaldo+irrf13+pensao.total+descBeneficios+avisoDescontado;
+                html+=linha(`Saldo de salário (${diasSaldo} dias)`,saldo)+linha(`13º proporcional (${avos13Valor}/12)`,decimo)+linha(`Férias proporcionais (${avosFerias}/12)`,feriasProp)+linha('1/3 sobre férias proporcionais',tercoProp);
+                if(feriasIntegrais>0)html+=linha('Férias integrais não gozadas',feriasIntegrais)+linha('1/3 sobre férias integrais',tercoIntegrais); if(feriasDobro>0)html+=linha('Férias em dobro',feriasDobro)+linha('1/3 sobre férias em dobro',tercoDobro); if(avisoIndenizado>0)html+=linha(`Aviso-prévio indenizado (${diasAviso} dias)`,avisoIndenizado); if(avisoDescontado>0)html+=linha('Aviso-prévio não cumprido',null,avisoDescontado);
+                html+=linha('INSS sobre saldo de salário',null,inssSaldo)+linha('INSS sobre 13º',null,inss13)+linha('IRRF sobre saldo de salário',null,irrfSaldo)+linha('IRRF sobre 13º',null,irrf13)+linha('Pensão alimentícia',null,pensao.total)+linha('Coparticipações VT/VR/Saúde',null,descBeneficios);
+                if(tipo==='semJusta'){
+                    let fgts; if(document.getElementById('modoFgts').value==='informado')fgts={saldo:numero('fgtsAnterior'),base:numero('baseMultaFgts')}; else fgts=projetarFgts(admissao,fimProjetado,salario,decimo); const multa=arredondar(fgts.base*0.40);
+                    html+=`<tr class="fgts-row"><td class="py-2.5 px-4">Saldo FGTS estimado/informado, fora do pagamento direto</td><td colspan="2" class="py-2.5 px-4 text-right">${formatar(fgts.saldo)}</td></tr><tr class="fgts-row"><td class="py-2.5 px-4">Multa rescisória de 40%, destinada à conta vinculada</td><td colspan="2" class="py-2.5 px-4 text-right">${formatar(multa)}</td></tr><tr class="fgts-total"><td class="py-2.5 px-4">TOTAL ESTIMADO NA CONTA FGTS</td><td colspan="2" class="py-2.5 px-4 text-right">${formatar(fgts.saldo+multa)}</td></tr>`;
+                }
+            }
+            const titulo=tipo==='mensal'?'TOTAL LÍQUIDO MENSAL':'TOTAL LÍQUIDO DE PAGAMENTO DIRETO'; html+=`<tr class="total-row"><td class="py-3 px-4">${titulo}</td><td colspan="2" class="py-3 px-4 text-right">${formatar(totalDireto-totalDescontos)}</td></tr>`;
+            document.getElementById('resultBody').innerHTML=html;
+            document.getElementById('employerBody').innerHTML=`<tr><td class="py-2.5 px-4">Salário bruto</td><td class="py-2.5 px-4">${formatar(salario)}</td></tr><tr><td class="py-2.5 px-4">INSS patronal</td><td class="py-2.5 px-4">${formatar(patronal)}</td></tr><tr><td class="py-2.5 px-4">RAT</td><td class="py-2.5 px-4">${formatar(rat)}</td></tr><tr><td class="py-2.5 px-4">Terceiros</td><td class="py-2.5 px-4">${formatar(terceiros)}</td></tr><tr><td class="py-2.5 px-4">FGTS mensal</td><td class="py-2.5 px-4">${formatar(fgtsMensal)}</td></tr><tr><td class="py-2.5 px-4">Provisão mensal de 13º e férias + 1/3</td><td class="py-2.5 px-4">${formatar(provisao13+provisaoFerias)}</td></tr><tr><td class="py-2.5 px-4">FGTS e encargos sobre provisões</td><td class="py-2.5 px-4">${formatar(fgtsProv+encProv)}</td></tr><tr><td class="py-2.5 px-4">Custo bruto dos benefícios</td><td class="py-2.5 px-4">${formatar(custoBrutoBeneficios)}</td></tr><tr><td class="py-2.5 px-4">(-) Participação do empregado</td><td class="py-2.5 px-4">${formatar(-participacaoBeneficiosEmpresa)}</td></tr><tr><td class="py-2.5 px-4">Custo líquido dos benefícios</td><td class="py-2.5 px-4">${formatar(custoLiquidoBeneficios)}</td></tr><tr class="employer-row"><td class="py-3 px-4">CUSTO MENSAL ESTIMADO PARA A EMPRESA</td><td class="py-3 px-4">${formatar(custoTotal)}</td></tr>`;
+            document.getElementById('results').style.display='block'; document.getElementById('results').scrollIntoView({behavior:'smooth'});
+        }
+    </script>
+</body>
+</html>

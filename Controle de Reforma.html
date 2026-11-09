@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Gastos da Reforma</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#035485',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        emerald: {
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Estilos para impressão (PDF) */
+        @media print {
+            header, .no-print, button, input[type="file"] {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            main {
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .shadow-sm, .shadow-xl, .shadow-lg {
+                box-shadow: none !important;
+            }
+            .border {
+                border-color: #e2e8f0 !important;
+            }
+            table {
+                width: 100% !important;
+                border: 1px solid #cbd5e1 !important;
+            }
+            th {
+                background-color: #0f172a !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            td input, td select {
+                border: none !important;
+                background: transparent !important;
+                appearance: none;
+                -webkit-appearance: none;
+                padding: 0 !important;
+                font-weight: 600 !important;
+            }
+            .total-card {
+                border: 1px solid #cbd5e1 !important;
+                background-color: #f8fafc !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Header Navbar Sticky -->
+    <header class="bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-brand-500/20 rounded-xl border border-brand-500/30">
+                    <i class="fa-solid fa-hammer text-2xl text-brand-500"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight">Orçamento / Controle de Reforma</h1>
+                    <p class="text-xs text-slate-300">Gestão Dinâmica de Materiais, Peças e Mão de Obra</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 flex-wrap justify-center no-print">
+                <button onclick="exportarBackup()" class="btn btn-backup flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg shadow-sm transition">
+                    <i class="fa-solid fa-file-export"></i> Exportar
+                </button>
+                <button onclick="document.getElementById('inputImportar').click()" class="btn btn-backup flex items-center gap-2 bg-amber-700 hover:bg-amber-600 text-white font-semibold text-xs px-3.5 py-2 rounded-lg shadow-sm transition">
+                    <i class="fa-solid fa-file-import"></i> Importar
+                </button>
+                <input type="file" id="inputImportar" style="display: none;" accept=".json" onchange="importarBackup(event)">
+
+                <button onclick="window.print()" class="btn btn-print flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg shadow-sm transition border border-emerald-400/30">
+                    <i class="fa-solid fa-print"></i> Imprimir / PDF
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow space-y-6">
+
+        <!-- Card da Tabela -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6">
+            
+            <!-- Barra de Ação Superior da Tabela -->
+            <div class="actions-bar flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
+                <div>
+                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-brand-600"></i> Itens da Reforma
+                    </h2>
+                    <p class="text-xs text-slate-500">Adicione ou edite os materiais, peças e mão de obra abaixo</p>
+                </div>
+                
+                <button onclick="adicionarLinha()" class="btn btn-add no-print flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg shadow-sm transition">
+                    <i class="fa-solid fa-plus"></i> Adicionar Item
+                </button>
+            </div>
+
+            <!-- Tabela Responsiva -->
+            <div class="table-responsive overflow-x-auto">
+                <table id="tabelaReforma" class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-900 text-white uppercase tracking-wider font-semibold">
+                            <th style="width: 18%;" class="py-3 px-3 rounded-l-lg">Tipo</th>
+                            <th style="width: 32%;" class="py-3 px-3">Descrição</th>
+                            <th style="width: 10%;" class="py-3 px-3 text-center">Qtd</th>
+                            <th style="width: 15%;" class="py-3 px-3 text-right">Valor Unitário (R$)</th>
+                            <th style="width: 15%;" class="py-3 px-3 text-right">Subtotal (R$)</th>
+                            <th style="width: 10%;" class="py-3 px-3 text-center rounded-r-lg no-print">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpoTabela" class="divide-y divide-slate-100 font-medium">
+                        <!-- Linhas carregadas dinamicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Card de Total Geral -->
+            <div class="total-container total-card bg-emerald-50 border border-emerald-200/80 rounded-xl p-4 flex flex-col sm:flex-row justify-between sm:justify-end items-center gap-2 text-slate-800">
+                <span class="text-sm font-semibold text-emerald-950 uppercase tracking-wide">Total Geral da Reforma:</span>
+                <span id="totalGeral" class="text-2xl font-extrabold text-emerald-600">R$ 0,00</span>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>Controle e Gestão de Gastos da Reforma.</p>
+            <p class="mt-1 text-slate-400">&copy; Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Lógica JavaScript Preservada na Íntegra -->
+    <script>
+        function formatarMoeda(valor) {
+            return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function adicionarLinha(dados = { tipo: 'Material', descricao: '', qtd: 1, valorUnit: 0 }) {
+            const tbody = document.getElementById('corpoTabela');
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-slate-50/80 transition";
+
+            tr.innerHTML = `
+                <td class="py-2 px-2">
+                    <select onchange="salvarDados()" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-slate-800 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-xs">
+                        <option value="Material" ${dados.tipo === 'Material' ? 'selected' : ''}>Material</option>
+                        <option value="Peças" ${dados.tipo === 'Peças' ? 'selected' : ''}>Peças</option>
+                        <option value="Mão de Obra" ${dados.tipo === 'Mão de Obra' ? 'selected' : ''}>Mão de Obra</option>
+                    </select>
+                </td>
+                <td class="py-2 px-2">
+                    <input type="text" value="${dados.descricao}" placeholder="Ex: Cimento, Encanador..." oninput="salvarDados()" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-slate-800 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-xs">
+                </td>
+                <td class="py-2 px-2 text-center">
+                    <input type="number" value="${dados.qtd}" min="0" step="any" oninput="salvarDados()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-slate-800 font-medium text-center focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-xs">
+                </td>
+                <td class="py-2 px-2 text-right">
+                    <input type="number" value="${dados.valorUnit}" min="0" step="0.01" oninput="salvarDados()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-slate-800 font-medium text-right focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-xs">
+                </td>
+                <td class="py-2 px-3 text-right font-bold text-slate-700 subtotal">R$ 0,00</td>
+                <td class="py-2 px-2 text-center no-print">
+                    <button class="btn btn-delete bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-2.5 py-1.5 rounded-md font-semibold text-xs transition flex items-center justify-center gap-1 mx-auto" onclick="removerLinha(this)">
+                        <i class="fa-solid fa-trash-can"></i> <span class="hidden sm:inline">Excluir</span>
+                    </button>
+                </td>
+            `;
+
+            tbody.appendChild(tr);
+            salvarDados();
+        }
+
+        function removerLinha(botao) {
+            const tr = botao.closest('tr');
+            tr.remove();
+            salvarDados();
+        }
+
+        function salvarDados() {
+            const linhas = document.querySelectorAll('#corpoTabela tr');
+            const dadosTabela = [];
+            let totalGeral = 0;
+
+            linhas.forEach(linha => {
+                const tipo = linha.querySelector('td:nth-child(1) select').value;
+                const descricao = linha.querySelector('td:nth-child(2) input').value;
+                const qtdInput = linha.querySelector('td:nth-child(3) input');
+                const valorInput = linha.querySelector('td:nth-child(4) input');
+                const subtotalTd = linha.querySelector('.subtotal');
+
+                const qtd = parseFloat(qtdInput.value) || 0;
+                const valorUnit = parseFloat(valorInput.value) || 0;
+                const subtotal = qtd * valorUnit;
+
+                subtotalTd.textContent = formatarMoeda(subtotal);
+                totalGeral += subtotal;
+
+                dadosTabela.push({ tipo, descricao, qtd: qtdInput.value, valorUnit: valorInput.value });
+            });
+
+            document.getElementById('totalGeral').textContent = formatarMoeda(totalGeral);
+            localStorage.setItem('dadosReforma', JSON.stringify(dadosTabela));
+        }
+
+        function exportarBackup() {
+            const dadosSalvos = localStorage.getItem('dadosReforma');
+            if (!dadosSalvos || JSON.parse(dadosSalvos).length === 0) {
+                alert('Não há dados para exportar.');
+                return;
+            }
+
+            const blob = new Blob([dadosSalvos], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            
+            a.href = url;
+            a.download = `Controle_de_Reforma_${new Date().getFullYear()}_${String(new Date().getDate()).padStart(2, '0')}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${new Date().getFullYear()}_${String(new Date().getHours()).padStart(2, '0')}h${String(new Date().getMinutes()).padStart(2, '0')}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importarBackup(event) {
+            const arquivo = event.target.files[0];
+            if (!arquivo) return;
+
+            const leitor = new FileReader();
+            leitor.onload = function(e) {
+                try {
+                    const dadosImportados = JSON.parse(e.target.result);
+                    if (Array.isArray(dadosImportados)) {
+                        document.getElementById('corpoTabela').innerHTML = '';
+                        
+                        dadosImportados.forEach(item => {
+                            adicionarLinha({
+                                tipo: item.tipo,
+                                descricao: item.descricao,
+                                qtd: parseFloat(item.qtd) || 0,
+                                valorUnit: parseFloat(item.valorUnit) || 0
+                            });
+                        });
+                        alert('Backup importado com sucesso!');
+                    } else {
+                        alert('O arquivo selecionado não é um formato de backup válido.');
+                    }
+                } catch (erro) {
+                    alert('Erro ao ler o arquivo de backup.');
+                }
+                event.target.value = '';
+            };
+            leitor.readAsText(arquivo);
+        }
+
+        window.onload = function() {
+            const dadosSalvos = localStorage.getItem('dadosReforma');
+            if (dadosSalvos) {
+                const arrayDados = JSON.parse(dadosSalvos);
+                if (arrayDados.length > 0) {
+                    arrayDados.forEach(item => {
+                        adicionarLinha({
+                            tipo: item.tipo,
+                            descricao: item.descricao,
+                            qtd: parseFloat(item.qtd) || 0,
+                            valorUnit: parseFloat(item.valorUnit) || 0
+                        });
+                    });
+                    return;
+                }
+            }
+            adicionarLinha();
+        };
+    </script>
+
+</body>
+</html>

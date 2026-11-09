@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparativo: Aplicação Financeira com Retiradas vs. Mercado Imobiliário</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#035485',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        emerald: {
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for table */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Estilos específicos para Impressão / Salvar PDF */
+        /* Resumo dos parâmetros: oculto na tela e exibido somente na impressão */
+        #printParameters { display: none; }
+        @media print {
+            header, #simulationForm, #toggleTableBtn, button {
+                display: none !important;
+            }
+            #printParameters {
+                display: block !important;
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            main {
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .lg\:col-span-4 {
+                display: none !important;
+            }
+            .lg\:col-span-8 {
+                width: 100% !important;
+            }
+            #tableContainer {
+                display: block !important;
+            }
+            .shadow-sm, .shadow-xl {
+                box-shadow: none !important;
+            }
+            .border {
+                border-color: #e2e8f0 !important;
+            }
+            #resultHeroCard {
+                background: #0f172a !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Header Navbar -->
+    <header class="bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-brand-500/20 rounded-xl border border-brand-500/30">
+                    <i class="fa-solid me-1 fa-calculator text-2xl text-brand-500"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight">Simulador Imobiliário vs. Renda Fixa</h1>
+                    <p class="text-xs text-slate-300">Compare a liquidação com saques contínuos contra a manutenção patrimonial</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="window.print()" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-4 py-2 rounded-lg shadow-md transition border border-emerald-400/30">
+                    <i class="fa-solid fa-print text-sm"></i>
+                    <span>Imprimir Relatório</span>
+                </button>
+                <div class="hidden md:flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 text-xs text-slate-300">
+                    <i class="fa-solid fa-circle-info text-brand-500"></i>
+                    <span>Cálculos com juros compostos e inflação mensal</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left Column: Input Form -->
+            <div class="lg:col-span-4 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 flex flex-col gap-5">
+                <div class="border-b border-slate-100 pb-4">
+                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-brand-600"></i> Parâmetros da Simulação
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">Ajuste os valores abaixo para recalcular instantaneamente.</p>
+                </div>
+
+                <form id="simulationForm" onsubmit="event.preventDefault();" class="space-y-4">
+                    
+                    <!-- Patrimônio Inicial -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Patrimônio Inicial em Imóveis</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 font-medium">R$</span>
+                            <input type="text" id="patrimonioInicial" value="0" class="w-full pl-10 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Quantidade Inicial de Imóveis -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Nº Imóveis</label>
+                            <input type="number" id="qtdImoveis" value="0" min="1" max="1000" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Méd. por Imóvel</label>
+                            <div class="py-2 px-2 bg-slate-100 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 truncate" id="valorMedioImovelDisplay">
+                                R$ 0
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configuração da Retirada Mensal -->
+                    <div class="p-3 bg-brand-50/60 rounded-xl border border-brand-100 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <label class="block text-xs font-bold text-brand-900 uppercase tracking-wider">Retirada para Sobrevivência</label>
+                            <span class="text-[10px] text-brand-700 font-medium">Descontado Mês a Mês</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <select id="tipoRetirada" class="w-full px-2 py-1.5 bg-white border border-brand-200 rounded-md text-xs font-medium text-slate-800 focus:ring-2 focus:ring-brand-500">
+                                    <option value="fixo">Valor Fixo (R$)</option>
+                                    <option value="percentual_ano">% do Patrimônio/Ano</option>
+                                    <option value="percentual_mes">% ao Mês</option>
+                                </select>
+                            </div>
+                            <div>
+                                <input type="text" id="valorRetirada" value="0" class="w-full px-3 py-1.5 bg-white border border-brand-200 rounded-md text-xs font-bold text-slate-900 focus:ring-2 focus:ring-brand-500">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="reajustaInflacao" checked class="w-4 h-4 text-brand-600 rounded focus:ring-brand-500 border-slate-300">
+                            <label for="reajustaInflacao" class="text-xs text-slate-700">Corrigir retirada mensal pela inflação</label>
+                        </div>
+                    </div>
+
+                    <!-- Rentabilidade & Inflação -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1" title="Rentabilidade nominal bruta da aplicação">Rend. Aplicação (% a.a.)</label>
+                            <div class="relative">
+                                <input type="number" id="rendimentoAplicação" value="0" step="0.1" class="w-full pr-7 pl-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold">%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Inflação IPCA (% a.a.)</label>
+                            <div class="relative">
+                                <input type="number" id="inflacao" value="0" step="0.1" class="w-full pr-7 pl-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold">%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Imóveis: Valorização & Aluguel -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Valorização Imóvel (% a.a.)</label>
+                            <div class="relative">
+                                <input type="number" id="valorizacaoImovel" value="0" step="0.1" class="w-full pr-7 pl-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold">%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Aluguel Líquido (% a.a.)</label>
+                            <div class="relative">
+                                <input type="number" id="yieldAluguel" value="0" step="0.1" class="w-full pr-7 pl-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                                <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold">%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prazo em Anos -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">Prazo da Simulação</label>
+                            <span id="prazoValueDisplay" class="text-xs font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">1 Ano</span>
+                        </div>
+                        <input type="range" id="prazoAnos" min="1" max="30" value="1" class="w-full accent-brand-600 bg-slate-200 h-2 rounded-lg cursor-pointer">
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- Right Column: Key Results & Graphs -->
+            <div class="lg:col-span-8 space-y-6">
+                
+                <!-- Parâmetros usados: visíveis somente na impressão -->
+                <section id="printParameters" class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+                    <h3 class="text-base font-bold text-slate-900 mb-3">Parâmetros utilizados no cálculo</h3>
+                    <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-xs text-slate-700">
+                        <div><span class="font-semibold">Patrimônio inicial:</span> <span id="printPatrimonioInicial"></span></div>
+                        <div><span class="font-semibold">Quantidade de imóveis:</span> <span id="printQtdImoveis"></span></div>
+                        <div><span class="font-semibold">Valor médio por imóvel:</span> <span id="printValorMedioImovel"></span></div>
+                        <div><span class="font-semibold">Retirada:</span> <span id="printRetirada"></span></div>
+                        <div><span class="font-semibold">Correção da retirada pela inflação:</span> <span id="printReajusteInflacao"></span></div>
+                        <div><span class="font-semibold">Rendimento da aplicação:</span> <span id="printRendimentoAplicacao"></span></div>
+                        <div><span class="font-semibold">Inflação IPCA:</span> <span id="printInflacao"></span></div>
+                        <div><span class="font-semibold">Valorização do imóvel:</span> <span id="printValorizacaoImovel"></span></div>
+                        <div><span class="font-semibold">Aluguel líquido:</span> <span id="printYieldAluguel"></span></div>
+                        <div><span class="font-semibold">Prazo da simulação:</span> <span id="printPrazoAnos"></span></div>
+                    </div>
+                </section>
+
+                <!-- Hero Banner / Main Result Callout -->
+                <div id="resultHeroCard" class="bg-gradient-to-br from-brand-900 via-slate-900 to-slate-900 rounded-2xl p-6 text-white shadow-xl border border-brand-800/40 relative overflow-hidden">
+                    <div class="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
+                        <i class="fa-solid fa-house-circle-check text-9xl text-white"></i>
+                    </div>
+
+                    <div class="relative z-10 flex flex-col md:flex-row justify-between gap-6 items-start md:items-center">
+                        <div class="space-y-2 max-w-xl">
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/20 text-brand-300 text-xs font-semibold border border-brand-400/20">
+                                <i class="fa-solid fa-bullseye"></i> Diagnóstico ao final de <span id="heroPrazoText">1 ano</span>
+                            </div>
+                            <h3 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
+                                Com o saldo financeiro você compraria <span id="imoveisFinaisHero" class="text-emerald-400 underline decoration-emerald-500 decoration-4 underline-offset-4">0.0</span> imóveis.
+                            </h3>
+                            <p id="heroSubtitle" class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                                Você começou com <strong class="text-white">0 imóveis</strong>. Após realizar retiradas mensais e contar com a valorização dos imóveis, seu poder de compra em termos de imóveis variou.
+                            </p>
+                        </div>
+
+                        <!-- Big Badge Indicator -->
+                        <div class="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/15 text-center min-w-[160px] self-stretch md:self-auto flex flex-col justify-center items-center">
+                            <span class="text-[11px] uppercase tracking-widest text-slate-300 font-medium">Poder de Compra</span>
+                            <span id="variacaoImoveisBadge" class="text-2xl font-black text-emerald-400 my-1">+0%</span>
+                            <span id="diferencaAbsolutaImoveis" class="text-xs text-slate-300">0 imóveis de dif.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Metric Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Cenário A: Dinheiro Aplicado -->
+                    <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm space-y-3 relative overflow-hidden">
+                        <div class="w-1 h-full bg-brand-500 absolute left-0 top-0"></div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[11px] font-bold uppercase tracking-wider text-brand-600">Cenário A: Vendeu e Aplicou</span>
+                                <h4 class="text-base font-bold text-slate-800">Saldo Restante da Aplicação</h4>
+                            </div>
+                            <div class="p-2 bg-brand-50 text-brand-600 rounded-lg">
+                                <i class="fa-solid fa-chart-line"></i>
+                            </div>
+                        </div>
+                        <div class="pt-1">
+                            <span id="saldoFinalAplicacao" class="text-2xl font-extrabold text-slate-900 block">R$ 0</span>
+                            <div class="flex justify-between items-center text-xs text-slate-500 mt-2 pt-2 border-t border-slate-100">
+                                <span>Total Retirado no Período:</span>
+                                <span id="totalRetiradoAcumulado" class="font-bold text-slate-700">R$ 0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cenário B: Manteve Imóveis -->
+                    <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-sm space-y-3 relative overflow-hidden">
+                        <div class="w-1 h-full bg-slate-700 absolute left-0 top-0"></div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Cenário B: Manteve Imóveis</span>
+                                <h4 class="text-base font-bold text-slate-800">Patrimônio Imobiliário Atualizado</h4>
+                            </div>
+                            <div class="p-2 bg-slate-100 text-slate-600 rounded-lg">
+                                <i class="fa-solid fa-building"></i>
+                            </div>
+                        </div>
+                        <div class="pt-1">
+                            <span id="patrimonioImoveisFinal" class="text-2xl font-extrabold text-slate-900 block">R$ 0</span>
+                            <div class="flex justify-between items-center text-xs text-slate-500 mt-2 pt-2 border-t border-slate-100">
+                                <span>Novo Valor por Imóvel:</span>
+                                <span id="valorFuturoUmImovel" class="font-bold text-slate-700">R$ 0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Chart -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-area text-brand-600"></i> Evolução Patrimonial Ano a Ano
+                            </h3>
+                            <p class="text-xs text-slate-500">Compara os saldos após a mesma retirada mensal: aplicação financeira vs. imóveis com aluguel líquido</p>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs font-medium">
+                            <span class="inline-flex items-center gap-1 text-slate-600"><span class="w-3 h-3 bg-brand-500 rounded-full inline-block"></span> Renda Fixa</span>
+                            <span class="inline-flex items-center gap-1 text-slate-600"><span class="w-3 h-3 bg-slate-700 rounded-full inline-block"></span> Imóveis</span>
+                        </div>
+                    </div>
+
+                    <div class="relative w-full h-[320px]">
+                        <canvas id="evolutionChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Expandable Yearly Table Section -->
+        <div class="mt-10 bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-table-list text-brand-600"></i> Detalhamento Ano a Ano
+                    </h3>
+                    <p class="text-xs text-slate-500">Acompanhe o saldo da aplicação após as retiradas e o valor de mercado de cada imóvel.</p>
+                </div>
+                <button id="toggleTableBtn" onclick="toggleTable()" class="px-4 py-2 text-xs font-semibold text-brand-700 bg-brand-50 hover:bg-brand-100 rounded-lg transition flex items-center gap-2 border border-brand-200">
+                    <i class="fa-solid fa-eye" id="toggleIcon"></i> <span id="toggleText">Esconder Tabela Detalhada</span>
+                </button>
+            </div>
+
+            <div id="tableContainer" class="overflow-x-auto transition-all duration-300">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-100/80 text-slate-700 uppercase tracking-wider font-bold border-b border-slate-200">
+                            <th class="py-3 px-4">Ano</th>
+                            <th class="py-3 px-4">Saldo Inicial (R$)</th>
+                            <th class="py-3 px-4">Rendimento Anual (R$)</th>
+                            <th class="py-3 px-4 text-amber-600">Retirada Total Ano (R$)</th>
+                            <th class="py-3 px-4 text-amber-600">Retirada Mensal (R$)</th>
+                            <th class="py-3 px-4 font-bold text-brand-700">Saldo Final Aplicado (R$)</th>
+                            <th class="py-3 px-4">Valor de 1 Imóvel (R$)</th>
+                            <th class="py-3 px-4 text-emerald-700 font-bold bg-emerald-50/50 text-center">Nº de Imóveis Equivalentes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="yearlyTableBody" class="divide-y divide-slate-100 text-slate-700 font-medium">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>Simulador comparativo financeiro x imobiliário. Os dois cenários suportam a mesma retirada mensal; no cenário imobiliário, o aluguel líquido é usado primeiro e eventual diferença reduz o patrimônio.</p>
+            <p class="mt-1 text-slate-400">&copy; Simulador de Decisão Patrimonial - Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Global Variables
+        let chartInstance = null;
+
+        // Utility: Format currency in BRL
+        const formatCurrency = (val) => {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(val);
+        };
+
+        // Utility: Format number with decimal places
+        const formatNumber = (val, decimals = 2) => {
+            return new Intl.NumberFormat('pt-BR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(val);
+        };
+
+        // Clean currency input string to number
+        const parseCurrencyValue = (valStr) => {
+            if (typeof valStr === 'number') return valStr;
+            const cleaned = valStr.replace(/\./g, '').replace(',', '.').replace(/[^0-9.]/g, '');
+            return parseFloat(cleaned) || 0;
+        };
+
+        // Parse a percentage written with comma or dot
+        const parsePercentageValue = (valStr) => {
+            return parseFloat(String(valStr).replace(',', '.')) || 0;
+        };
+
+        // Format raw input string while typing
+        const maskCurrencyInput = (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (!value) {
+                e.target.value = '';
+                return;
+            }
+            value = parseInt(value, 10).toLocaleString('pt-BR');
+            e.target.value = value;
+        };
+
+        // DOM Elements
+        const patrimonioInicialInput = document.getElementById('patrimonioInicial');
+        const qtdImoveisInput = document.getElementById('qtdImoveis');
+        const valorMedioImovelDisplay = document.getElementById('valorMedioImovelDisplay');
+        const tipoRetiradaSelect = document.getElementById('tipoRetirada');
+        const valorRetiradaInput = document.getElementById('valorRetirada');
+        const reajustaInflacaoCheck = document.getElementById('reajustaInflacao');
+        const rendimentoAplicacaoInput = document.getElementById('rendimentoAplicação');
+        const inflacaoInput = document.getElementById('inflacao');
+        const valorizacaoImovelInput = document.getElementById('valorizacaoImovel');
+        const yieldAluguelInput = document.getElementById('yieldAluguel');
+        const prazoAnosInput = document.getElementById('prazoAnos');
+        const prazoValueDisplay = document.getElementById('prazoValueDisplay');
+
+        // Estado visual dos campos: zero/vazio em cinza; valor informado em preto.
+        // Esta rotina altera somente a apresentação e não interfere no motor de cálculo.
+        function updateInputVisualState(element) {
+            if (!element || element.type === 'checkbox' || element.tagName === 'SELECT' || element.type === 'range') return;
+            const rawValue = String(element.value ?? '').trim();
+            const numericValue = element.id === 'patrimonioInicial' || element.id === 'valorRetirada'
+                ? parseCurrencyValue(rawValue)
+                : parsePercentageValue(rawValue);
+            const isEmptyOrZero = rawValue === '' || numericValue === 0;
+            element.classList.toggle('text-slate-400', isEmptyOrZero);
+            element.classList.toggle('text-slate-900', !isEmptyOrZero);
+        }
+
+        function refreshInputVisualStates() {
+            simulationInputs.forEach(updateInputVisualState);
+        }
+
+
+        // Persistencia local: conserva somente os parametros do ultimo calculo.
+        // O motor de calculo e o layout permanecem inalterados.
+        const STORAGE_KEY = 'calculadoraComparativaUltimoCalculo';
+        const simulationInputs = [
+            patrimonioInicialInput,
+            qtdImoveisInput,
+            tipoRetiradaSelect,
+            valorRetiradaInput,
+            reajustaInflacaoCheck,
+            rendimentoAplicacaoInput,
+            inflacaoInput,
+            valorizacaoImovelInput,
+            yieldAluguelInput,
+            prazoAnosInput
+        ];
+
+        simulationInputs.forEach((element) => {
+            if (element.type !== 'checkbox' && element.tagName !== 'SELECT' && element.type !== 'range') {
+                element.addEventListener('input', () => updateInputVisualState(element));
+                element.addEventListener('change', () => updateInputVisualState(element));
+            }
+        });
+
+        function saveLastCalculation() {
+            try {
+                const savedValues = {};
+                simulationInputs.forEach((element) => {
+                    savedValues[element.id] = element.type === 'checkbox'
+                        ? element.checked
+                        : element.value;
+                });
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(savedValues));
+            } catch (error) {
+                console.warn('Nao foi possivel salvar o ultimo calculo.', error);
+            }
+        }
+
+        function restoreLastCalculation() {
+            try {
+                const savedValues = JSON.parse(localStorage.getItem(STORAGE_KEY));
+                if (!savedValues || typeof savedValues !== 'object') return;
+
+                simulationInputs.forEach((element) => {
+                    if (!Object.prototype.hasOwnProperty.call(savedValues, element.id)) return;
+                    if (element.type === 'checkbox') {
+                        element.checked = Boolean(savedValues[element.id]);
+                    } else {
+                        element.value = savedValues[element.id];
+                    }
+                });
+                prazoValueDisplay.innerText = `${prazoAnosInput.value} ${prazoAnosInput.value === '1' ? 'Ano' : 'Anos'}`;
+            } catch (error) {
+                console.warn('Nao foi possivel restaurar o ultimo calculo.', error);
+            }
+        }
+
+        restoreLastCalculation();
+        refreshInputVisualStates();
+
+        // Event Listeners for Dynamic Recalculation
+        [
+            qtdImoveisInput, reajustaInflacaoCheck,
+            rendimentoAplicacaoInput, inflacaoInput, valorizacaoImovelInput,
+            yieldAluguelInput, prazoAnosInput
+        ].forEach(element => {
+            element.addEventListener('input', updateSimulation);
+            element.addEventListener('change', updateSimulation);
+        });
+
+        // Masked Currency Input Handlers
+        patrimonioInicialInput.addEventListener('input', (e) => {
+            maskCurrencyInput(e);
+            updateSimulation();
+        });
+
+        valorRetiradaInput.addEventListener('input', (e) => {
+            if (tipoRetiradaSelect.value === 'fixo') {
+                maskCurrencyInput(e);
+            }
+            updateSimulation();
+        });
+
+        tipoRetiradaSelect.addEventListener('change', () => {
+            updateSimulation();
+            updateInputVisualState(valorRetiradaInput);
+        });
+
+        prazoAnosInput.addEventListener('input', (e) => {
+            prazoValueDisplay.innerText = `${e.target.value} ${e.target.value === '1' ? 'Ano' : 'Anos'}`;
+        });
+
+        function runSimulation() {
+            // Inputs Parsing
+            const patrimonioInicial = Math.max(0, parseCurrencyValue(patrimonioInicialInput.value));
+            const qtdImoveis = Math.max(1, parseInt(qtdImoveisInput.value, 10) || 1);
+            const valorInicialImovel = patrimonioInicial / qtdImoveis;
+            const rendimentoAnualNominal = parsePercentageValue(rendimentoAplicacaoInput.value) / 100;
+            const inflacaoAnual = parsePercentageValue(inflacaoInput.value) / 100;
+            const valorizacaoAnualImovel = parsePercentageValue(valorizacaoImovelInput.value) / 100;
+            const yieldAnualAluguel = parsePercentageValue(yieldAluguelInput.value) / 100;
+            const prazoAnos = Math.max(1, parseInt(prazoAnosInput.value, 10) || 1);
+            const reajustarRetirada = reajustaInflacaoCheck.checked;
+
+            // Monthly equivalent rates. Values below -100% are limited to avoid invalid roots.
+            const safeAnnualRate = (rate) => Math.max(rate, -0.999999);
+            const rMensalAplicacao = Math.pow(1 + safeAnnualRate(rendimentoAnualNominal), 1 / 12) - 1;
+            const inflacaoMensal = Math.pow(1 + safeAnnualRate(inflacaoAnual), 1 / 12) - 1;
+            const valorizacaoMensalImovel = Math.pow(1 + safeAnnualRate(valorizacaoAnualImovel), 1 / 12) - 1;
+            const yieldMensalAluguel = Math.pow(1 + safeAnnualRate(yieldAnualAluguel), 1 / 12) - 1;
+
+            // Initial monthly withdrawal: the same target is applied to both scenarios.
+            let retiradaMensalInicial = 0;
+            const tipoRetirada = tipoRetiradaSelect.value;
+            const valorRetiradaInformado = parsePercentageValue(valorRetiradaInput.value);
+
+            if (tipoRetirada === 'fixo') {
+                retiradaMensalInicial = parseCurrencyValue(valorRetiradaInput.value);
+            } else if (tipoRetirada === 'percentual_ano') {
+                retiradaMensalInicial = (patrimonioInicial * (valorRetiradaInformado / 100)) / 12;
+            } else if (tipoRetirada === 'percentual_mes') {
+                retiradaMensalInicial = patrimonioInicial * (valorRetiradaInformado / 100);
+            }
+
+            // Scenario A: financial investment.
+            let saldoAplicacao = patrimonioInicial;
+
+            // Scenario B: property portfolio. Fractional property equivalents are allowed so that
+            // the monthly withdrawal can be treated consistently without forcing whole-unit sales.
+            let patrimonioImoveis = patrimonioInicial;
+            let valorUmImovel = valorInicialImovel;
+
+            let retiradaMensalAtual = Math.max(0, retiradaMensalInicial);
+            let totalRetiradoAplicacao = 0;
+            let totalRetiradoImoveis = 0;
+            let totalAluguelLiquido = 0;
+            const yearlyData = [];
+            // O primeiro ciclo de 12 meses e identificado como Ano 0.
+            // O prazo total e o motor de calculo mensal permanecem inalterados.
+
+            const totalMeses = prazoAnos * 12;
+            let acumuladoRendimentoAno = 0;
+            let acumuladoRetiradaAplicacaoAno = 0;
+            let acumuladoAluguelAno = 0;
+            let acumuladoRetiradaImoveisAno = 0;
+            let saldoInicioAno = patrimonioInicial;
+
+            for (let mes = 1; mes <= totalMeses; mes++) {
+                if (reajustarRetirada && mes > 1) {
+                    retiradaMensalAtual *= (1 + inflacaoMensal);
+                }
+
+                // Scenario A: monthly financial return, followed by the common withdrawal target.
+                const rendimentoMes = saldoAplicacao * rMensalAplicacao;
+                saldoAplicacao = Math.max(0, saldoAplicacao + rendimentoMes);
+                acumuladoRendimentoAno += rendimentoMes;
+
+                const retiradaAplicacaoMes = Math.min(saldoAplicacao, retiradaMensalAtual);
+                saldoAplicacao -= retiradaAplicacaoMes;
+                acumuladoRetiradaAplicacaoAno += retiradaAplicacaoMes;
+                totalRetiradoAplicacao += retiradaAplicacaoMes;
+
+                // Scenario B: market appreciation, then liquid rent, then the same withdrawal target.
+                valorUmImovel = Math.max(0, valorUmImovel * (1 + valorizacaoMensalImovel));
+                patrimonioImoveis = Math.max(0, patrimonioImoveis * (1 + valorizacaoMensalImovel));
+
+                const aluguelLiquidoMes = Math.max(0, patrimonioImoveis * yieldMensalAluguel);
+                const recursosImobiliariosMes = patrimonioImoveis + aluguelLiquidoMes;
+                const retiradaImoveisMes = Math.min(recursosImobiliariosMes, retiradaMensalAtual);
+
+                // Rental surplus is reinvested; if rent is insufficient, the shortfall consumes
+                // an equivalent fractional part of the property portfolio.
+                patrimonioImoveis = Math.max(0, recursosImobiliariosMes - retiradaImoveisMes);
+
+                acumuladoAluguelAno += aluguelLiquidoMes;
+                acumuladoRetiradaImoveisAno += retiradaImoveisMes;
+                totalAluguelLiquido += aluguelLiquidoMes;
+                totalRetiradoImoveis += retiradaImoveisMes;
+
+                if (mes % 12 === 0) {
+                    const anoAtual = (mes / 12) - 1;
+                    const imoveisEqAplicacao = valorUmImovel > 0 ? saldoAplicacao / valorUmImovel : 0;
+                    const imoveisEqMantidos = valorUmImovel > 0 ? patrimonioImoveis / valorUmImovel : 0;
+
+                    yearlyData.push({
+                        ano: anoAtual,
+                        saldoInicial: saldoInicioAno,
+                        rendimentoAno: acumuladoRendimentoAno,
+                        retiradaAno: acumuladoRetiradaAplicacaoAno,
+                        saldoFinal: Math.max(0, saldoAplicacao),
+                        valorUmImovel,
+                        imoveisEquivalentes: Math.max(0, imoveisEqAplicacao),
+                        patrimonioImoveisTotal: Math.max(0, patrimonioImoveis),
+                        imoveisMantidosEquivalentes: Math.max(0, imoveisEqMantidos),
+                        aluguelLiquidoAno: acumuladoAluguelAno,
+                        retiradaImoveisAno: acumuladoRetiradaImoveisAno
+                    });
+
+                    acumuladoRendimentoAno = 0;
+                    acumuladoRetiradaAplicacaoAno = 0;
+                    acumuladoAluguelAno = 0;
+                    acumuladoRetiradaImoveisAno = 0;
+                    saldoInicioAno = Math.max(0, saldoAplicacao);
+                }
+            }
+
+            return {
+                patrimonioInicial,
+                qtdImoveis,
+                valorInicialImovel,
+                prazoAnos,
+                totalRetiradoAcumulado: totalRetiradoAplicacao,
+                totalRetiradoAplicacao,
+                totalRetiradoImoveis,
+                totalAluguelLiquido,
+                yearlyData,
+                resultadoFinal: yearlyData[yearlyData.length - 1]
+            };
+        }
+
+        function updatePrintParameters(patrimonio, qtd) {
+            const tipoRetiradaTextos = {
+                fixo: 'Valor fixo mensal',
+                percentual_ano: '% do patrimônio ao ano',
+                percentual_mes: '% do patrimônio ao mês'
+            };
+            const tipo = tipoRetiradaSelect.value;
+            const valorRetirada = tipo === 'fixo'
+                ? formatCurrency(parseCurrencyValue(valorRetiradaInput.value))
+                : `${formatNumber(parsePercentageValue(valorRetiradaInput.value), 2)}%`;
+            document.getElementById('printPatrimonioInicial').innerText = formatCurrency(patrimonio);
+            document.getElementById('printQtdImoveis').innerText = qtd;
+            document.getElementById('printValorMedioImovel').innerText = formatCurrency(patrimonio / qtd);
+            document.getElementById('printRetirada').innerText = `${tipoRetiradaTextos[tipo]}: ${valorRetirada}`;
+            document.getElementById('printReajusteInflacao').innerText = reajustaInflacaoCheck.checked ? 'Sim' : 'Não';
+            document.getElementById('printRendimentoAplicacao').innerText = `${formatNumber(parsePercentageValue(rendimentoAplicacaoInput.value), 2)}% a.a.`;
+            document.getElementById('printInflacao').innerText = `${formatNumber(parsePercentageValue(inflacaoInput.value), 2)}% a.a.`;
+            document.getElementById('printValorizacaoImovel').innerText = `${formatNumber(parsePercentageValue(valorizacaoImovelInput.value), 2)}% a.a.`;
+            document.getElementById('printYieldAluguel').innerText = `${formatNumber(parsePercentageValue(yieldAluguelInput.value), 2)}% a.a.`;
+            document.getElementById('printPrazoAnos').innerText = `${Math.max(1, parseInt(prazoAnosInput.value, 10) || 1)} anos`;
+        }
+
+        function updateSimulation() {
+            saveLastCalculation();
+            const patrimonio = parseCurrencyValue(patrimonioInicialInput.value);
+            const qtd = Math.max(1, parseInt(qtdImoveisInput.value, 10) || 1);
+            valorMedioImovelDisplay.innerText = formatCurrency(patrimonio / qtd);
+            updatePrintParameters(patrimonio, qtd);
+
+            const simData = runSimulation();
+            const resFinal = simData.resultadoFinal;
+
+            // 1. Update Hero Banner
+            document.getElementById('heroPrazoText').innerText = `${simData.prazoAnos} ${simData.prazoAnos === 1 ? 'ano' : 'anos'}`;
+            document.getElementById('imoveisFinaisHero').innerText = formatNumber(resFinal.imoveisEquivalentes, 1);
+
+            const diffImoveis = resFinal.imoveisEquivalentes - simData.qtdImoveis;
+            const pctVariacao = simData.qtdImoveis > 0 ? (diffImoveis / simData.qtdImoveis) * 100 : 0;
+            const badgeElem = document.getElementById('variacaoImoveisBadge');
+            const diffAbsElem = document.getElementById('diferencaAbsolutaImoveis');
+
+            if (diffImoveis >= 0) {
+                badgeElem.innerText = `+${formatNumber(pctVariacao, 1)}%`;
+                badgeElem.className = 'text-2xl font-black text-emerald-400 my-1';
+                diffAbsElem.innerText = `+${formatNumber(diffImoveis, 1)} imóveis em poder de compra`;
+            } else {
+                badgeElem.innerText = `${formatNumber(pctVariacao, 1)}%`;
+                badgeElem.className = 'text-2xl font-black text-rose-400 my-1';
+                diffAbsElem.innerText = `${formatNumber(Math.abs(diffImoveis), 1)} imóveis a menos em poder de compra`;
+            }
+
+            document.getElementById('heroSubtitle').innerHTML =
+                `A mesma retirada mensal foi aplicada aos dois cenários. A aplicação entregou <strong>${formatCurrency(simData.totalRetiradoAplicacao)}</strong> e os imóveis entregaram <strong>${formatCurrency(simData.totalRetiradoImoveis)}</strong>, usando primeiro o aluguel líquido. Ao final, a carteira imobiliária equivale a <strong>${formatNumber(resFinal.imoveisMantidosEquivalentes, 1)} imóveis</strong>.`;
+
+            // 2. Update Metric Cards
+            document.getElementById('saldoFinalAplicacao').innerText = formatCurrency(resFinal.saldoFinal);
+            document.getElementById('totalRetiradoAcumulado').innerText = formatCurrency(simData.totalRetiradoAplicacao);
+            document.getElementById('patrimonioImoveisFinal').innerText = formatCurrency(resFinal.patrimonioImoveisTotal);
+            document.getElementById('valorFuturoUmImovel').innerText = formatCurrency(resFinal.valorUmImovel);
+
+            // 3. Update Chart
+            updateChart(simData.yearlyData);
+
+            // 4. Update Yearly Table
+            updateTable(simData.yearlyData);
+        }
+
+        function updateChart(yearlyData) {
+            const labels = yearlyData.map(d => `Ano ${d.ano}`);
+            const saldoAplicacaoData = yearlyData.map(d => d.saldoFinal);
+            const patrimonioImoveisData = yearlyData.map(d => d.patrimonioImoveisTotal);
+            const valorUmImovelData = yearlyData.map(d => d.valorUmImovel);
+            const ctx = document.getElementById('evolutionChart').getContext('2d');
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Saldo Aplicação (com retiradas)',
+                            data: saldoAplicacaoData,
+                            borderColor: '#0284c7',
+                            backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        },
+                        {
+                            label: 'Patrimônio Imóveis (aluguel e retiradas)',
+                            data: patrimonioImoveisData,
+                            borderColor: '#334155',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            tension: 0.3,
+                            pointRadius: 3
+                        },
+                        {
+                            label: 'Valor de 1 Imóvel',
+                            data: valorUmImovelData,
+                            borderColor: '#10b981',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            pointRadius: 3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: { family: 'Inter', size: 11 },
+                                usePointStyle: true,
+                                boxWidth: 8
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.y !== null) label += formatCurrency(context.parsed.y);
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    if (value >= 1000000) return 'R$ ' + (value / 1000000).toFixed(1) + 'M';
+                                    return 'R$ ' + (value / 1000).toFixed(0) + 'k';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTable(yearlyData) {
+            const tbody = document.getElementById('yearlyTableBody');
+            tbody.innerHTML = '';
+
+            yearlyData.forEach((d) => {
+                const tr = document.createElement('tr');
+                tr.className = d.ano % 2 === 0 ? 'bg-white hover:bg-slate-50' : 'bg-slate-50/50 hover:bg-slate-100/50';
+                tr.innerHTML = `
+                    <td class="py-2.5 px-4 font-bold text-slate-900">Ano ${d.ano}</td>
+                    <td class="py-2.5 px-4">${formatCurrency(d.saldoInicial)}</td>
+                    <td class="py-2.5 px-4 text-emerald-600">+${formatCurrency(d.rendimentoAno)}</td>
+                    <td class="py-2.5 px-4 text-amber-600 font-semibold">-${formatCurrency(d.retiradaAno)}</td>
+                    <td class="py-2.5 px-4 text-amber-600 font-semibold">-${formatCurrency(d.retiradaAno / 12)}</td>
+                    <td class="py-2.5 px-4 font-bold text-brand-700">${formatCurrency(d.saldoFinal)}</td>
+                    <td class="py-2.5 px-4 text-slate-600">${formatCurrency(d.valorUmImovel)}</td>
+                    <td class="py-2.5 px-4 text-center font-extrabold bg-emerald-50/30 text-emerald-800">
+                        ${formatNumber(d.imoveisEquivalentes, 2)}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function toggleTable() {
+            const container = document.getElementById('tableContainer');
+            const toggleIcon = document.getElementById('toggleIcon');
+            const toggleText = document.getElementById('toggleText');
+
+            if (container.classList.contains('hidden')) {
+                container.classList.remove('hidden');
+                toggleIcon.className = 'fa-solid fa-eye';
+                toggleText.innerText = 'Esconder Tabela Detalhada';
+            } else {
+                container.classList.add('hidden');
+                toggleIcon.className = 'fa-solid fa-eye-slash';
+                toggleText.innerText = 'Mostrar Tabela Detalhada';
+            }
+        }
+
+        window.onload = function() {
+            updateSimulation();
+        };
+    </script>
+</body>
+</html>

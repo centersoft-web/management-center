@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador Financeiro Completo</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0284c7', 600: '#0369a1', 700: '#035485', 800: '#075985', 900: '#0c4a6e' },
+                        emerald: { 500: '#10b981', 600: '#059669', 700: '#047857' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .highlight { background-color: #f0fdf4; font-weight: bold; }
+        .negative { color: #ef4444; }
+        @media print {
+            header, .no-print, button { display: none !important; }
+            body { background: white !important; color: black !important; }
+            main { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+            .shadow-sm, .shadow-xl, .shadow-lg { box-shadow: none !important; }
+            .border { border-color: #e2e8f0 !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
+    <header class="bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-brand-500/20 rounded-xl border border-brand-500/30"><i class="fa-solid fa-chart-line text-2xl text-brand-500"></i></div>
+                <div><h1 class="text-xl sm:text-2xl font-bold tracking-tight">Painel Financeiro</h1><p class="text-xs text-slate-300">Projeções de Investimentos e Amortização de Financiamento</p></div>
+            </div>
+            <div class="flex items-center gap-3"><div class="hidden md:flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 text-xs text-slate-300"><i class="fa-solid fa-circle-info text-brand-500"></i><span>Cálculos com juros compostos e SAC</span></div></div>
+        </div>
+    </header>
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow space-y-8">
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6">
+            <div class="border-b border-slate-100 pb-3"><h2 class="text-lg font-bold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-calendar-days text-brand-600"></i> 1. Projeção de Investimento (Visão Anual)</h2><p class="text-xs text-slate-500 mt-1">Simulação de crescimento patrimonial composto com horizonte em anos.</p></div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 no-print">
+                <div><label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Investimento Inicial</label><input type="number" id="anual_p" placeholder="Ex: 5000" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm"></div>
+                <div><label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Aporte Mensal</label><input type="number" id="anual_m" placeholder="Ex: 200" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm"></div>
+                <div><label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Retirada Mensal</label><input type="number" id="anual_r" placeholder="Ex: 50" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm"></div>
+                <div><label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Taxa Anual (%)</label><input type="number" id="anual_taxa" placeholder="Ex: 11.5" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm"></div>
+                <div><label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Qtd Anos</label><input type="number" id="anual_anos" placeholder="Ex: 10" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm"></div>
+                <div><label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Valor Final / Meta</label><input type="number" id="anual_final" placeholder="Calculado ou informe a meta" class="w-full px-3 py-2 bg-emerald-50 border border-emerald-300 rounded-lg text-emerald-900 font-semibold focus:ring-2 focus:ring-emerald-500 focus:bg-white transition text-sm"></div>
+            </div>
+            <div class="flex flex-wrap gap-3 no-print">
+                <button onclick="calcularAnual()" class="px-4 py-2 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition shadow-sm flex items-center gap-2"><i class="fa-solid fa-calculator"></i> Calcular Anual</button>
+                <button onclick="limparCampos('anual')" class="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition border border-slate-300 flex items-center gap-2"><i class="fa-solid fa-eraser"></i> Limpar</button>
+                <button onclick="imprimirSilencioso('res_anual', 'Relatório de Investimento Anual')" class="px-4 py-2 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition border border-emerald-200 flex items-center gap-2"><i class="fa-solid fa-print"></i> Imprimir Relatório</button>
+            </div>
+            <div id="res_anual" class="table-container overflow-x-auto max-h-[400px]"></div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6">
+            <div class="border-b border-slate-100 pb-3"><h2 class="text-lg font-bold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-calendar-stroke text-brand-600"></i> 2. Projeção de Investimento (Visão Mensal)</h2><p class="text-xs text-slate-500 mt-1">Detalhamento mês a mês da rentabilidade, aportes e amortizações do saldo.</p></div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 no-print">
+                <div><label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Investimento Inicial</label><input type="number" id="mensal_p" placeholder="Ex: 1000" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm"></div>
+                <div><label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Aporte Mensal</label><input type="number" id="mensal_m" placeholder="Ex: 100" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm"></div>
+                <div><label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Retirada Mensal</label><input type="number" id="mensal_r" placeholder="Ex: 50" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm"></div>
+                <div><label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Taxa Mensal (%)</label><input type="number" id="mensal_taxa" placeholder="Ex: 0.8" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm"></div>
+                <div><label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Qtd Meses</label><input type="number" id="mensal_meses" placeholder="Ex: 24" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm"></div>
+                <div><label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Valor Final / Meta</label><input type="number" id="mensal_final" placeholder="Calculado ou informe a meta" class="w-full px-3 py-2 bg-emerald-50 border border-emerald-300 rounded-lg text-emerald-900 font-semibold focus:ring-2 focus:ring-emerald-500 focus:bg-white transition text-sm"></div>
+            </div>
+            <div class="flex flex-wrap gap-3 no-print">
+                <button onclick="calcularMensal()" class="px-4 py-2 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition shadow-sm flex items-center gap-2"><i class="fa-solid fa-calculator"></i> Calcular Mensal</button>
+                <button onclick="limparCampos('mensal')" class="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition border border-slate-300 flex items-center gap-2"><i class="fa-solid fa-eraser"></i> Limpar</button>
+                <button onclick="imprimirSilencioso('res_mensal', 'Relatório de Investimento Mensal')" class="px-4 py-2 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition border border-emerald-200 flex items-center gap-2"><i class="fa-solid fa-print"></i> Imprimir Relatório</button>
+            </div>
+            <div id="res_mensal" class="table-container overflow-x-auto max-h-[400px]"></div>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6">
+            <div class="border-b border-slate-100 pb-3"><h2 class="text-lg font-bold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-house-circle-check text-brand-600"></i> 3. Amortização de Financiamento (SAC)</h2><p class="text-xs text-slate-500 mt-1">Cálculo de parcelas decrescentes no Sistema de Amortização Constante.</p></div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 no-print">
+                <div><label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Valor da Dívida</label><input type="number" id="sac_v" placeholder="Ex: 50000" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm"></div>
+                <div><label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Juros Anual (%)</label><input type="number" id="sac_j" placeholder="Ex: 9.5" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm"></div>
+                <div><label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Prazo (Meses)</label><input type="number" id="sac_t" placeholder="Ex: 36" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm"></div>
+            </div>
+            <div class="flex flex-wrap gap-3 no-print">
+                <button onclick="calcularSAC()" class="px-4 py-2 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-lg transition shadow-sm flex items-center gap-2"><i class="fa-solid fa-calculator"></i> Calcular SAC</button>
+                <button onclick="limparCampos('sac')" class="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition border border-slate-300 flex items-center gap-2"><i class="fa-solid fa-eraser"></i> Limpar</button>
+                <button onclick="imprimirSilencioso('res_sac', 'Relatório de Amortização SAC')" class="px-4 py-2 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition border border-emerald-200 flex items-center gap-2"><i class="fa-solid fa-print"></i> Imprimir Relatório</button>
+            </div>
+            <div id="res_sac" class="table-container overflow-x-auto max-h-[400px]"></div>
+        </div>
+    </main>
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500"><div class="max-w-7xl mx-auto px-4"><p>Painel Financeiro - Projeções e Análises de Investimento e Amortização.</p><p class="mt-1 text-slate-400">&copy; Simulador Financeiro - Todos os direitos reservados.</p></div></footer>
+    <iframe id="printFrame" class="hidden"></iframe>
+    <script>
+        const formatar = (v) => arredondarMoeda(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const arredondarMoeda = (v) => Math.round((v + Number.EPSILON) * 100) / 100;
+        const taxaAnualEfetivaParaMensal = (taxaAnual) => Math.pow(1 + taxaAnual, 1 / 12) - 1;
+
+        function obterNumero(id, nome, opcoes = {}) {
+            const campo = document.getElementById(id);
+            const texto = campo.value.trim();
+            const valor = Number(texto);
+            const { minimo = 0, inteiro = false, maiorQueMinimo = false } = opcoes;
+            if (texto === '' || !Number.isFinite(valor)) {
+                alert(`Informe ${nome} corretamente.`);
+                campo.focus();
+                return null;
+            }
+            if (inteiro && !Number.isInteger(valor)) {
+                alert(`${nome} deve ser um número inteiro.`);
+                campo.focus();
+                return null;
+            }
+            if ((maiorQueMinimo && valor <= minimo) || (!maiorQueMinimo && valor < minimo)) {
+                alert(`${nome} deve ser ${maiorQueMinimo ? 'maior que' : 'maior ou igual a'} ${minimo}.`);
+                campo.focus();
+                return null;
+            }
+            return valor;
+        }
+
+        function limparCampos(prefixo) {
+            const botao = document.querySelector(`[onclick*="limparCampos('${prefixo}')"]`);
+            const container = botao ? botao.closest('.shadow-sm') : null;
+            if (!container) return;
+            container.querySelectorAll('input').forEach(input => input.value = '');
+            const resId = prefixo === 'anual' ? 'res_anual' : prefixo === 'mensal' ? 'res_mensal' : 'res_sac';
+            document.getElementById(resId).innerHTML = '';
+        }
+
+        function imprimirSilencioso(id, titulo) {
+            const conteudo = document.getElementById(id).innerHTML;
+            if (!conteudo) return alert('Gere o cálculo primeiro!');
+
+            const configuracoes = {
+                res_anual: [
+                    ['Investimento Inicial', 'anual_p', 'moeda'],
+                    ['Aporte Mensal', 'anual_m', 'moeda'],
+                    ['Retirada Mensal', 'anual_r', 'moeda'],
+                    ['Taxa Anual', 'anual_taxa', 'percentual'],
+                    ['Quantidade de Anos', 'anual_anos', 'numero'], ['Valor Final / Meta', 'anual_final', 'moeda']
+                ],
+                res_mensal: [
+                    ['Investimento Inicial', 'mensal_p', 'moeda'],
+                    ['Aporte Mensal', 'mensal_m', 'moeda'],
+                    ['Retirada Mensal', 'mensal_r', 'moeda'],
+                    ['Taxa Mensal', 'mensal_taxa', 'percentual'],
+                    ['Quantidade de Meses', 'mensal_meses', 'numero'], ['Valor Final / Meta', 'mensal_final', 'moeda']
+                ],
+                res_sac: [
+                    ['Valor da Dívida', 'sac_v', 'moeda'],
+                    ['Juros Anual', 'sac_j', 'percentual'],
+                    ['Prazo', 'sac_t', 'meses']
+                ]
+            };
+
+            const formatarEntrada = (valor, tipo) => {
+                const numero = Number(valor);
+                if (!Number.isFinite(numero)) return valor;
+                if (tipo === 'moeda') return numero.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                if (tipo === 'percentual') return numero.toLocaleString('pt-BR', { maximumFractionDigits: 6 }) + '%';
+                if (tipo === 'meses') return numero.toLocaleString('pt-BR') + (numero === 1 ? ' mês' : ' meses');
+                return numero.toLocaleString('pt-BR');
+            };
+
+            const dados = (configuracoes[id] || []).map(([rotulo, campoId, tipo]) => {
+                const campo = document.getElementById(campoId);
+                return `<div class="dado"><span>${rotulo}</span><strong>${formatarEntrada(campo ? campo.value : '', tipo)}</strong></div>`;
+            }).join('');
+
+            const dataHora = new Date().toLocaleString('pt-BR');
+            const frame = document.getElementById('printFrame');
+            const doc = frame.contentWindow.document;
+            doc.open();
+            doc.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>${titulo}</title><style>
+                @page{size:landscape;margin:12mm;}
+                *{box-sizing:border-box;}
+                body{font-family:Arial,sans-serif;margin:0;color:#0f172a;background:#fff;}
+                h1{margin:0 0 4px;text-align:center;font-size:20px;color:#0f172a;}
+                .emitido{text-align:center;color:#64748b;font-size:10px;margin-bottom:14px;}
+                .dados{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin:0 0 14px;padding:10px;border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc;}
+                .dado{display:flex;flex-direction:column;gap:3px;padding:5px 7px;}
+                .dado span{font-size:9px;color:#64748b;text-transform:uppercase;font-weight:700;}
+                .dado strong{font-size:12px;color:#0f172a;}
+                table{width:100%;border-collapse:collapse;margin-top:8px;table-layout:auto;}
+                thead{display:table-header-group;}
+                tr{break-inside:avoid;page-break-inside:avoid;}
+                th,td{border:1px solid #cbd5e1;padding:6px 5px;text-align:center;font-size:10px;white-space:nowrap;}
+                th{background:#0284c7 !important;color:#fff !important;font-weight:700;}
+                .highlight{background:#f0fdf4 !important;font-weight:bold;}
+                .negative{color:#dc2626 !important;}
+                @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+            </style></head><body><h1>${titulo}</h1><div class="emitido">Relatório emitido em ${dataHora}</div><div class="dados">${dados}</div>${conteudo}<script>window.onload=function(){setTimeout(function(){window.print();},100);};<\/script></body></html>`);
+            doc.close();
+        }
+        function ler(id){const t=document.getElementById(id).value.trim();return t===''?null:Number(t)}
+        function sim(p,m,r,i,n){let x=arredondarMoeda(p);for(let k=0;k<n;k++){let b=arredondarMoeda(x+m);x=arredondarMoeda(b+arredondarMoeda(b*i)-r)}return x}
+        function taxaMeta(meta,p,m,r,n){let lo=-.999999,hi=.01,f=x=>sim(p,m,r,x,n)-meta,fl=f(lo),fh=f(hi);for(let z=0;fl*fh>0&&z<60;z++){hi=hi*2+.01;fh=f(hi)}if(fl*fh>0)return null;for(let z=0;z<120;z++){let md=(lo+hi)/2,fm=f(md);if(Math.abs(fm)<.005)return md;if(fl*fm<=0)hi=md;else{lo=md;fl=fm}}return(lo+hi)/2}
+        function prazoMeta(meta,p,m,r,i,max){let best=null;for(let n=1;n<=max;n++){let saldo=sim(p,m,r,i,n),d=Math.abs(saldo-meta);if(!best||d<best.d)best={n,d};if(d<=.01)break}return best.n}
+        function preparar(tipo){const an=tipo==='anual',ids=an?{p:'anual_p',m:'anual_m',r:'anual_r',t:'anual_taxa',n:'anual_anos',f:'anual_final'}:{p:'mensal_p',m:'mensal_m',r:'mensal_r',t:'mensal_taxa',n:'mensal_meses',f:'mensal_final'},v={};Object.keys(ids).forEach(k=>v[k]=ler(ids[k]));if(Object.values(v).some(x=>x!==null&&!Number.isFinite(x)))return alert('Revise os valores.'),null;let vaz=Object.keys(v).filter(k=>v[k]===null);if(vaz.length!==1)return alert('Deixe exatamente um campo vazio.'),null;let q=vaz[0],meses=v.n===null?null:(an?v.n*12:v.n),i=v.t===null?null:(an?taxaAnualEfetivaParaMensal(v.t/100):v.t/100);if(q!=='f'&&v.f===null)return alert('Informe o Valor Final / Meta.'),null;if(q==='f')v.f=sim(v.p,v.m,v.r,i,meses);else if(q==='t'){i=taxaMeta(v.f,v.p,v.m,v.r,meses);if(i===null)return alert('Não foi possível calcular a taxa.'),null;v.t=an?(Math.pow(1+i,12)-1)*100:i*100}else if(q==='n'){let nm=prazoMeta(v.f,v.p,v.m,v.r,i,2400);v.n=an?Math.ceil(nm/12):nm;meses=an?v.n*12:v.n}else{let z0=sim(q==='p'?0:v.p,q==='m'?0:v.m,q==='r'?0:v.r,i,meses),z1=sim(q==='p'?1:v.p,q==='m'?1:v.m,q==='r'?1:v.r,i,meses),coef=z1-z0;if(Math.abs(coef)<1e-12)return alert('Não foi possível calcular o campo.'),null;v[q]=(v.f-z0)/coef}document.getElementById(ids[q]).value=q==='n'?v[q]:v[q].toFixed(q==='t'?6:2);return{an,v,i,calculado:q}}
+        function aviso(q){return `<div class="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4"><p class="text-xs font-bold uppercase text-emerald-700">Campo calculado e preenchido: ${q}</p></div>`}
+        function calcularAnual(){let d=preparar('anual');if(!d)return;let{v,i}=d,x=arredondarMoeda(v.p),h=`<table class="w-full text-left border-collapse text-xs"><thead><tr><th>Ano</th><th>Aportes no Ano</th><th>Retiradas no Ano</th><th>Rendimento Ano</th><th>Saldo Final</th></tr></thead><tbody>`;for(let a=1;a<=v.n;a++){let ini=x,ap=arredondarMoeda(v.m*12),rt=arredondarMoeda(v.r*12);for(let k=0;k<12;k++){let b=arredondarMoeda(x+v.m);x=arredondarMoeda(b+arredondarMoeda(b*i)-v.r)}let rd=arredondarMoeda(x-ini-ap+rt);h+=`<tr><td class="py-2.5 px-4 text-center">Ano ${a}</td><td class="text-center">${formatar(ap)}</td><td class="text-center">${formatar(rt)}</td><td class="text-center">${formatar(rd)}</td><td class="text-center highlight">${formatar(x)}</td></tr>`}document.getElementById('anual_final').value=x.toFixed(2);document.getElementById('res_anual').innerHTML=h+'</tbody></table>'+aviso(d.calculado)}
+        function calcularMensal(){let d=preparar('mensal');if(!d)return;let{v,i}=d,x=arredondarMoeda(v.p),h=`<table class="w-full text-left border-collapse text-xs"><thead><tr><th>Mês</th><th>Saldo Inicial</th><th>Aporte</th><th>Rendimento</th><th>Retirada</th><th>Saldo Final</th></tr></thead><tbody>`;for(let k=1;k<=v.n;k++){let ini=x,b=arredondarMoeda(x+v.m),rd=arredondarMoeda(b*i);x=arredondarMoeda(b+rd-v.r);h+=`<tr><td class="text-center">Mês ${k}</td><td class="text-center">${formatar(ini)}</td><td class="text-center">${formatar(v.m)}</td><td class="text-center">${formatar(rd)}</td><td class="text-center">${formatar(v.r)}</td><td class="text-center highlight">${formatar(x)}</td></tr>`}document.getElementById('mensal_final').value=x.toFixed(2);document.getElementById('res_mensal').innerHTML=h+'</tbody></table>'+aviso(d.calculado)}
+        function calcularSAC() {
+            const p = obterNumero('sac_v', 'o valor da dívida', { minimo: 0, maiorQueMinimo: true });
+            const taxaPercentual = obterNumero('sac_j', 'a taxa anual', { minimo: -100, maiorQueMinimo: true });
+            const t = obterNumero('sac_t', 'o prazo', { minimo: 0, maiorQueMinimo: true, inteiro: true });
+            if ([p, taxaPercentual, t].some(valor => valor === null)) return;
+
+            const iM = taxaAnualEfetivaParaMensal(taxaPercentual / 100);
+            const amortBase = arredondarMoeda(p / t);
+            let saldo = arredondarMoeda(p);
+            let totalPago = 0;
+            let html = `<table class="w-full text-left border-collapse text-xs"><thead class="bg-slate-100/80 text-slate-700 uppercase tracking-wider font-bold border-b border-slate-200 sticky top-0"><tr><th class="py-3 px-4 text-center">Mês</th><th class="py-3 px-4 text-center">Prestação</th><th class="py-3 px-4 text-center">Juros</th><th class="py-3 px-4 text-center">Amortização</th><th class="py-3 px-4 text-center">Saldo Devedor</th></tr></thead><tbody class="divide-y divide-slate-100 text-slate-700 font-medium">`;
+            for (let i = 1; i <= t; i++) {
+                const juros = arredondarMoeda(saldo * iM);
+                const amort = i === t ? saldo : Math.min(amortBase, saldo);
+                const prest = arredondarMoeda(amort + juros);
+                totalPago = arredondarMoeda(totalPago + prest);
+                saldo = arredondarMoeda(Math.max(0, saldo - amort));
+                html += `<tr class="${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} hover:bg-slate-100/50"><td class="py-2.5 px-4 text-center font-bold text-slate-900">${i}</td><td class="py-2.5 px-4 text-center font-bold text-brand-700">${formatar(prest)}</td><td class="py-2.5 px-4 text-center text-amber-600">${formatar(juros)}</td><td class="py-2.5 px-4 text-center text-emerald-600">${formatar(amort)}</td><td class="py-2.5 px-4 text-center">${formatar(saldo)}</td></tr>`;
+            }
+            html += `<tr class="highlight border-t-2 border-emerald-200"><td colspan="1" class="py-3 px-4 font-extrabold text-slate-900 text-center">TOTAL PAGO</td><td colspan="4" class="py-3 px-4 font-black text-emerald-700 text-left pl-6 text-sm">${formatar(totalPago)}</td></tr>`;
+            document.getElementById('res_sac').innerHTML = html + '</tbody></table>';
+        }
+
+
+        // Persistência local: mantém campos e resultados ao fechar e reabrir o HTML.
+        const CHAVE_MEMORIA = 'simuladorFinanceiro_dados_v1';
+        const IDS_CAMPOS = [
+            'anual_p', 'anual_m', 'anual_r', 'anual_taxa', 'anual_anos', 'anual_final',
+            'mensal_p', 'mensal_m', 'mensal_r', 'mensal_taxa', 'mensal_meses', 'mensal_final',
+            'sac_v', 'sac_j', 'sac_t'
+        ];
+        const IDS_RESULTADOS = ['res_anual', 'res_mensal', 'res_sac'];
+
+        function salvarMemoria() {
+            try {
+                const dados = {
+                    campos: {},
+                    resultados: {}
+                };
+
+                IDS_CAMPOS.forEach(id => {
+                    const elemento = document.getElementById(id);
+                    if (elemento) dados.campos[id] = elemento.value;
+                });
+
+                IDS_RESULTADOS.forEach(id => {
+                    const elemento = document.getElementById(id);
+                    if (elemento) dados.resultados[id] = elemento.innerHTML;
+                });
+
+                localStorage.setItem(CHAVE_MEMORIA, JSON.stringify(dados));
+            } catch (erro) {
+                console.warn('Não foi possível salvar os dados localmente.', erro);
+            }
+        }
+
+        function restaurarMemoria() {
+            try {
+                const textoSalvo = localStorage.getItem(CHAVE_MEMORIA);
+                if (!textoSalvo) return;
+
+                const dados = JSON.parse(textoSalvo);
+
+                IDS_CAMPOS.forEach(id => {
+                    const elemento = document.getElementById(id);
+                    if (elemento && dados.campos && Object.prototype.hasOwnProperty.call(dados.campos, id)) {
+                        elemento.value = dados.campos[id];
+                    }
+                });
+
+                IDS_RESULTADOS.forEach(id => {
+                    const elemento = document.getElementById(id);
+                    if (elemento && dados.resultados && Object.prototype.hasOwnProperty.call(dados.resultados, id)) {
+                        elemento.innerHTML = dados.resultados[id];
+                    }
+                });
+            } catch (erro) {
+                console.warn('Não foi possível restaurar os dados salvos.', erro);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            restaurarMemoria();
+
+            IDS_CAMPOS.forEach(id => {
+                const elemento = document.getElementById(id);
+                if (elemento) elemento.addEventListener('input', salvarMemoria);
+            });
+
+            IDS_RESULTADOS.forEach(id => {
+                const elemento = document.getElementById(id);
+                if (elemento) {
+                    new MutationObserver(salvarMemoria).observe(elemento, {
+                        childList: true,
+                        subtree: true,
+                        characterData: true
+                    });
+                }
+            });
+        });
+
+        window.addEventListener('beforeunload', salvarMemoria);
+
+    </script>
+</body>
+</html>

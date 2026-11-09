@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Simulador IRPF 2026 - Aposentadoria e Alugueis</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--b:#0369a1;--bg:#f8fafc;--bd:#e2e8f0;--ok:#047857;--warn:#92400e}*{box-sizing:border-box}body{margin:0;font:14px Inter,system-ui,Segoe UI,Arial;background:#f8fafc;color:#1e293b;-webkit-font-smoothing:antialiased}header{background:linear-gradient(90deg,#0f172a,#0c4a6e,#0f172a);color:white;padding:16px 24px;box-shadow:0 10px 15px -12px #000;position:sticky;top:0;z-index:20}main{max-width:1480px;margin:auto;padding:24px 16px}.card{background:white;border:1px solid rgba(226,232,240,.9);border-radius:16px;padding:24px;margin:0 0 24px;box-shadow:0 1px 3px rgba(15,23,42,.05)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}label{display:block;font-size:12px;font-weight:700;margin-bottom:5px}input,select{width:100%;padding:9px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc;color:#0f172a;font-weight:600}button{border:0;border-radius:8px;padding:9px 12px;font-weight:700;cursor:pointer}.primary{background:#0369a1;color:white;box-shadow:0 1px 2px rgba(0,0,0,.1)}.danger{background:#fee2e2;color:#991b1b}.metric{padding:16px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0}.metric b{display:block;font-size:20px;margin-top:5px}.annual-results .metric-label{display:block;white-space:nowrap}.annual-results .metric b{display:block;margin-top:8px}#memoAno{white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal;max-width:100%}table{width:100%;border-collapse:collapse}th,td{padding:8px;border-bottom:1px solid #e2e8f0;text-align:left}th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;background:#f1f5f9;color:#475569}.num{text-align:right}.memo-row td{background:#f8fafc;color:#475569;font-size:12px;border-left:4px solid #0284c7;line-height:1.5}.memo-row strong{color:#0f172a}.method-note{margin-top:8px;padding:10px 12px;border-radius:8px;background:#eff6ff;border:1px solid #bfdbfe;color:#334155;font-size:12px;line-height:1.55}.method-note strong{color:#0f172a}.note{font-size:12px;color:#475569;line-height:1.5}.warn{background:#fffbeb;border-color:#fde68a;box-shadow:none}.ok{color:var(--ok)}details{margin-top:10px}code{background:#f1f5f9;padding:2px 4px} @media(max-width:700px){.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}table{min-width:980px}}@media print{button,.no-print{display:none!important}header{position:static;box-shadow:none}body{background:white}.card{break-inside:avoid;box-shadow:none}details{display:block}details>summary{display:none}details>pre{display:block;white-space:pre-wrap}.memo-row{display:table-row!important}main{max-width:100%;padding:12px}}
+
+/* Cada imóvel em duas linhas, sem rolagem horizontal */
+.scroll table{display:block;width:100%;min-width:0}
+.scroll thead{display:none}
+#rows{display:block;width:100%}
+#rows tr:not(.memo-row){display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;width:100%;padding:14px 0;border-bottom:1px solid #e2e8f0}
+#rows tr:not(.memo-row)>td{display:block!important;width:auto!important;min-width:0!important;border:0!important;padding:0!important}
+#rows tr:not(.memo-row)>td::before{display:block;margin-bottom:5px;font-size:12px;font-weight:800;color:#475569;text-transform:uppercase;line-height:1.25}
+#rows tr:not(.memo-row)>td:nth-child(1)::before{content:"Fonte"}
+#rows tr:not(.memo-row)>td:nth-child(2)::before{content:"Aluguel recebido"}
+#rows tr:not(.memo-row)>td:nth-child(3)::before{content:"IPTU/taxas"}
+#rows tr:not(.memo-row)>td:nth-child(4)::before{content:"Condomínio"}
+#rows tr:not(.memo-row)>td:nth-child(5)::before{content:"Taxa de administração"}
+#rows tr:not(.memo-row)>td:nth-child(6)::before{content:"Sublocação paga"}
+#rows tr:not(.memo-row)>td:nth-child(7)::before{content:"Base aluguel"}
+#rows tr:not(.memo-row)>td:nth-child(8)::before{content:"Previdência oficial"}
+#rows tr:not(.memo-row)>td:nth-child(9)::before{content:"Dependentes"}
+#rows tr:not(.memo-row)>td:nth-child(10)::before{content:"Pensão judicial"}
+#rows tr:not(.memo-row)>td:nth-child(11)::before{content:"Método automático"}
+#rows tr:not(.memo-row)>td:nth-child(12)::before{content:"Imposto a ser retido"}
+#rows tr:not(.memo-row)>td:nth-child(13)::before{content:"Remover"}
+#rows tr.memo-row{display:block!important;width:100%;margin:0 0 12px}
+#rows tr.memo-row td{display:block!important;width:100%!important;border:0!important;border-left:4px solid #0284c7!important;padding:10px 12px!important}
+@media(max-width:900px){#rows tr:not(.memo-row){grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* Ajustes de espaço da grade de imóveis */
+.scroll{width:100%;overflow:visible}
+#rows input,#rows select{width:100%;min-width:0;height:40px;padding:7px 8px;font-size:13px}#rows td{vertical-align:middle}#rows .base-output,#rows .metodo-output,#rows .ir-output{background:#fff;font-weight:800}#rows .base-output,#rows .ir-output{text-align:right}#rows .metodo-output{text-align:center;color:#075985}#rows .ir-output{background:#ecfdf5;border-color:#a7f3d0;color:#047857;font-size:14px}#rows .metodo-output{font-size:12px}
+table{table-layout:fixed}
+th,td{padding:7px 6px;overflow-wrap:anywhere}
+th:nth-child(-n+12),td:nth-child(-n+12){width:8.1%;min-width:0}th:nth-child(13),td:nth-child(13){width:2.8%;min-width:0}
+@media(min-width:1180px){.card{padding:18px}.scroll table{width:100%;min-width:0}}
+@media(max-width:700px){main{padding:10px 4px}.card{padding:10px}.scroll table{width:100%;min-width:0}#rows input,#rows select{height:36px;padding:5px 6px;font-size:12px}th,td{padding:6px 4px}th{font-size:11px;letter-spacing:0}}
+
+/* Impressao otimizada: preserva todos os dados sem corte */
+@page{size:A4 landscape;margin:8mm}
+@media print{
+
+  html,body{width:100%;margin:0!important;padding:0!important;background:#fff!important;font-size:9px!important}
+  header{position:static!important;padding:8px 12px!important;box-shadow:none!important}
+  header h1{font-size:16px!important}
+  main{width:100%!important;max-width:none!important;margin:0!important;padding:6px!important}
+  .card{width:100%!important;margin:0 0 8px!important;padding:8px!important;border-radius:6px!important;box-shadow:none!important;break-inside:avoid-page}
+  .scroll{overflow:visible!important;width:100%!important}
+  table,.scroll table{width:100%!important;min-width:0!important;max-width:100%!important;table-layout:fixed!important;font-size:8px!important}
+  th,td{padding:3px 2px!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important}
+  #rows input,#rows select{width:100%!important;min-width:0!important;padding:2px!important;border:0!important;background:transparent!important;font-size:8px!important;appearance:none!important;-webkit-appearance:none!important}
+  th:nth-child(1),td:nth-child(1){width:6%!important;min-width:0!important}
+  th:nth-child(2),td:nth-child(2){width:12%!important;min-width:0!important}
+  th:nth-child(3),td:nth-child(3){width:10%!important;min-width:0!important}
+  th:nth-child(4),td:nth-child(4){width:10%!important;min-width:0!important}
+  th:nth-child(5),td:nth-child(5){width:14%!important;min-width:0!important}
+  th:nth-child(6),td:nth-child(6){width:11%!important;min-width:0!important}
+  th:nth-child(7),td:nth-child(7){width:12%!important;min-width:0!important}
+  th:nth-child(8),td:nth-child(8){width:12%!important;min-width:0!important}
+  th:nth-child(9),td:nth-child(9){width:8%!important;min-width:0!important}
+  th:nth-child(10),td:nth-child(10){width:8%!important;min-width:0!important} th:nth-child(11),td:nth-child(11){width:10%!important;min-width:0!important} th:nth-child(12),td:nth-child(12){width:10%!important;min-width:0!important} th:nth-child(13),td:nth-child(13){display:none!important}
+  .memo-row td{display:table-cell!important;width:auto!important;font-size:8px!important;padding:4px!important}
+  .grid{gap:6px!important}
+  .metric{padding:6px!important}
+  .metric b{font-size:12px!important}
+  details{display:block!important}
+  details>summary{display:none!important}
+  details>pre{display:block!important;white-space:pre-wrap!important;font-size:8px!important}
+  button,.no-print{display:none!important}
+}
+</style>
+</head><body>
+<header><div style="max-width:1280px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:16px"><div><h1 style="font-size:22px;margin:0;font-weight:800">Simulador IRPF – PF x PJ</h1><div style="font-size:12px;color:#cbd5e1;margin-top:3px">Ano-calendário 2026 • Aposentadoria e Rendimentos de Aluguéis</div></div><div class="no-print" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button type="button" class="primary" onclick="exportarDados()" style="background:#2563eb;white-space:nowrap">Exportar</button><button type="button" class="primary" onclick="document.getElementById('importarArquivo').click()" style="background:#7c3aed;white-space:nowrap">Importar</button><input id="importarArquivo" type="file" accept="application/json,.json" style="display:none" onchange="importarDados(event)"><button type="button" class="danger" onclick="limparDados()" style="white-space:nowrap">Limpar dados</button><button type="button" class="primary" onclick="imprimirCalculo()" style="background:#059669;white-space:nowrap">Imprimir cálculo / PDF</button></div></div></header>
+<main>
+<div class="card"><h2>Identificação do Contribuinte</h2><div class="grid"><div><label>Nome do contribuinte</label><input id="nomeContribuinte" type="text" placeholder="Digite o nome completo"></div></div></div>
+<div class="card warn"><b>Importante</b><div class="note">Estimativa educacional para o ano-calendario 2026. O calculo oficial deve ser conferido no Meu Imposto de Renda/Carne-Leao e nos comprovantes das fontes pagadoras. Nao contempla 13o salario, rendimentos recebidos acumuladamente, molestia grave, exterior, ganho de capital nem tributacao minima de altas rendas.</div></div>
+<div class="card"><h2>1. Aposentadoria mensal</h2><div class="grid">
+<div><label>Aposentadoria bruta mensal (R$)</label><input id="apos" type="number" min="0" step="0.01"></div>
+<div><label>Idade</label><input id="idade" type="number" min="0" step="1"></div>
+<div><label>Previdência oficial dedutível no mês (R$)</label><input id="prev" type="number" min="0" step="0.01"></div>
+<div><label>Número de dependentes</label><input id="deps" type="number" min="0" step="1" value="0"></div>
+</div><p class="note">Para 65 anos ou mais, aplica-se apenas a aposentadoria a parcela isenta mensal de R$ 1.903,98. Para formar a base da tabela, o simulador escolhe automaticamente o maior entre as deducoes legais informadas e o desconto simplificado mensal de R$ 607,20.</p></div>
+<div class="card"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><h2>2. Rendimentos de Aluguéis</h2><button class="primary no-print" onclick="addRow()">+ Adicionar imovel</button></div><div class="scroll"><table><thead><tr><th>#</th><th>Fonte</th><th>Aluguel recebido</th><th>IPTU/taxas</th><th>Condominio</th><th>Taxa de administração</th><th>Sublocacao paga</th><th>Base aluguel</th><th>Previdência oficial</th><th>Dependentes</th><th>Pensão judicial</th><th>Método automático</th><th>Imposto a ser retido</th><th></th></tr></thead><tbody id="rows"></tbody></table></div><p class="note">Só informe encargos efetivamente suportados pelo locador e legalmente excluíveis do rendimento de aluguel. Informe as deduções legais mensais que realmente existirem: previdência oficial, dependentes e pensão alimentícia judicial. Se todas forem zero, o simulador aplicará automaticamente o desconto simplificado mensal de R$ 607,20. Se o total superar R$ 607,20, utilizará automaticamente as deduções legais. As opções não são somadas. Para aluguéis PF com várias linhas, informe as deduções em apenas uma linha para evitar duplicidade. Livro Caixa não se aplica a rendimentos de aluguel.</p></div>
+<div class="card"><h2>3. Apuração Mensal (Cálculos Isolados)</h2><div class="grid"><div class="metric">IRRF estimado aposentadoria<b id="irApos">R$ 0,00</b></div><div class="metric">Carne-Leao alugueis PF<b id="irPF">R$ 0,00</b></div><div class="metric">IRRF estimado alugueis PJ<b id="irPJ">R$ 0,00</b></div><div class="metric">Total mensal estimado<b id="irMes">R$ 0,00</b></div></div><details><summary>Memoria mensal</summary><pre id="memo"></pre></details></div>
+<div class="card"><h2>4. Ajuste Anual (Consolidação de Dados)</h2><div class="grid">
+<div><label>Despesas médicas anuais dedutíveis (R$)</label><input id="med" type="number" min="0" step="0.01"></div>
+<div><label>Outras deduções legais anuais (R$)</label><input id="outras" type="number" min="0" step="0.01"></div>
+<div><label>Método da declaração</label><select id="metodo"><option value="auto">Mais vantajoso (automático)</option><option value="legal">Deduções legais</option><option value="simplificado">Desconto simplificado anual</option></select></div>
+</div><p class="note">Projecao pressupoe os mesmos valores mensais por 12 meses e nao inclui 13o. No metodo legal, considera dependentes (R$ 2.275,08/ano), previdencia informada, despesas medicas e outras deducoes informadas. No simplificado, usa ate R$ 17.640,00.</p><div class="grid annual-results"><div class="metric"><span class="metric-label">Rendimentos tributaveis anuais</span><b id="rendAno">R$ 0,00</b></div><div class="metric"><span class="metric-label">Base anual estimada</span><b id="baseAno">R$ 0,00</b></div><div class="metric"><span class="metric-label">IR anual devido estimado</span><b id="irAno">R$ 0,00</b></div><div class="metric"><span class="metric-label">IR mensal pago/retido x12</span><b id="pagoAno">R$ 0,00</b></div><div class="metric"><span class="metric-label" id="saldoLabel">Saldo projetado a pagar</span><b id="saldo">R$ 0,00</b></div><div class="metric"><span class="metric-label">Valor final / meta</span><b id="metaReserva">R$ 0,00</b></div><div class="metric"><label for="montanteAplicado">Montante inicial aplicado (R$)</label><input id="montanteAplicado" type="number" min="0" step="0.01" value="0"></div><div class="metric"><label for="taxaReserva">Taxa mensal da aplicação (%)</label><input id="taxaReserva" type="number" min="0" step="0.0001" value="0"></div><div class="metric"><span class="metric-label">Aporte mensal sugerido</span><b id="aporteReserva">R$ 0,00</b></div><div class="metric"><label for="aportePlanejado">Aporte mensal planejado (R$)</label><input id="aportePlanejado" type="number" min="0" step="0.01" value="0"></div><div class="metric"><span class="metric-label">Valor acumulado em 12 meses</span><b id="acumuladoReserva">R$ 0,00</b></div><div class="metric"><span class="metric-label">Valor que sobrou da aplicação</span><b id="sobraAplicacao">R$ 0,00</b></div><div class="metric"><span class="metric-label">Saldo restante a pagar</span><b id="saldoFinalReserva">R$ 0,00</b></div><div class="metric"><span class="metric-label">Crescimento sobre o valor inicial</span><b id="crescimentoAplicacao">0,00%</b></div><div class="metric"><label for="inflacaoAno">Inflação no ano (%)</label><input id="inflacaoAno" type="number" min="0" step="0.01" value="0"></div><div class="metric"><span class="metric-label">Crescimento real após a inflação</span><b id="crescimentoRealAplicacao">0,00%</b></div></div><details><summary>Memoria anual</summary><pre id="memoAno"></pre></details></div>
+<div class="card"><h2>Parâmetros Normativos Utilizados</h2><div class="note">Mensal 2026: faixas 0% ate R$ 2.428,80; 7,5% ate R$ 2.826,65 (deducao R$ 182,16); 15% ate R$ 3.751,05 (R$ 394,16); 22,5% ate R$ 4.664,68 (R$ 675,49); 27,5% acima (R$ 908,73). Reducao: imposto zerado ate R$ 5.000,00 de rendimentos tributaveis; de R$ 5.000,01 a R$ 7.350,00, reducao = 978,62 - 0,133145 x rendimentos tributaveis. Anual: tabela propria de 2026 e reducao ate R$ 60.000,00, gradual ate R$ 88.200,00.</div></div>
+</main>
+<script>
+const C={is65:1903.98,simpM:607.20,depM:189.59,depA:2275.08,simpA:17640,redMMax:312.89,redAMax:2694.15};
+const round2=v=>Math.round((Number(v)+Number.EPSILON)*100)/100; const brl=v=>round2(Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); const n=id=>Math.max(0,Number(document.getElementById(id).value)||0);
+function tabelaM(base){if(base<=2428.80)return 0;if(base<=2826.65)return round2(base*.075-182.16);if(base<=3751.05)return round2(base*.15-394.16);if(base<=4664.68)return round2(base*.225-675.49);return round2(base*.275-908.73)}
+function reducaoM(imposto,rendTrib){let r=0;if(rendTrib<=5000)r=C.redMMax;else if(rendTrib<=7350)r=Math.max(0,978.62-.133145*rendTrib);return round2(Math.min(imposto,r))}
+function calcM(rendTrib,dedLegais=0,permitirSimpl=true){rendTrib=round2(Math.max(0,rendTrib));dedLegais=round2(Math.max(0,dedLegais));const ded=round2(permitirSimpl?Math.max(dedLegais,C.simpM):dedLegais),base=round2(Math.max(0,rendTrib-ded)),bruto=round2(Math.max(0,tabelaM(base))),red=reducaoM(bruto,rendTrib);return{rendTrib,ded,base,bruto,red,ir:round2(Math.max(0,bruto-red))}}
+function faixaM(base){if(base<=2428.80)return{aliq:0,parcela:0};if(base<=2826.65)return{aliq:.075,parcela:182.16};if(base<=3751.05)return{aliq:.15,parcela:394.16};if(base<=4664.68)return{aliq:.225,parcela:675.49};return{aliq:.275,parcela:908.73}}
+function calcAluguelBase2026(rendTrib,dedLegais=0){const c=calcM(rendTrib,dedLegais,true),metodo=dedLegais>C.simpM?'Deduções legais':'Desconto simplificado',f=faixaM(c.base);return{rendTrib:c.rendTrib,dedLegais,metodo,ded:c.ded,base:c.base,aliq:f.aliq,parcela:f.parcela,bruto:c.bruto,red:c.red,ir:c.ir}}
+function memoAluguel(c){const legal=c.metodo==='Deduções legais',rotulo=legal?'Deduções legais utilizadas':'Desconto simplificado mensal';return `<strong>Memória de Cálculo:</strong> Método automático: ${c.metodo} | Rendimento tributável: ${brl(c.rendTrib)} | Deduções legais informadas: ${brl(c.dedLegais)} | ${rotulo}: ${brl(c.ded)} | Base de cálculo: ${brl(c.base)} | Alíquota: ${(c.aliq*100).toLocaleString('pt-BR',{minimumFractionDigits:1})}% | Parcela a deduzir: ${brl(c.parcela)} | Imposto pela tabela: ${brl(c.bruto)} | Redução: ${brl(c.red)} | Imposto final: ${brl(c.ir)}.<div class="method-note"><strong>Escolha automática:</strong> foi aplicada a maior dedução entre ${brl(C.simpM)} e as deduções legais informadas.</div>`}
+function tabelaA(base){if(base<=29145.60)return 0;if(base<=33919.80)return round2(base*.075-2185.92);if(base<=45012.60)return round2(base*.15-4729.91);if(base<=55976.16)return round2(base*.225-8105.85);return round2(base*.275-10904.66)}
+function reducaoA(imposto,rendTrib){let r=0;if(rendTrib<=60000)r=C.redAMax;else if(rendTrib<=88200)r=Math.max(0,8429.73-.095575*rendTrib);return round2(Math.min(imposto,r))}
+function calcularAporteMeta(meta,taxa,meses){meta=round2(Math.max(0,Number(meta)||0));taxa=Math.max(0,Number(taxa)||0);meses=Math.max(1,Math.trunc(Number(meses)||12));if(meta===0)return 0;if(taxa===0)return round2(meta/meses);let fator=0;for(let k=0;k<meses;k++)fator=(fator+1)*(1+taxa);return fator>0?round2(meta/fator):0}
+function calcularValorAcumulado(montanteInicial,aporte,taxa,meses){montanteInicial=Math.max(0,Number(montanteInicial)||0);aporte=Math.max(0,Number(aporte)||0);taxa=Math.max(0,Number(taxa)||0);meses=Math.max(1,Math.trunc(Number(meses)||12));let acumulado=montanteInicial;for(let k=0;k<meses;k++)acumulado=(acumulado+aporte)*(1+taxa);return round2(acumulado)}
+function addRow(d={}){const tr=document.createElement('tr');const memo=document.createElement('tr');memo.className='memo-row';tr.innerHTML=`<td><select class="fonte"><option value="PF">PF</option><option value="PJ">PJ</option></select></td><td><input class="alug" type="number" min="0" step=".01"></td><td><input class="iptu" type="number" min="0" step=".01"></td><td><input class="cond" type="number" min="0" step=".01"></td><td><input class="adm" type="number" min="0" step=".01"></td><td><input class="sub" type="number" min="0" step=".01"></td><td><input class="base base-output" type="text" readonly value="R$ 0,00"></td><td><input class="prevded" type="number" min="0" step=".01" value="0"></td><td><input class="depsded" type="number" min="0" step="1" value="0"></td><td><input class="pensaoded" type="number" min="0" step=".01" value="0"></td><td><input class="metodo-auto metodo-output" type="text" readonly value="Automático"></td><td><input class="ir ir-output" type="text" readonly value="R$ 0,00"></td><td><button class="danger no-print">x</button></td>`;memo.innerHTML='<td colspan="13" class="memo-content">Aguardando valores...</td>';for(const k of ['fonte','alug','iptu','cond','adm','sub','prevded','depsded','pensaoded']){let e=tr.querySelector('.'+k);if(d[k]!=null)e.value=d[k];e.addEventListener('input',calc);e.addEventListener('change',calc)}tr.querySelector('button').onclick=()=>{memo.remove();tr.remove();calc()};const body=document.getElementById('rows');body.appendChild(tr);body.appendChild(memo);calc();if(typeof salvarDados==='function')salvarDados()}
+function calc(){const apos=n('apos'),idade=n('idade'),prev=n('prev'),deps=n('deps'),isento65=idade>=65?Math.min(apos,C.is65):0,rendApos=Math.max(0,apos-isento65),legalM=prev+deps*C.depM,ca=calcM(rendApos,legalM,true);let pf=0,pj=0,rentTotal=0,totalIRPJ=0,dedLegalPF=0;const rs=[...document.querySelectorAll('#rows tr:not(.memo-row)')];rs.forEach((r,i)=>{const get=c=>Math.max(0,Number(r.querySelector('.'+c).value)||0),a=get('alug'),ded=get('iptu')+get('cond')+get('adm')+get('sub'),base=Math.max(0,a-ded),fonte=r.querySelector('.fonte').value,prevDed=get('prevded'),depsDed=Math.trunc(get('depsded')),pensaoDed=get('pensaoded'),dedLegal=prevDed+depsDed*C.depM+pensaoDed,memo=r.nextElementSibling.querySelector('.memo-content');r.querySelector('.base').value=brl(base);rentTotal+=base;const c=calcAluguelBase2026(base,dedLegal);r.querySelector('.metodo-auto').value=c.metodo;if(fonte==='PF'){pf+=base;dedLegalPF+=dedLegal;r.querySelector('.ir').value='No total PF';memo.innerHTML=`<strong>Memória do imóvel PF:</strong> Base tributável individual: ${brl(base)}. Deduções legais nesta linha: ${brl(dedLegal)}. Método preliminar: ${c.metodo}. O Carnê-Leão final é calculado sobre o total PF.`;}else{pj+=base;totalIRPJ+=c.ir;r.querySelector('.ir').value=brl(c.ir);memo.innerHTML=memoAluguel(c);}});const cpf=calcAluguelBase2026(pf,dedLegalPF),cpjConsolidado=calcAluguelBase2026(pj);document.getElementById('irApos').textContent=brl(ca.ir);document.getElementById('irPF').textContent=brl(cpf.ir);document.getElementById('irPJ').textContent=brl(totalIRPJ);const pagoM=ca.ir+cpf.ir+totalIRPJ;document.getElementById('irMes').textContent=brl(pagoM);document.getElementById('memo').textContent=`Aposentadoria: tributável ${brl(rendApos)}; parcela 65+ ${brl(isento65)}; dedução usada ${brl(ca.ded)}; base ${brl(ca.base)}; imposto tabela ${brl(ca.bruto)}; redução ${brl(ca.red)}; IR ${brl(ca.ir)}.\nAluguéis PF somados: base tributável ${brl(pf)}; imposto tabela ${brl(cpf.bruto)}; redução ${brl(cpf.red)}; Carnê-Leão estimado ${brl(cpf.ir)}.\nAluguéis PJ: IRRF calculado individualmente por imóvel/fonte pagadora e somado no resumo: ${brl(totalIRPJ)}. Base PJ total apenas informativa: ${brl(pj)}.`;const rendAno=(rendApos+rentTotal)*12,legalA=prev*12+deps*C.depA+n('med')+n('outras'),simpA=round2(Math.min(C.simpA,rendAno*.20)),met=document.getElementById('metodo').value;let dedA=met==='legal'?legalA:met==='simplificado'?simpA:Math.max(legalA,simpA),nome=dedA===legalA?'legais':'simplificado';const baseA=round2(Math.max(0,rendAno-dedA)),brutoA=round2(Math.max(0,tabelaA(baseA))),redA=reducaoA(brutoA,rendAno),irA=round2(Math.max(0,brutoA-redA)),pagoA=round2(pagoM*12),saldo=round2(irA-pagoA),metaReserva=Math.max(0,saldo),montanteAplicado=n('montanteAplicado'),taxaReserva=n('taxaReserva')/100,aporteReserva=calcularAporteMeta(metaReserva,taxaReserva,12),aportePlanejado=n('aportePlanejado'),acumuladoReserva=calcularValorAcumulado(montanteAplicado,aportePlanejado,taxaReserva,12),sobraAplicacao=round2(Math.max(0,acumuladoReserva-metaReserva)),saldoFinalReserva=round2(Math.max(0,metaReserva-acumuladoReserva)),crescimentoAplicacao=montanteAplicado>0?round2((sobraAplicacao-montanteAplicado)/montanteAplicado*100):0,inflacaoAno=n('inflacaoAno'),crescimentoRealAplicacao=round2(crescimentoAplicacao-inflacaoAno);document.getElementById('rendAno').textContent=brl(rendAno);document.getElementById('baseAno').textContent=brl(baseA);document.getElementById('irAno').textContent=brl(irA);document.getElementById('pagoAno').textContent=brl(pagoA);document.getElementById('saldoLabel').textContent=saldo>0?'Saldo projetado a pagar':'Saldo projetado a restituir';document.getElementById('saldo').textContent=brl(Math.abs(saldo));document.getElementById('metaReserva').textContent=brl(metaReserva);document.getElementById('aporteReserva').textContent=brl(aporteReserva);document.getElementById('acumuladoReserva').textContent=brl(acumuladoReserva);document.getElementById('sobraAplicacao').textContent=brl(sobraAplicacao);document.getElementById('saldoFinalReserva').textContent=brl(saldoFinalReserva);document.getElementById('crescimentoAplicacao').textContent=crescimentoAplicacao.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';document.getElementById('crescimentoRealAplicacao').textContent=crescimentoRealAplicacao.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';document.getElementById('memoAno').textContent=`Projeção de 12 meses. Rendimentos tributáveis: ${brl(rendAno)}. Deduções legais: ${brl(legalA)}. Desconto simplificado: ${brl(simpA)}. Método usado: ${nome}. Base anual: ${brl(baseA)}. Imposto pela tabela anual: ${brl(brutoA)}. Redução anual: ${brl(redA)}. IR devido: ${brl(irA)}. IR pago/retido projetado: ${brl(pagoA)}. Meta para o saldo anual a pagar: ${brl(metaReserva)}. Montante inicial aplicado: ${brl(montanteAplicado)}. Aporte mensal planejado: ${brl(aportePlanejado)}. Com taxa mensal de ${(taxaReserva*100).toLocaleString('pt-BR',{maximumFractionDigits:4})}%, o valor acumulado em 12 meses é ${brl(acumuladoReserva)}. Após descontar o saldo projetado a pagar, sobra ${brl(sobraAplicacao)} e permanece ${brl(saldoFinalReserva)} a pagar. Aporte mensal sugerido para cobrir o saldo projetado, sem considerar o montante inicial: ${brl(aporteReserva)}. Crescimento do valor que sobrou em relação ao montante inicial: ${crescimentoAplicacao.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}%. Inflação informada no ano: ${inflacaoAno.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}%. Crescimento real após subtrair a inflação: ${crescimentoRealAplicacao.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}%.`;}
+const STORAGE_KEY='simuladorIRPF2026_dados';
+function salvarDados(){
+  const dados={
+    nomeContribuinte:document.getElementById('nomeContribuinte')?.value||'',
+    apos:document.getElementById('apos')?.value||'', idade:document.getElementById('idade')?.value||'',
+    prev:document.getElementById('prev')?.value||'', deps:document.getElementById('deps')?.value||'',
+    med:document.getElementById('med')?.value||'', outras:document.getElementById('outras')?.value||'',
+    metodo:document.getElementById('metodo')?.value||'auto', montanteAplicado:document.getElementById('montanteAplicado')?.value||'0', inflacaoAno:document.getElementById('inflacaoAno')?.value||'0', taxaReserva:document.getElementById('taxaReserva')?.value||'0', aportePlanejado:document.getElementById('aportePlanejado')?.value||'0',
+    imoveis:[...document.querySelectorAll('#rows tr:not(.memo-row)')].map(r=>({
+      fonte:r.querySelector('.fonte').value, alug:r.querySelector('.alug').value,
+      iptu:r.querySelector('.iptu').value, cond:r.querySelector('.cond').value,
+      adm:r.querySelector('.adm').value, sub:r.querySelector('.sub').value, prevded:r.querySelector('.prevded').value, depsded:r.querySelector('.depsded').value, pensaoded:r.querySelector('.pensaoded').value
+    }))
+  };
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(dados));
+}
+function carregarDados(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY); if(!raw)return false;
+    const d=JSON.parse(raw);
+    for(const id of ['nomeContribuinte','apos','idade','prev','deps','med','outras','metodo','montanteAplicado','inflacaoAno','taxaReserva','aportePlanejado']){
+      if(d[id]!==undefined && document.getElementById(id)) document.getElementById(id).value=d[id];
+    }
+    document.getElementById('rows').innerHTML='';
+    (d.imoveis||[]).forEach(x=>addRow(x));
+    if(!(d.imoveis||[]).length){addRow();addRow();}
+    calc(); return true;
+  }catch(e){console.warn('Não foi possível restaurar os dados salvos.',e);return false;}
+}
+function ativarSalvamentoAutomatico(){
+  document.addEventListener('input',salvarDados);
+  document.addEventListener('change',salvarDados);
+  window.addEventListener('beforeunload',salvarDados);
+}
+function exportarDados(){
+  salvarDados();
+  const raw=localStorage.getItem(STORAGE_KEY)||'{}';
+  const blob=new Blob([raw],{type:'application/json;charset=utf-8'});
+  const a=document.createElement('a');
+  const agora=new Date();
+  const dataFormatada=String(agora.getDate()).padStart(2,'0')+'-'+String(agora.getMonth()+1).padStart(2,'0')+'-'+agora.getFullYear();
+  const horaFormatada=String(agora.getHours()).padStart(2,'0')+'-'+String(agora.getMinutes()).padStart(2,'0')+'-'+String(agora.getSeconds()).padStart(2,'0');
+  a.href=URL.createObjectURL(blob);a.download=`Simulador_IRPF_PF_x_PJ_2026_${dataFormatada}_${horaFormatada}.json`;
+  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href);
+}
+function importarDados(event){
+  const arquivo=event.target.files&&event.target.files[0];if(!arquivo)return;
+  const leitor=new FileReader();
+  leitor.onload=()=>{try{const d=JSON.parse(leitor.result);localStorage.setItem(STORAGE_KEY,JSON.stringify(d));carregarDados();salvarDados();}catch(e){alert('Arquivo de dados inválido.');}event.target.value='';};
+  leitor.readAsText(arquivo,'utf-8');
+}
+function limparDados(){
+  if(!confirm('Deseja limpar todos os dados preenchidos neste simulador?'))return;
+  localStorage.removeItem(STORAGE_KEY);
+  for(const id of ['nomeContribuinte','apos','idade','prev','med','outras']){const e=document.getElementById(id);if(e)e.value='';}
+  document.getElementById('deps').value='0';document.getElementById('metodo').value='auto';document.getElementById('montanteAplicado').value='0';document.getElementById('inflacaoAno').value='0';document.getElementById('taxaReserva').value='0';document.getElementById('aportePlanejado').value='0';document.getElementById('rows').innerHTML='';addRow();addRow();calc();salvarDados();
+}
+function imprimirCalculo(){calc();const nome=document.getElementById('nomeContribuinte').value.trim();const tituloOriginal=document.title;if(nome)document.title='Simulador IRPF 2026 - '+nome;window.print();document.title=tituloOriginal}
+for(const id of ['apos','idade','prev','deps','med','outras','metodo','montanteAplicado','inflacaoAno','taxaReserva','aportePlanejado'])document.getElementById(id).addEventListener('input',calc);if(!carregarDados()){addRow();addRow();calc();}ativarSalvamentoAutomatico();
+</script></body></html>

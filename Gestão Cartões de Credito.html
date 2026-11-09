@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Cartões de Crédito</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#035485',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        emerald: {
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Elemento de Cabeçalho de Impressão (Escondido na tela) */
+        #print-header { display: none; }
+
+        /* Estilos de Impressão */
+        @media print {
+            header, .no-print, button, input[type="file"], .add-form {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            #print-header { 
+                display: block !important; 
+                text-align: center; 
+                margin-bottom: 20px; 
+                border-bottom: 2px solid #0f172a;
+                padding-bottom: 10px;
+            }
+            #print-header h2 { margin: 0; font-size: 20px; text-transform: uppercase; color: #0f172a; font-weight: 800; }
+            #print-header p { margin: 4px 0 0; font-size: 12px; color: #475569; font-weight: 600; }
+
+            main {
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .shadow-sm, .shadow-xl, .shadow-lg {
+                box-shadow: none !important;
+            }
+            .border {
+                border-color: #e2e8f0 !important;
+            }
+            table {
+                width: 100% !important;
+                border: 1px solid #cbd5e1 !important;
+            }
+            th {
+                background-color: #0f172a !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            td input {
+                border: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+                font-weight: 600 !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+    <div id="print-header">
+        <h2>Relatório de Cartões de Crédito</h2>
+        <p id="print-investor-name"></p>
+        <p>Data de emissão: <span id="print-date"></span></p>
+    </div>
+
+    <!-- Header Navbar Sticky -->
+    <header class="bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-brand-500/20 rounded-xl border border-brand-500/30">
+                    <i class="fa-solid fa-credit-card text-2xl text-brand-500"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2">
+                        Cartões de Crédito
+                    </h1>
+                    <div class="flex items-center gap-2 text-xs text-slate-300 mt-0.5">
+                        <span>Titular:</span>
+                        <input type="text" id="nome-usuario" placeholder="Seu Nome" class="bg-slate-800/80 border border-slate-700 text-brand-300 font-bold px-2 py-0.5 rounded focus:outline-none focus:ring-1 focus:ring-brand-500 text-xs w-48" oninput="syncPrintHeader()">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 flex-wrap justify-center no-print">
+                <button onclick="exportarDados()" class="btn flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg shadow-sm transition">
+                    <i class="fa-solid fa-file-export"></i> Exportar
+                </button>
+                <button onclick="document.getElementById('importFile').click()" class="btn flex items-center gap-2 bg-amber-700 hover:bg-amber-600 text-white font-semibold text-xs px-3.5 py-2 rounded-lg shadow-sm transition">
+                    <i class="fa-solid fa-file-import"></i> Importar
+                </button>
+                <input type="file" id="importFile" style="display:none" accept=".json" onchange="importarDados(event)">
+
+                <button onclick="window.print()" class="btn flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg shadow-sm transition border border-emerald-400/30">
+                    <i class="fa-solid fa-print"></i> Imprimir / PDF
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow space-y-6">
+
+        <div id="section-cartao" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6">
+            
+            <!-- Form de Adição -->
+            <div class="add-form bg-slate-50 border border-slate-200/80 p-4 rounded-xl space-y-3 no-print">
+                <div class="border-b border-slate-200 pb-2">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle text-brand-600"></i> Adicionar Novo Cartão
+                    </h2>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <input type="text" id="cartaoF1" placeholder="Nome do Cartão (ex: Itaú)" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                    <input type="text" id="cartaoF2" placeholder="Banco (ex: Itaú Pagamentos)" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                    <input type="text" id="cartaoF3" placeholder="Número (16 dígitos)" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                    <input type="text" id="cartaoF4" placeholder="Link do Portal/Fatura" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                </div>
+                <div class="flex justify-end pt-1">
+                    <button class="bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs px-5 py-2 rounded-lg shadow-sm transition flex items-center gap-2" onclick="addItem()">
+                        <i class="fa-solid fa-plus"></i> Adicionar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabela Responsiva -->
+            <div class="table-container overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-900 text-white uppercase tracking-wider font-semibold">
+                            <th class="no-print py-3 px-3 rounded-l-lg text-center" style="width: 80px;">Ordem</th>
+                            <th class="py-3 px-3">Cartão</th>
+                            <th class="py-3 px-3">Banco</th>
+                            <th class="py-3 px-3 text-left">Número</th>
+                            <th class="py-3 px-3">Link</th>
+                            <th class="no-print py-3 px-3 text-center rounded-r-lg">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="body-cartao" class="divide-y divide-slate-100 font-medium"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>Gestão e Organização de Cartões de Crédito.</p>
+            <p class="mt-1 text-slate-400">&copy; Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        const STORAGE_KEY = 'asset_pro_cards_data';
+        let data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { cartao: [], usuario: "" };
+        let editIdx = { index: null };
+
+        function syncPrintHeader() {
+            const nome = document.getElementById('nome-usuario').value;
+            document.getElementById('print-investor-name').innerText = nome ? "Titular: " + nome : "";
+            document.getElementById('print-date').innerText = new Date().toLocaleDateString('pt-BR');
+            data.usuario = nome;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function mover(index, direcao) {
+            const novoIndex = index + direcao;
+            if (novoIndex >= 0 && novoIndex < data.cartao.length) {
+                const temp = data.cartao[index];
+                data.cartao[index] = data.cartao[novoIndex];
+                data.cartao[novoIndex] = temp;
+                render();
+            }
+        }
+
+        function render() {
+            const body = document.getElementById(`body-cartao`);
+            if (!body) return;
+            body.innerHTML = '';
+            
+            document.getElementById('nome-usuario').value = data.usuario || "";
+            syncPrintHeader();
+
+            data.cartao.forEach((item, index) => {
+                if (editIdx.index === index) {
+                    body.innerHTML += `<tr class="bg-slate-50">
+                        <td class="no-print"></td>
+                        <td class="py-2 px-2"><input type="text" id="edit-f1" value="${item.nome}" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs font-medium focus:ring-1 focus:ring-brand-500"></td>
+                        <td class="py-2 px-2"><input type="text" id="edit-f2" value="${item.cidade}" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs font-medium focus:ring-1 focus:ring-brand-500"></td>
+                        <td class="py-2 px-2"><input type="text" id="edit-f3" value="${item.insc}" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs font-medium focus:ring-1 focus:ring-brand-500"></td>
+                        <td class="py-2 px-2"><input type="text" id="edit-f4" value="${item.link}" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs font-medium focus:ring-1 focus:ring-brand-500"></td>
+                        <td class="py-2 px-2 text-center no-print">
+                            <button class="bg-emerald-600 text-white px-2.5 py-1 rounded text-xs font-semibold mr-1 hover:bg-emerald-700 transition" onclick="saveEdit(${index})">Salvar</button>
+                            <button class="bg-slate-200 text-slate-700 px-2.5 py-1 rounded text-xs font-semibold hover:bg-slate-300 transition" onclick="cancelEdit()">Cancelar</button>
+                        </td>
+                    </tr>`;
+                } else {
+                    body.innerHTML += `<tr class="hover:bg-slate-50/80 transition">
+                        <td class="no-print py-2 px-2 text-center">
+                            <button class="bg-slate-100 hover:bg-brand-600 hover:text-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded text-xs transition" onclick="mover(${index}, -1)">↑</button>
+                            <button class="bg-slate-100 hover:bg-brand-600 hover:text-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded text-xs transition" onclick="mover(${index}, 1)">↓</button>
+                        </td>
+                        <td class="py-2.5 px-3"><strong>${item.nome || ''}</strong></td>
+                        <td class="py-2.5 px-3">${item.cidade || ''}</td>
+                        <td class="py-2.5 px-3"><code class="bg-slate-100 text-rose-600 px-1.5 py-0.5 rounded font-mono text-xs">${item.insc || '****'}</code> <button class="bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 px-2 py-0.5 rounded text-[11px] ml-1 transition" onclick="copiar('${item.insc}', this)">Copiar</button></td>
+                        <td class="py-2.5 px-3">
+                            ${item.link ? `<a href="${item.link}" target="_blank" class="inline-flex items-center gap-1 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 px-2.5 py-1 rounded text-xs font-semibold transition"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Portal</a>` : '-'}
+                        </td>
+                        <td class="no-print py-2.5 px-3 text-center">
+                            <button class="text-emerald-700 hover:text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded font-semibold text-xs mr-1 transition" onclick="insertRow(${index})">Inserir ↓</button>
+                            <button class="text-brand-600 hover:text-brand-700 bg-brand-50 border border-brand-200 px-2 py-1 rounded font-semibold text-xs mr-1 transition" onclick="setEdit(${index})">Editar</button>
+                            <button class="text-rose-600 hover:text-rose-700 bg-rose-50 border border-rose-200 px-2 py-1 rounded font-semibold text-xs transition" onclick="removeItem(${index})">Excluir</button>
+                        </td>
+                    </tr>`;
+                }
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function addItem() {
+            const f1Val = document.getElementById('cartaoF1').value;
+            if (!f1Val) return;
+            data.cartao.push({ 
+                id: Date.now(), 
+                nome: f1Val, 
+                cidade: document.getElementById('cartaoF2').value,
+                insc: document.getElementById('cartaoF3').value,
+                link: document.getElementById('cartaoF4').value 
+            });
+            limparFormulario();
+            render();
+        }
+
+        function insertRow(index) {
+            data.cartao.splice(index + 1, 0, { id: Date.now(), nome: "", cidade: "", insc: "", link: "" });
+            setEdit(index + 1);
+        }
+
+        function setEdit(index) { editIdx.index = index; render(); }
+        function cancelEdit() { editIdx.index = null; render(); }
+
+        function saveEdit(index) {
+            const item = data.cartao[index];
+            item.nome = document.getElementById('edit-f1').value;
+            item.cidade = document.getElementById('edit-f2').value;
+            item.insc = document.getElementById('edit-f3').value;
+            item.link = document.getElementById('edit-f4').value;
+            cancelEdit();
+        }
+
+        function removeItem(index) {
+            if(confirm("Excluir este cartão?")) { data.cartao.splice(index, 1); render(); }
+        }
+
+        function limparFormulario() {
+            ['cartaoF1', 'cartaoF2', 'cartaoF3', 'cartaoF4'].forEach(id => document.getElementById(id).value = '');
+        }
+
+        function copiar(texto, btn) {
+            if(!texto || texto === "") return;
+            navigator.clipboard.writeText(texto);
+            const old = btn.innerText; btn.innerText = "Copiado!";
+            setTimeout(() => { btn.innerText = old; }, 1000);
+        }
+
+        function exportarDados() {
+            const agora = new Date();
+            const dia = String(agora.getDate()).padStart(2, '0');
+            const mes = String(agora.getMonth() + 1).padStart(2, '0');
+            const ano = agora.getFullYear();
+            const hora = String(agora.getHours()).padStart(2, '0');
+            const min = String(agora.getMinutes()).padStart(2, '0');
+            const nomeArquivo = `Cartões_de_Crédito_${ano}_${dia}-${mes}-${ano}_${hora}h${min}.json`;
+
+            const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = nomeArquivo;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importarDados(e) {
+            const reader = new FileReader();
+            reader.onload = (ev) => { 
+                try { 
+                    const imported = JSON.parse(ev.target.result);
+                    if(imported.cartao) { data = imported; render(); }
+                } catch(err) { alert("Arquivo inválido."); } 
+            };
+            reader.readAsText(e.target.files[0]);
+        }
+
+        render();
+    </script>
+</body>
+</html>

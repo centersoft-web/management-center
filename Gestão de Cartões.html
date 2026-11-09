@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Compras Parceladas</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Estilos de Impressão */
+        @media print {
+            header, .no-print, button, input[type="file"], .add-form {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
+            }
+            main {
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .shadow-sm, .shadow-xl, .shadow-lg {
+                box-shadow: none !important;
+            }
+            .border {
+                border-color: #e2e8f0 !important;
+            }
+            table {
+                width: 100% !important;
+                border: 1px solid #cbd5e1 !important;
+                font-size: 11px !important;
+            }
+            th {
+                background-color: #0f172a !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            td input {
+                border: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Header Navbar Sticky -->
+    <header class="bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-indigo-500/20 rounded-xl border border-indigo-500/30">
+                    <i class="fa-solid fa-credit-card text-2xl text-indigo-400"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2">
+                        Controle de Compras Parceladas
+                    </h1>
+                    <p class="text-xs text-slate-300">Gestão de parcelamentos e débitos em aberto</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 flex-wrap justify-center no-print">
+                <button onclick="exportarDados()" class="btn flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg shadow-sm transition">
+                    <i class="fa-solid fa-file-export"></i> Exportar
+                </button>
+                <button onclick="document.getElementById('importFile').click()" class="btn flex items-center gap-2 bg-amber-700 hover:bg-amber-600 text-white font-semibold text-xs px-3.5 py-2 rounded-lg shadow-sm transition">
+                    <i class="fa-solid fa-file-import"></i> Importar
+                </button>
+                <input type="file" id="importFile" style="display:none" accept=".json" onchange="importarDados(event)">
+
+                <button onclick="window.print()" class="btn flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg shadow-sm transition border border-emerald-400/30">
+                    <i class="fa-solid fa-print"></i> Imprimir / PDF
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow space-y-6">
+
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6">
+            
+            <!-- Form de Cadastro e Edição -->
+            <div class="add-form bg-slate-50 border border-slate-200/80 p-4 rounded-xl space-y-3 no-print" id="compraForm">
+                <div class="border-b border-slate-200 pb-2">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle text-brand-600"></i> Cadastrar / Editar Compra Parcelada
+                    </h2>
+                </div>
+                
+                <input type="hidden" id="editId">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Cartão</label>
+                        <input type="text" id="cartaoNome" placeholder="Ex: Visa Itaú" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Descrição</label>
+                        <input type="text" id="descricao" placeholder="O que comprou?" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Valor Total (R$)</label>
+                        <input type="number" id="valorTotal" step="0.01" placeholder="0.00" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Nº Parcelas</label>
+                        <input type="number" id="parcelas" placeholder="Ex: 10" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Data da Compra</label>
+                        <input type="date" id="dataInicio" title="Data da Compra" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Dia Vencimento</label>
+                        <input type="number" id="diaVencimento" placeholder="Ex: 15" min="1" max="31" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button id="btnAdd" class="bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs px-5 py-2 rounded-lg shadow-sm transition flex items-center gap-2" onclick="adicionarCompra()">
+                        <i class="fa-solid fa-plus"></i> Adicionar
+                    </button>
+                    <button id="btnUpdate" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-5 py-2 rounded-lg shadow-sm transition hidden flex items-center gap-2" onclick="salvarEdicao()">
+                        <i class="fa-solid fa-floppy-disk"></i> Salvar Alteração
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabela Responsiva -->
+            <div class="table-container overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-900 text-white uppercase tracking-wider font-semibold">
+                            <th class="no-print py-3 px-3 rounded-l-lg text-center" style="width: 70px;">Ordem</th>
+                            <th class="py-3 px-3">Cartão</th>
+                            <th class="py-3 px-3">Descrição</th>
+                            <th class="py-3 px-3">Progresso</th>
+                            <th class="py-3 px-3">Valor Parcela</th>
+                            <th class="py-3 px-3">Saldo Devedor</th>
+                            <th class="py-3 px-3">Finaliza em</th>
+                            <th class="no-print py-3 px-3 text-center rounded-r-lg">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaCompras" class="divide-y divide-slate-100 font-medium"></tbody>
+                    <tfoot>
+                        <tr class="bg-slate-100 font-bold text-slate-800 border-t-2 border-slate-200">
+                            <td colspan="5" class="py-3 px-4 text-right uppercase tracking-wider text-[11px]">TOTAL DE DÉBITO RESTANTE:</td>
+                            <td id="valorDebitoTotal" class="py-3 px-3 text-rose-600 font-extrabold text-sm">R$ 0,00</td>
+                            <td colspan="2" class="no-print"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>Controle de Compras Parceladas e Débitos Pendentes.</p>
+            <p class="mt-1 text-slate-400">&copy; Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        let compras = JSON.parse(localStorage.getItem('financas_parcelas_alberto')) || [];
+
+        function adicionarCompra() {
+            const cartao = document.getElementById('cartaoNome').value;
+            const desc = document.getElementById('descricao').value;
+            const total = parseFloat(document.getElementById('valorTotal').value);
+            const qtd = parseInt(document.getElementById('parcelas').value);
+            const data = document.getElementById('dataInicio').value;
+            const venc = parseInt(document.getElementById('diaVencimento').value) || 15;
+
+            if (!cartao || isNaN(total) || isNaN(qtd) || !data) return alert("Preencha todos os campos.");
+
+            compras.push({ id: Date.now(), cartao, desc, total, qtd, dataInicio: data, diaVenc: venc });
+            limparFormulario();
+            salvarERenderizar();
+        }
+
+        function mover(index, direcao) {
+            const novoIndex = index + direcao;
+            if (novoIndex >= 0 && novoIndex < compras.length) {
+                const temp = compras[index];
+                compras[index] = compras[novoIndex];
+                compras[novoIndex] = temp;
+                salvarERenderizar();
+            }
+        }
+
+        function renderizar() {
+            const lista = document.getElementById('listaCompras');
+            lista.innerHTML = '';
+            const hoje = new Date();
+            const hojeRef = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+            let somaDebitoTotal = 0;
+
+            compras.forEach((c, index) => {
+                const dt = new Date(c.dataInicio + 'T00:00:00');
+                const diaVenc = c.diaVenc || 15;
+                
+                let mesInicioEfetivo = dt.getMonth();
+                if (dt.getDate() > 10) {
+                    mesInicioEfetivo += 1;
+                }
+                
+                const dataInicioRef = new Date(dt.getFullYear(), mesInicioEfetivo, 1);
+                const valorUnit = c.total / c.qtd;
+                
+                let diffMeses = (hojeRef.getFullYear() - dataInicioRef.getFullYear()) * 12 + (hojeRef.getMonth() - dataInicioRef.getMonth());
+                
+                let atual = Math.min(Math.max(diffMeses + 1, 0), c.qtd);
+                const saldo = (c.qtd - atual) * valorUnit;
+                somaDebitoTotal += saldo;
+
+                const dataFinal = new Date(dataInicioRef);
+                dataFinal.setMonth(dataFinal.getMonth() + (c.qtd - 1));
+                const dataExibicaoFinal = new Date(dataFinal.getFullYear(), dataFinal.getMonth(), diaVenc);
+
+                lista.innerHTML += `
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="no-print py-2 px-2 text-center">
+                            <button class="bg-slate-100 hover:bg-brand-600 hover:text-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded text-xs transition" onclick="mover(${index}, -1)">↑</button>
+                            <button class="bg-slate-100 hover:bg-brand-600 hover:text-white border border-slate-200 text-slate-600 px-2 py-0.5 rounded text-xs transition" onclick="mover(${index}, 1)">↓</button>
+                        </td>
+                        <td class="py-2.5 px-3 font-bold text-slate-900">${c.cartao} <span class="text-[10px] font-semibold text-slate-400 block sm:inline">(Venc: ${diaVenc})</span></td>
+                        <td class="py-2.5 px-3">${c.desc}</td>
+                        <td class="py-2.5 px-3">
+                            <span class="inline-flex items-center gap-1 font-semibold ${atual === c.qtd ? 'text-emerald-600' : 'text-slate-700'}">
+                                ${atual} de ${c.qtd} ${atual === c.qtd ? '<i class="fa-solid fa-circle-check text-emerald-500"></i>' : ''}
+                            </span>
+                        </td>
+                        <td class="py-2.5 px-3">${valorUnit.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</td>
+                        <td class="py-2.5 px-3 font-bold ${saldo > 0 ? 'text-rose-600' : 'text-emerald-600'}">
+                            ${saldo.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}
+                        </td>
+                        <td class="py-2.5 px-3 text-slate-600">${dataExibicaoFinal.toLocaleDateString('pt-BR')}</td>
+                        <td class="no-print py-2.5 px-3 text-center whitespace-nowrap">
+                            <button class="text-brand-600 hover:text-brand-700 bg-brand-50 border border-brand-200 px-2 py-1 rounded font-semibold text-xs mr-1 transition" onclick="editarCompra(${c.id})" title="Editar">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button class="text-rose-600 hover:text-rose-700 bg-rose-50 border border-rose-200 px-2 py-1 rounded font-semibold text-xs transition" onclick="removerCompra(${c.id})" title="Excluir">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+            });
+
+            document.getElementById('valorDebitoTotal').innerText = somaDebitoTotal.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+        }
+
+        function editarCompra(id) {
+            const item = compras.find(c => c.id === id);
+            if (!item) return;
+            document.getElementById('editId').value = item.id;
+            document.getElementById('cartaoNome').value = item.cartao;
+            document.getElementById('descricao').value = item.desc;
+            document.getElementById('valorTotal').value = item.total;
+            document.getElementById('parcelas').value = item.qtd;
+            document.getElementById('dataInicio').value = item.dataInicio;
+            document.getElementById('diaVencimento').value = item.diaVenc || 15;
+            document.getElementById('btnAdd').classList.add('hidden');
+            document.getElementById('btnUpdate').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function salvarEdicao() {
+            const id = parseInt(document.getElementById('editId').value);
+            const index = compras.findIndex(c => c.id === id);
+            if (index !== -1) {
+                compras[index].cartao = document.getElementById('cartaoNome').value;
+                compras[index].desc = document.getElementById('descricao').value;
+                compras[index].total = parseFloat(document.getElementById('valorTotal').value);
+                compras[index].qtd = parseInt(document.getElementById('parcelas').value);
+                compras[index].dataInicio = document.getElementById('dataInicio').value;
+                compras[index].diaVenc = parseInt(document.getElementById('diaVencimento').value);
+            }
+            limparFormulario();
+            salvarERenderizar();
+        }
+
+        function limparFormulario() {
+            document.getElementById('editId').value = '';
+            document.getElementById('cartaoNome').value = '';
+            document.getElementById('descricao').value = '';
+            document.getElementById('valorTotal').value = '';
+            document.getElementById('parcelas').value = '';
+            document.getElementById('dataInicio').value = '';
+            document.getElementById('diaVencimento').value = '';
+            document.getElementById('btnAdd').classList.remove('hidden');
+            document.getElementById('btnUpdate').classList.add('hidden');
+        }
+
+        function removerCompra(id) {
+            if(confirm("Excluir este registro?")) {
+                compras = compras.filter(c => c.id !== id);
+                salvarERenderizar();
+            }
+        }
+
+        function salvarERenderizar() {
+            localStorage.setItem('financas_parcelas_alberto', JSON.stringify(compras));
+            renderizar();
+        }
+
+        function exportarDados() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(compras));
+            const a = document.createElement('a');
+            const d = new Date();
+            const dia = d.getDate().toString().padStart(2, '0');
+            const mes = (d.getMonth() + 1).toString().padStart(2, '0');
+            const ano = d.getFullYear();
+            const hora = d.getHours().toString().padStart(2, '0');
+            const minuto = d.getMinutes().toString().padStart(2, '0');
+            const nomeArquivo = `Controle_de_Compras_Parceladas_${ano}_${dia}-${mes}-${ano}_${hora}h${minuto}.json`;
+            a.setAttribute("href", dataStr);
+            a.setAttribute("download", nomeArquivo);
+            a.click();
+        }
+
+        function importarDados(e) {
+            const reader = new FileReader();
+            reader.onload = (ev) => { try { compras = JSON.parse(ev.target.result); salvarERenderizar(); } catch { alert("Erro!"); }};
+            reader.readAsText(e.target.files[0]);
+        }
+
+        renderizar();
+    </script>
+</body>
+</html>

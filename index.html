@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management Center by Center Soft Inc.®</title>
+    <link rel="icon" href="icon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="icon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-deep: #060b1a;
+            --accent: #d4af37;
+            --border: rgba(255, 255, 255, 0.08);
+            --sidebar-width: 60px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-deep);
+            display: flex;
+            height: 100vh;
+            color: white;
+            overflow: hidden;
+        }
+
+        .fundo-background {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(135deg, rgba(6, 11, 26, 0.95) 0%, rgba(10, 25, 47, 0.88) 100%),
+                url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+        }
+
+        .titulo-master {
+            font-family: 'Cinzel', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            background: linear-gradient(180deg, #ffffff 30%, #a1a1a1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.6));
+            margin-bottom: 5px;
+        }
+
+        .subtitulo-master {
+            letter-spacing: 0.5em;
+            font-size: 0.55rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        #login-overlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            transition: opacity 0.6s ease;
+            opacity: 0;
+        }
+
+        .glass-card {
+            background: rgba(10, 20, 40, 0.7);
+            padding: 35px;
+            border-radius: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+            width: 320px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Barras laterais esquerda e direita */
+        .sidebar {
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
+            background: rgba(5, 10, 25, 0.92);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            z-index: 100;
+        }
+
+        .sidebar-left { border-right: 1px solid var(--border); }
+        .sidebar-right { border-left: 1px solid var(--border); }
+
+        .sidebar.locked .nav-item:not(.special-btn),
+        .sidebar.locked .module-area {
+            opacity: 0.05;
+            pointer-events: none;
+        }
+
+        /* O M permanece fixo no topo esquerdo */
+        .logo-btn {
+            font-family: 'Cinzel', serif;
+            width: 32px;
+            height: 32px;
+            min-height: 32px;
+            border: 1px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 22px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            background: transparent;
+        }
+
+        .logo-btn:hover {
+            background: var(--accent);
+            color: #050a19;
+        }
+
+        .module-area {
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Distribui os módulos por quase toda a altura disponível. */
+        .sidebar-left .module-area {
+            padding-bottom: 4px;
+        }
+
+        .sidebar-right .module-area {
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+        /* Somente os módulos adicionais são distribuídos no espaço superior.
+           Configuração e bloqueio permanecem agrupados no rodapé. */
+        .sidebar-right #right-modules {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            justify-content: space-between;
+        }
+
+        .nav-item {
+            width: 42px;
+            height: 42px;
+            min-height: 42px;
+            color: #64748b;
+            cursor: pointer;
+            margin-bottom: 0;
+            border: none;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+            font-size: 20px;
+        }
+
+        .nav-item:hover { color: var(--accent); transform: translateY(-1px); }
+
+        .sidebar-left .nav-item.active {
+            color: var(--accent);
+            border-left: 2px solid var(--accent);
+        }
+
+        .sidebar-right .nav-item.active {
+            color: var(--accent);
+            border-right: 2px solid var(--accent);
+        }
+
+        .right-actions {
+            width: 100%;
+            margin-top: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding-top: 18px;
+            border-top: 1px solid rgba(212, 175, 55, 0.28);
+        }
+
+        input {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            color: white;
+            margin-bottom: 15px;
+            width: 100%;
+            text-align: center;
+            outline: none;
+            font-size: 0.8rem;
+        }
+
+        button.primary-btn {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.75rem;
+            font-family: 'Cinzel', serif;
+        }
+
+        button.primary-btn:hover { background: var(--accent); color: black; }
+
+        .main-content {
+            flex: 1;
+            min-width: 0;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #content-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+            background: white;
+        }
+
+        .welcome {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        @media (max-height: 700px) {
+            .sidebar { padding: 8px 0; }
+            .logo-btn { margin-bottom: 8px; }
+            .nav-item { height: 36px; min-height: 36px; margin-bottom: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="fundo-background"></div>
+
+    <div id="login-overlay">
+        <div class="glass-card">
+            <div class="logo-btn" style="margin: 0 auto 20px;">M</div>
+            <h2 class="titulo-master" style="font-size: 1.3rem;">Management Center</h2>
+            <p class="subtitulo-master" style="margin-bottom: 25px;">Acesso Reservado</p>
+            <input type="password" id="senhaSistema" placeholder="Senha">
+            <button class="primary-btn" onclick="fazerLogin()">Entrar</button>
+        </div>
+    </div>
+
+    <div id="config-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 2000;">
+        <div class="glass-card" style="width: 300px; border: 1px solid var(--accent);">
+            <h3 style="font-family: 'Cinzel'; margin-bottom: 20px; font-size: 0.9rem;">Segurança</h3>
+            <input type="password" id="senhaAtual" placeholder="Senha Atual">
+            <input type="password" id="senhaNova" placeholder="Nova Senha">
+            <button class="primary-btn" onclick="salvarNovaSenha()">Gravar</button>
+            <button class="primary-btn" onclick="abrirAvisoBackupPelasConfiguracoes()" style="margin-top: 10px; border-color: rgba(212,175,55,0.55); font-size: 0.65rem;">⚠️ Política de Uso e Backup</button>
+            <button class="primary-btn" onclick="fecharConfig()" style="border-color: #444; color: #888; margin-top: 10px;">Voltar</button>
+        </div>
+    </div>
+
+    <!-- ESQUERDA: M fixo + os primeiros 9 módulos -->
+    <nav class="sidebar sidebar-left" id="sidebar-left">
+        <button class="logo-btn" title="Início" aria-label="Ir para o início" onclick="goHome()">M</button>
+        <div class="module-area" id="left-modules"></div>
+    </nav>
+
+    <main class="main-content">
+        <div id="welcome-screen" class="welcome">
+            <h2 class="titulo-master">Management Center</h2>
+            <p class="subtitulo-master">Sistema Patrimonial Elite</p>
+        </div>
+        <iframe id="content-frame" title="Módulo do Management Center"></iframe>
+    </main>
+
+    <!-- DIREITA: módulos a partir do 10º + Configuração e Bloqueio fixos no final -->
+    <nav class="sidebar sidebar-right" id="sidebar-right">
+        <div class="module-area" id="right-modules"></div>
+        <div class="right-actions">
+            <button class="nav-item special-btn" title="Configurações" aria-label="Configurações" onclick="abrirConfig()">⚙️</button>
+            <button class="nav-item special-btn" title="Bloquear" aria-label="Bloquear" onclick="fazerLogout()">🔒</button>
+        </div>
+    </nav>
+
+    <div id="backup-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.92); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(10px);">
+        <div class="glass-card" style="width: 480px; max-width: 90%; border: 1px solid var(--accent); text-align: left; padding: 30px;">
+            <h3 style="font-family: 'Cinzel'; margin-bottom: 15px; font-size: 1.1rem; color: var(--accent); text-align: center;">POLÍTICA DE USO &amp; BACKUP DE DADOS</h3>
+            <div style="font-size: 0.8rem; line-height: 1.6; color: #cbd5e1; margin-bottom: 20px; max-height: 350px; overflow-y: auto; padding-right: 5px;">
+                <p style="margin-bottom: 12px;"><strong>1. Armazenamento Local:</strong><br>Este sistema opera de forma local e armazena suas informações diretamente na memória do seu navegador web (<em>LocalStorage</em>). Não há servidor externo ou banco de dados em nuvem sincronizando suas informações.</p>
+                <p style="margin-bottom: 12px;"><strong>2. Responsabilidade pelos Dados e Backups:</strong><br>A realização de backups periódicos é de <strong>total e exclusiva responsabilidade do usuário</strong>. Utilize regularmente a funcionalidade de exportação/backup disponível nos módulos.</p>
+                <div style="border-left: 3px solid #ff4d4d; padding: 10px 12px; margin-bottom: 12px; border-radius: 2px;"><strong style="color: #ff6b6b;">3. Isenção de Responsabilidade:</strong><br>O sistema, seus desenvolvedores e mantenedores <strong>não se responsabilizam por perda, corrupção ou eliminação de dados</strong> decorrentes de limpeza do navegador, formatação do dispositivo, falhas do sistema operacional, ação de antivírus ou ausência de cópias de segurança.</div>
+            </div>
+            <button class="primary-btn" onclick="fecharAvisoBackup()">Estou Ciente e De Acordo</button>
+        </div>
+    </div>
+
+    <script>
+        /*
+         * CADASTRO DOS MÓDULOS
+         * Os 9 primeiros aparecem à esquerda.
+         * Do 10º ao 17º aparecem automaticamente à direita.
+         * Para inserir outro módulo, acrescente um novo objeto ao final da lista.
+         */
+        const MODULOS = [
+            { icone: '💰', nome: 'Aluguéis', arquivo: 'Gestão de Aluguéis.html' },
+            { icone: '🏠', nome: 'Imóveis & IPTU', arquivo: 'Imóveis & IPTU & Serviços.html' },
+            { icone: '🧾', nome: 'Gestão de Contratos', arquivo: 'Gestão de Contratos.html' },
+            { icone: '📊', nome: 'Financeiro Global', arquivo: 'Gestão Financeira Global.html' },
+            { icone: '🏦', nome: 'Contas Bancárias', arquivo: 'Gestão Contas Bancárias.html' },
+            { icone: '💳', nome: 'Cartões de Crédito', arquivo: 'Gestão Cartões de Credito.html' },
+            { icone: '💳', nome: 'Cartões & Parcelas', arquivo: 'Gestão de Cartões.html' },
+            { icone: '📈', nome: 'Quantum Trade', arquivo: 'Quantum Trade.html' },
+            { icone: '🚗', nome: 'Frota', arquivo: 'FleetManager PRO.html' },
+            { icone: '📈', nome: 'Calculadora Financeira', arquivo: 'Calculadora Financeira.html' },
+            { icone: '🏠', nome: 'Custos Imobiliários', arquivo: 'Simulador de Custos Imobiliários.html' },
+            { icone: '💷', nome: 'Simulador de Doação', arquivo: 'Simulador de Custos de Doação.html' },
+            { icone: '🧮', nome: 'Simulador PF x PJ', arquivo: 'Simulador IRPF – PF x PJ.html' },
+            { icone: '💼', nome: 'Cálculo Trabalhista', arquivo: 'Calculo Trabalhista.html' },
+            { icone: '🔨', nome: 'Controle de Reforma', arquivo: 'Controle de Reforma.html' },
+            { icone: '⚖️', nome: 'Calculadora Comparativa', arquivo: 'Calculadora Comparativa.html' },
+            { icone: '🕘', nome: 'Agenda de Tarefas', arquivo: 'Agenda de Tarefas.html' },
+
+            /* EXEMPLO: novos módulos serão distribuídos automaticamente.
+            ,{ icone: '📁', nome: 'Documentos', arquivo: 'Documentos.html' }
+            ,{ icone: '📅', nome: 'Agenda', arquivo: 'Agenda.html' }
+            ,{ icone: '⚖️', nome: 'Jurídico', arquivo: 'Juridico.html' } // 10º: vai para a direita
+            */
+        ];
+
+        const LIMITE_ESQUERDA = 9;
+        const LIMITE_DIREITA = 8;
+        let SENHA_MESTRE = localStorage.getItem('senhaMaster') !== null
+            ? localStorage.getItem('senhaMaster')
+            : '';
+
+        function criarBotaoModulo(modulo) {
+            const botao = document.createElement('button');
+            botao.type = 'button';
+            botao.className = 'nav-item';
+            botao.title = modulo.nome;
+            botao.setAttribute('aria-label', modulo.nome);
+            botao.textContent = modulo.icone;
+            botao.addEventListener('click', function () {
+                openModule(modulo.arquivo, botao);
+            });
+            return botao;
+        }
+
+        function renderizarModulos() {
+            const esquerda = document.getElementById('left-modules');
+            const direita = document.getElementById('right-modules');
+            esquerda.innerHTML = '';
+            direita.innerHTML = '';
+
+            MODULOS.forEach((modulo, indice) => {
+                if (indice < LIMITE_ESQUERDA) {
+                    esquerda.appendChild(criarBotaoModulo(modulo));
+                } else if (indice < LIMITE_ESQUERDA + LIMITE_DIREITA) {
+                    direita.appendChild(criarBotaoModulo(modulo));
+                } else {
+                    console.warn('Módulo não exibido por ultrapassar o limite de 17:', modulo.nome);
+                }
+            });
+        }
+
+        function barrasBloqueadas() {
+            return document.getElementById('sidebar-left').classList.contains('locked') ||
+                   document.getElementById('sidebar-right').classList.contains('locked');
+        }
+
+        function definirBloqueio(bloqueado) {
+            document.getElementById('sidebar-left').classList.toggle('locked', bloqueado);
+            document.getElementById('sidebar-right').classList.toggle('locked', bloqueado);
+        }
+
+        function fazerLogin() {
+            if (document.getElementById('senhaSistema').value === SENHA_MESTRE) {
+                const overlay = document.getElementById('login-overlay');
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    definirBloqueio(false);
+                }, 500);
+            } else {
+                alert('Senha incorreta');
+            }
+            document.getElementById('senhaSistema').value = '';
+        }
+
+        function fazerLogout() {
+            goHome();
+            const overlay = document.getElementById('login-overlay');
+            overlay.style.display = 'flex';
+            setTimeout(() => { overlay.style.opacity = '1'; }, 10);
+            definirBloqueio(true);
+        }
+
+        function abrirConfig() {
+            document.getElementById('config-modal').style.display = 'flex';
+        }
+
+        function fecharConfig() {
+            document.getElementById('config-modal').style.display = 'none';
+        }
+
+        function salvarNovaSenha() {
+            if (document.getElementById('senhaAtual').value === SENHA_MESTRE) {
+                const nova = document.getElementById('senhaNova').value;
+                SENHA_MESTRE = nova;
+                localStorage.setItem('senhaMaster', nova);
+                alert(nova === '' ? 'Senha removida com sucesso! Agora o acesso é direto.' : 'Senha alterada com sucesso!');
+                fecharConfig();
+                document.getElementById('senhaAtual').value = '';
+                document.getElementById('senhaNova').value = '';
+            } else {
+                alert('Senha atual incorreta.');
+            }
+        }
+
+        function openModule(url, btn) {
+            if (barrasBloqueadas()) return;
+            document.getElementById('welcome-screen').style.display = 'none';
+            const frame = document.getElementById('content-frame');
+            frame.style.display = 'block';
+            frame.src = url;
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function goHome() {
+            document.getElementById('welcome-screen').style.display = 'flex';
+            const frame = document.getElementById('content-frame');
+            frame.style.display = 'none';
+            frame.src = 'about:blank';
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        }
+
+        function abrirAvisoBackupPelasConfiguracoes() {
+            fecharConfig();
+            document.getElementById('backup-modal').style.display = 'flex';
+        }
+
+        function fecharAvisoBackup() {
+            document.getElementById('backup-modal').style.display = 'none';
+            abrirConfig();
+        }
+
+        document.getElementById('senhaSistema').addEventListener('keypress', event => {
+            if (event.key === 'Enter') fazerLogin();
+        });
+
+        renderizarModulos();
+    </script>
+</body>
+</html>

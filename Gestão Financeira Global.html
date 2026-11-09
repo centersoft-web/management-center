@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão Financeira Global</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#035485',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        emerald: {
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Estilos de Impressão */
+        @media print {
+            .no-print, header, nav, .btn-action, .import-panel, .toolbar, .tabs, #fileInput, #fileExtrato {
+                display: none !important;
+            }
+            body { background: white !important; color: black !important; padding: 0 !important; }
+            main { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+            .card-print { box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
+            input { border: none !important; background: transparent !important; padding: 0 !important; }
+            .aviso-saida { color: black !important; }
+            @page { size: portrait; margin: 1cm; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Header Navbar -->
+    <header class="bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white shadow-lg sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-brand-500/20 rounded-xl border border-brand-500/30">
+                    <i class="fa-solid fa-wallet text-2xl text-brand-500"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight">Gestão Financeira Global</h1>
+                    <p class="text-xs text-slate-300 font-medium">Controle Unificado de Fluxo de Caixa e Investimentos</p>
+                </div>
+            </div>
+
+            <!-- Botões das Abas Principais -->
+            <div class="flex bg-slate-800/80 p-1 rounded-xl border border-slate-700 gap-1 w-full sm:w-auto">
+                <button id="btn-tab-fluxo" onclick="switchMainTab('aba-fluxo')" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-bold text-xs transition-all bg-brand-600 text-white shadow-sm">
+                    <i class="fa-solid fa-coins"></i> 💰 Gestão Financeira
+                </button>
+                <button id="btn-tab-portfolio" onclick="switchMainTab('aba-portfolio')" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-bold text-xs transition-all text-slate-300 hover:text-white hover:bg-slate-700/50">
+                    <i class="fa-solid fa-chart-line"></i> 📈 Gestão de Investimentos
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow">
+
+        <!-- ==================== ABA 1: GESTÃO FINANCEIRA (FLUXO DE CAIXA) ==================== -->
+        <section id="aba-fluxo" class="space-y-6">
+            
+            <!-- Barra Superior: Título & Filtros -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h2 id="tituloPagina" class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        💰 Gestão Financeira - Jan/2026
+                    </h2>
+                    <p class="text-xs text-slate-500">Acompanhe entradas, saídas e saldo acumulado mês a mês</p>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <label class="text-xs font-bold uppercase text-slate-700 tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-days text-brand-600"></i> Ano:
+                    </label>
+                    <select id="selectAno" onchange="changeYear()" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-slate-900 font-semibold text-xs focus:ring-2 focus:ring-brand-500 outline-none cursor-pointer"></select>
+                </div>
+            </div>
+
+            <!-- Painel de Importação Bancária -->
+            <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4 no-print">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-emerald-500/10 text-emerald-600 rounded-xl border border-emerald-500/20">
+                        <i class="fa-solid fa-file-invoice-dollar text-xl"></i>
+                    </div>
+                    <div>
+                        <strong class="text-xs font-bold text-emerald-900 uppercase tracking-wider block">📂 Importação por Mês (Extrato Bancário)</strong>
+                        <p class="text-xs text-emerald-700">Extraindo dados para o mês selecionado: <b id="mesAlvoTxt" class="text-emerald-900">...</b></p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap w-full md:w-auto">
+                    <input type="file" id="fileExtrato" accept=".txt,.csv" class="text-xs text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 cursor-pointer">
+                    <button onclick="importarArquivoBanco()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-rocket"></i> Importar este Mês
+                    </button>
+                </div>
+            </div>
+
+            <!-- Toolbar de Ações -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 p-3 shadow-sm flex flex-wrap gap-2 items-center justify-between no-print text-xs">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button onclick="saveData()" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-2 rounded-lg transition shadow-sm">
+                        <i class="fa-solid fa-floppy-disk"></i> Salvar
+                    </button>
+                    <button onclick="copyPreviousMonth()" class="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-2 rounded-lg transition shadow-sm">
+                        <i class="fa-regular fa-copy"></i> Copiar Anterior
+                    </button>
+                    <button onclick="ordenarPorDia()" class="inline-flex items-center gap-1.5 bg-brand-600 hover:bg-brand-500 text-white font-bold px-3 py-2 rounded-lg transition shadow-sm">
+                        <i class="fa-solid fa-arrow-down-1-9"></i> Ordenar por Dia
+                    </button>
+                    <button onclick="limparMesInteiro()" class="inline-flex items-center gap-1.5 bg-orange-600 hover:bg-orange-700 text-white font-bold px-3 py-2 rounded-lg transition shadow-sm">
+                        <i class="fa-solid fa-broom"></i> Limpar Mês
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button onclick="exportBackup()" class="inline-flex items-center gap-1.5 bg-slate-600 hover:bg-slate-700 text-white font-bold px-3 py-2 rounded-lg transition shadow-sm">
+                        <i class="fa-solid fa-file-export"></i> Exportar
+                    </button>
+                    <button onclick="document.getElementById('fileInput').click()" class="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-2 rounded-lg transition shadow-sm">
+                        <i class="fa-solid fa-file-import"></i> Importar
+                    </button>
+                    <button onclick="window.print()" class="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-2 rounded-lg transition shadow-sm">
+                        <i class="fa-solid fa-print"></i> Imprimir
+                    </button>
+                    <input type="file" id="fileInput" onchange="importBackup(event)" accept=".txt" class="hidden">
+                </div>
+            </div>
+
+            <!-- Abas dos Meses -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 p-3 shadow-sm no-print">
+                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-1.5" id="tabContainer"></div>
+            </div>
+
+            <!-- Tabela de Lançamentos -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden card-print">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-900 text-white font-bold uppercase tracking-wider text-[11px]">
+                                <th class="p-3 w-16 text-center cursor-pointer hover:bg-slate-800 transition" onclick="ordenarPorCampo('d')">Dia 🔃</th>
+                                <th class="p-3 min-w-[200px] cursor-pointer hover:bg-slate-800 transition" onclick="ordenarPorCampo('desc')">Descrição 🔃</th>
+                                <th class="p-3 w-32 text-right cursor-pointer hover:bg-slate-800 transition" onclick="ordenarPorCampo('e')">Entrada 🔃</th>
+                                <th class="p-3 w-32 text-right cursor-pointer hover:bg-slate-800 transition" onclick="ordenarPorCampo('s')">Saída 🔃</th>
+                                <th class="p-3 w-36 text-right">Saldo Acum.</th>
+                                <th class="p-3 w-20 text-center action-cell-header no-print">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="divide-y divide-slate-100 font-medium text-slate-700"></tbody>
+                    </table>
+                </div>
+
+                <!-- Resumo Financeiro / Footer Totais -->
+                <div class="bg-slate-50 p-4 border-t border-slate-200 space-y-2 text-xs font-bold text-slate-700">
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-500">Saldo Anterior (Meses passados):</span>
+                        <span id="valorMesAnterior" class="mono text-sm text-slate-800">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between items-center text-emerald-600">
+                        <span>(+) Entradas deste Mês:</span>
+                        <span id="totalEntradasMes" class="mono text-sm">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between items-center text-rose-600">
+                        <span>(-) Saídas deste Mês:</span>
+                        <span id="totalSaidasMes" class="mono text-sm">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-slate-200 text-base font-black text-slate-900">
+                        <span>Saldo Final em Conta:</span>
+                        <span id="saldoFinalReal" class="mono">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- ==================== ABA 2: GESTÃO DE INVESTIMENTOS (PATRIMÔNIO) ==================== -->
+        <section id="aba-portfolio" class="space-y-6 hidden">
+            
+            <!-- Dashboard Navbar Patrimonio -->
+            <nav class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex flex-col lg:flex-row justify-between items-center gap-4 text-slate-800 card-print">
+                <div class="flex items-center gap-3 min-w-[220px]">
+                    <div class="p-3 bg-brand-500/10 text-brand-600 rounded-xl border border-brand-500/20 shrink-0">
+                        <i class="fa-solid fa-chart-pie text-2xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-slate-900 uppercase tracking-wider text-xs">Gestão de Patrimônio</h2>
+                        <input type="text" id="nome-investidor" placeholder="Seu Nome" class="border-b border-slate-300 p-0 bg-transparent font-bold text-brand-600 focus:border-brand-500 text-sm w-full outline-none" oninput="salvarTudo()">
+                    </div>
+                </div>
+
+                <!-- Patrimônio Total -->
+                <div class="text-center px-6 py-2 border-y lg:border-y-0 lg:border-x border-slate-200 shrink-0 w-full lg:w-auto">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Patrimônio Líquido Estimado</div>
+                    <div id="grand-total" class="text-2xl sm:text-3xl font-black mono text-emerald-600 leading-none">R$ 0,00</div>
+                </div>
+
+                <!-- Cotações Públicas -->
+                <div class="flex items-center gap-4 shrink-0 flex-wrap justify-center">
+                    <div class="text-right px-2 border-r border-slate-200">
+                        <div class="text-[9px] font-bold text-slate-400 uppercase">Dólar</div>
+                        <div id="top-usd" class="mono font-bold text-emerald-600 text-xs">R$ 0,00</div>
+                    </div>
+                    <div class="text-right px-2 border-r border-slate-200">
+                        <div class="text-[9px] font-bold text-slate-400 uppercase">Euro</div>
+                        <div id="top-eur" class="mono font-bold text-brand-700 text-xs">R$ 0,00</div>
+                    </div>
+                    <div class="text-right px-2 border-r border-slate-200">
+                        <div class="text-[9px] font-bold text-slate-400 uppercase">CDI</div>
+                        <div id="display-cdi" class="mono font-bold text-brand-600 text-xs">---</div>
+                    </div>
+                    <div class="text-right pl-1">
+                        <div class="text-[9px] font-bold text-slate-400 uppercase">Status Mercado</div>
+                        <div id="status-text" class="flex items-center justify-end gap-1.5 mt-0.5">
+                            <span id="status-dot" class="h-2 w-2 rounded-full bg-amber-500 shrink-0"></span>
+                            <span id="label-fonte" class="font-bold text-[9px] uppercase tracking-tighter text-slate-500">BANCO CENTRAL (...)</span>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Ações Investimentos -->
+            <div class="flex gap-2 flex-wrap no-print">
+                <button onclick="buscarDadosPublicos()" class="bg-brand-600 hover:bg-brand-500 text-white px-3 py-2 rounded-lg text-xs font-bold uppercase transition shadow-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate"></i> Sincronizar Cotações
+                </button>
+                <button onclick="exportarDados()" class="bg-slate-600 hover:bg-slate-700 text-white px-3 py-2 rounded-lg text-xs font-bold uppercase transition shadow-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-file-export"></i> Exportar
+                </button>
+                <button onclick="document.getElementById('inputImport').click()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg text-xs font-bold uppercase transition shadow-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-file-import"></i> Importar
+                </button>
+                <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-2 rounded-lg text-xs font-bold uppercase transition shadow-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-print"></i> Imprimir
+                </button>
+                <input type="file" id="inputImport" class="hidden" accept=".json" onchange="importarDados(event)">
+            </div>
+
+            <!-- Tabela Portfolio -->
+            <div class="bg-white text-slate-900 rounded-2xl shadow-sm overflow-hidden border border-slate-200 card-print">
+                <!-- Cabeçalho Tabela -->
+                <div class="hidden md:grid grid-cols-12 gap-2 bg-slate-900 text-white font-bold uppercase tracking-wider text-[11px] p-3">
+                    <div class="col-span-3">Ativo</div>
+                    <div class="col-span-3">Valor / Quantia Inicial</div>
+                    <div class="col-span-2">Data Início</div>
+                    <div class="col-span-2">Aporte Mensal</div>
+                    <div class="col-span-2 text-right">Total Líquido (BRL)</div>
+                </div>
+
+                <!-- Lista de Ativos -->
+                <div id="portfolio-list" class="divide-y divide-slate-100 text-xs font-semibold">
+                    
+                    <!-- Master DI -->
+                    <div class="p-3 grid grid-cols-1 md:grid-cols-12 gap-2 items-center hover:bg-slate-50 transition">
+                        <div class="md:col-span-3 flex items-center gap-2">
+                            <span class="w-2 h-6 bg-brand-500 rounded-full shrink-0"></span>
+                            <span class="font-bold text-slate-800">Master DI (100% CDI)</span>
+                        </div>
+                        <div class="md:col-span-3"><input type="number" id="v-master" placeholder="R$" oninput="salvarTudo()" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="date" id="d-master" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="number" id="a-master" placeholder="Aporte R$" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div id="res-total-master" class="md:col-span-2 text-right font-black mono text-brand-700 text-sm">R$ 0,00</div>
+                    </div>
+
+                    <!-- Fundo Mapfre -->
+                    <div class="p-3 grid grid-cols-1 md:grid-cols-12 gap-2 items-center hover:bg-slate-50 transition">
+                        <div class="md:col-span-3 flex items-center gap-2">
+                            <span class="w-2 h-6 bg-rose-500 rounded-full shrink-0"></span>
+                            <span class="font-bold text-slate-800">Fundo Mapfre</span>
+                        </div>
+                        <div class="md:col-span-3"><input type="number" id="v-mapfre" placeholder="R$" oninput="salvarTudo()" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="date" id="d-mapfre" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="number" id="a-mapfre" placeholder="Aporte R$" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div id="res-total-mapfre" class="md:col-span-2 text-right font-black mono text-brand-700 text-sm">R$ 0,00</div>
+                    </div>
+
+                    <!-- Previdência -->
+                    <div class="p-3 grid grid-cols-1 md:grid-cols-12 gap-2 items-center hover:bg-slate-50 transition">
+                        <div class="md:col-span-3 flex items-center gap-2">
+                            <span class="w-2 h-6 bg-indigo-500 rounded-full shrink-0"></span>
+                            <span class="font-bold text-slate-800">Previdência</span>
+                        </div>
+                        <div class="md:col-span-3"><input type="number" id="v-prev" placeholder="R$" oninput="salvarTudo()" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="date" id="d-prev" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="number" id="a-prev" placeholder="Aporte R$" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div id="res-total-prev" class="md:col-span-2 text-right font-black mono text-brand-700 text-sm">R$ 0,00</div>
+                    </div>
+
+                    <!-- Tesouro Selic -->
+                    <div class="p-3 grid grid-cols-1 md:grid-cols-12 gap-2 items-center hover:bg-slate-50 transition">
+                        <div class="md:col-span-3 flex items-center gap-2">
+                            <span class="w-2 h-6 bg-emerald-500 rounded-full shrink-0"></span>
+                            <span class="font-bold text-slate-800">Tesouro Selic</span>
+                        </div>
+                        <div class="md:col-span-3"><input type="number" id="v-selic" placeholder="R$" oninput="salvarTudo()" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="date" id="d-selic" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="number" id="a-selic" placeholder="Aporte R$" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div id="res-total-selic" class="md:col-span-2 text-right font-black mono text-brand-700 text-sm">R$ 0,00</div>
+                    </div>
+
+                    <!-- LCI / LCA -->
+                    <div class="p-3 grid grid-cols-1 md:grid-cols-12 gap-2 items-center hover:bg-slate-50 transition">
+                        <div class="md:col-span-3 flex items-center gap-2">
+                            <span class="w-2 h-6 bg-sky-500 rounded-full shrink-0"></span>
+                            <span class="font-bold text-slate-800">LCI / LCA</span>
+                        </div>
+                        <div class="md:col-span-3"><input type="number" id="v-lci" placeholder="R$" oninput="salvarTudo()" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="date" id="d-lci" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="number" id="a-lci" placeholder="Aporte R$" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div id="res-total-lci" class="md:col-span-2 text-right font-black mono text-brand-700 text-sm">R$ 0,00</div>
+                    </div>
+
+                    <!-- Poupança -->
+                    <div class="p-3 grid grid-cols-1 md:grid-cols-12 gap-2 items-center hover:bg-slate-50 transition">
+                        <div class="md:col-span-3 flex items-center gap-2">
+                            <span class="w-2 h-6 bg-amber-500 rounded-full shrink-0"></span>
+                            <span class="font-bold text-slate-800">Poupança</span>
+                        </div>
+                        <div class="md:col-span-3"><input type="number" id="v-poup" placeholder="R$" oninput="salvarTudo()" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="date" id="d-poup" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="number" id="a-poup" placeholder="Aporte R$" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div id="res-total-poup" class="md:col-span-2 text-right font-black mono text-brand-700 text-sm">R$ 0,00</div>
+                    </div>
+
+                    <!-- Dólar -->
+                    <div class="p-3 grid grid-cols-1 md:grid-cols-12 gap-2 items-center hover:bg-slate-50 transition">
+                        <div class="md:col-span-3 flex items-center gap-2">
+                            <span class="w-2 h-6 bg-emerald-600 rounded-full shrink-0"></span>
+                            <div>
+                                <span class="font-bold text-slate-800">Dólar (USD)</span>
+                                <span id="cot-usd" class="text-[10px] text-slate-400 mono block font-normal">R$ 0,00</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-3"><input type="number" id="v-usd" placeholder="US$" oninput="salvarTudo()" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="date" id="d-usd" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="number" id="a-usd" placeholder="Aporte US$" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div id="res-total-usd" class="md:col-span-2 text-right font-black mono text-brand-700 text-sm">R$ 0,00</div>
+                    </div>
+
+                    <!-- Euro -->
+                    <div class="p-3 grid grid-cols-1 md:grid-cols-12 gap-2 items-center hover:bg-slate-50 transition">
+                        <div class="md:col-span-3 flex items-center gap-2">
+                            <span class="w-2 h-6 bg-blue-800 rounded-full shrink-0"></span>
+                            <div>
+                                <span class="font-bold text-slate-800">Euro (EUR)</span>
+                                <span id="cot-eur" class="text-[10px] text-slate-400 mono block font-normal">R$ 0,00</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-3"><input type="number" id="v-eur" placeholder="€" oninput="salvarTudo()" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="date" id="d-eur" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="number" id="a-eur" placeholder="Aporte €" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div id="res-total-eur" class="md:col-span-2 text-right font-black mono text-brand-700 text-sm">R$ 0,00</div>
+                    </div>
+
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500 no-print">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>Sistema Unificado de Gestão Financeira e Investimentos.</p>
+            <p class="mt-1 text-slate-400">&copy; Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- SCRIPT GERAL UNIFICADO -->
+    <script>
+        // ==================== TROCA DE ABAS PRINCIPAIS ====================
+        function switchMainTab(tabId) {
+            document.getElementById('aba-fluxo').classList.add('hidden');
+            document.getElementById('aba-portfolio').classList.add('hidden');
+
+            document.getElementById('btn-tab-fluxo').className = 'flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-bold text-xs transition-all text-slate-300 hover:text-white hover:bg-slate-700/50';
+            document.getElementById('btn-tab-portfolio').className = 'flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-bold text-xs transition-all text-slate-300 hover:text-white hover:bg-slate-700/50';
+
+            document.getElementById(tabId).classList.remove('hidden');
+            if (tabId === 'aba-fluxo') {
+                document.getElementById('btn-tab-fluxo').className = 'flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-bold text-xs transition-all bg-brand-600 text-white shadow-sm';
+            } else {
+                document.getElementById('btn-tab-portfolio').className = 'flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-bold text-xs transition-all bg-brand-600 text-white shadow-sm';
+            }
+        }
+
+        // ==================== ABA 1: GESTÃO FINANCEIRA ====================
+        const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+        let lastMonth = localStorage.getItem('lastActiveMonth');
+        let currentYear = new Date().getFullYear();
+        let currentMonth = lastMonth || months[new Date().getMonth()];
+        let fullDB = JSON.parse(localStorage.getItem('financeDB_v2')) || {};
+        let sortOrders = { d: 1, desc: 1, e: 1, s: 1 };
+
+        function format(v) { return v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+        function saveDataSilent() { localStorage.setItem('financeDB_v2', JSON.stringify(fullDB)); }
+        function saveData() { saveDataSilent(); alert("✔️ Dados salvos!"); }
+
+        function initFluxo() {
+            const sel = document.getElementById('selectAno');
+            sel.innerHTML = '';
+            for(let y=2024; y<=2050; y++){
+                let opt = document.createElement('option');
+                opt.value = y; opt.innerText = y;
+                if(y === parseInt(currentYear)) opt.selected = true;
+                sel.appendChild(opt);
+            }
+            checkAndCreateYear(currentYear);
+            renderTabs();
+            renderTable();
+            atualizarTextoFiltro();
+        }
+
+        function ordenarPorCampo(campo) {
+            let dados = fullDB[currentYear][currentMonth].filter(r => r.d || r.desc || r.e || r.s);
+            const ordem = sortOrders[campo];
+
+            dados.sort((a, b) => {
+                let valA = a[campo] || (campo === 'desc' ? '' : 0);
+                let valB = b[campo] || (campo === 'desc' ? '' : 0);
+
+                if (campo === 'd' || campo === 'e' || campo === 's') {
+                    return (parseFloat(valA) - parseFloat(valB)) * ordem;
+                } else {
+                    return valA.toString().localeCompare(valB.toString()) * ordem;
+                }
+            });
+
+            sortOrders[campo] *= -1;
+            while(dados.length < 15) dados.push({d:'', desc:'', e:'', s:''});
+            fullDB[currentYear][currentMonth] = dados;
+            saveDataSilent();
+            renderTable();
+        }
+
+        function checkAndCreateYear(year) {
+            if(!fullDB[year]) fullDB[year] = {};
+            months.forEach(m => {
+                if(!fullDB[year][m]) fullDB[year][m] = Array(15).fill().map(() => ({d:'', desc:'', e:'', s:''}));
+            });
+        }
+
+        function atualizarTextoFiltro() {
+            const txt = document.getElementById('mesAlvoTxt');
+            if(txt) txt.innerText = currentMonth + "/" + currentYear;
+            document.getElementById('tituloPagina').innerText = `💰 Gestão Financeira - ${currentMonth}/${currentYear}`;
+        }
+
+        function getSaldoAnterior(ano, mesNome) {
+            const mesIdx = months.indexOf(mesNome);
+            let saldo = 0;
+            for (let i = 0; i < mesIdx; i++) {
+                const m = months[i];
+                (fullDB[ano][m] || []).forEach(l => {
+                    saldo += parseFloat(l.e || 0);
+                    saldo -= parseFloat(l.s || 0);
+                });
+            }
+            return saldo;
+        }
+
+        function renderTable() {
+            const body = document.getElementById('tableBody');
+            body.innerHTML = '';
+            fullDB[currentYear][currentMonth].forEach((row, i) => {
+                const aviso = parseFloat(row.s) >= 1000 ? '<span class="text-amber-500 font-bold ml-1 text-xs" title="Saída elevada">⚠️</span>' : '';
+                
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+                tr.innerHTML = `
+                    <td class="p-1"><input type="text" value="${row.d || ''}" oninput="update(${i}, 'd', this.value)" class="w-full px-2 py-1 bg-transparent border border-transparent hover:border-slate-300 focus:border-brand-500 focus:bg-white rounded outline-none font-medium text-center"></td>
+                    <td class="p-1"><input type="text" uppercase value="${row.desc || ''}" oninput="update(${i}, 'desc', this.value)" class="w-full px-2 py-1 bg-transparent border border-transparent hover:border-slate-300 focus:border-brand-500 focus:bg-white rounded outline-none font-semibold uppercase"></td>
+                    <td class="p-1"><input type="number" step="0.01" value="${row.e || ''}" oninput="update(${i}, 'e', this.value)" class="w-full px-2 py-1 bg-transparent border border-transparent hover:border-slate-300 focus:border-brand-500 focus:bg-white rounded outline-none text-right font-mono font-bold text-emerald-600"></td>
+                    <td class="p-1">
+                        <div class="flex items-center">
+                            <input type="number" step="0.01" value="${row.s || ''}" oninput="update(${i}, 's', this.value)" class="w-full px-2 py-1 bg-transparent border border-transparent hover:border-slate-300 focus:border-brand-500 focus:bg-white rounded outline-none text-right font-mono font-bold text-rose-600">
+                            ${aviso}
+                        </div>
+                    </td>
+                    <td class="p-2 text-right font-mono font-bold status-cell"></td>
+                    <td class="p-2 text-center no-print">
+                        <button onclick="addLinha(${i})" class="text-brand-600 hover:bg-brand-50 p-1 rounded text-sm transition" title="Adicionar Linha"><i class="fa-solid fa-circle-plus"></i></button>
+                        <button onclick="delLinha(${i})" class="text-rose-600 hover:bg-rose-50 p-1 rounded text-sm transition" title="Excluir Linha"><i class="fa-solid fa-trash-can"></i></button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+            recalculate();
+        }
+
+        function recalculate() {
+            const saldoAnterior = getSaldoAnterior(currentYear, currentMonth);
+            document.getElementById('valorMesAnterior').innerText = "R$ " + format(saldoAnterior);
+            let acumulado = saldoAnterior;
+            let totalEntradas = 0;
+            let totalSaidas = 0;
+            const rows = document.querySelectorAll('#tableBody tr');
+            fullDB[currentYear][currentMonth].forEach((data, i) => {
+                const e = parseFloat(data.e || 0);
+                const s = parseFloat(data.s || 0);
+                totalEntradas += e;
+                totalSaidas += s;
+                acumulado += (e - s);
+                const cell = rows[i].querySelector('.status-cell');
+                const temDado = data.d || data.desc || data.e || data.s;
+                cell.innerText = temDado ? format(acumulado) : '';
+                cell.className = `p-2 text-right font-mono font-bold status-cell ${acumulado >= 0 ? 'text-emerald-600' : 'text-rose-600'}`;
+            });
+            document.getElementById('totalEntradasMes').innerText = "R$ " + format(totalEntradas);
+            document.getElementById('totalSaidasMes').innerText = "R$ " + format(totalSaidas);
+            document.getElementById('saldoFinalReal').innerText = "R$ " + format(acumulado);
+            document.getElementById('saldoFinalReal').className = `mono ${acumulado >= 0 ? 'text-emerald-600' : 'text-rose-600'}`;
+        }
+
+        function update(i, field, val) {
+            if (field === 'desc') val = val.toUpperCase();
+            fullDB[currentYear][currentMonth][i][field] = val;
+            saveDataSilent();
+            if(field === 's') renderTable();
+            else recalculate();
+        }
+
+        function addLinha(index) {
+            fullDB[currentYear][currentMonth].splice(index + 1, 0, {d:'', desc:'', e:'', s:''});
+            saveDataSilent();
+            renderTable();
+        }
+
+        function delLinha(i) {
+            fullDB[currentYear][currentMonth].splice(i, 1);
+            if(fullDB[currentYear][currentMonth].length < 5) fullDB[currentYear][currentMonth].push({d:'', desc:'', e:'', s:''});
+            saveDataSilent();
+            renderTable();
+        }
+
+        function ordenarPorDia() { ordenarPorCampo('d'); }
+
+        function limparMesInteiro() {
+            if(confirm("Deseja apagar todos os dados deste mês?")) {
+                fullDB[currentYear][currentMonth] = Array(15).fill().map(() => ({d:'', desc:'', e:'', s:''}));
+                saveDataSilent();
+                renderTable();
+            }
+        }
+
+        function changeYear() {
+            currentYear = document.getElementById('selectAno').value;
+            checkAndCreateYear(currentYear);
+            renderTable();
+            atualizarTextoFiltro();
+        }
+
+        function renderTabs() {
+            const cont = document.getElementById('tabContainer');
+            cont.innerHTML = '';
+            months.forEach(m => {
+                const b = document.createElement('button');
+                const isActive = m === currentMonth;
+                b.className = `month-btn py-2 px-1 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-lg text-xs text-slate-700 transition shadow-sm ${isActive ? '!border-brand-600 !text-brand-600 !bg-brand-50 shadow-inner' : ''}`;
+                b.innerText = m;
+                b.onclick = () => { 
+                    currentMonth = m; 
+                    localStorage.setItem('lastActiveMonth', m);
+                    renderTabs(); renderTable(); atualizarTextoFiltro();
+                };
+                cont.appendChild(b);
+            });
+        }
+
+        function copyPreviousMonth() {
+            const idx = months.indexOf(currentMonth);
+            if (idx > 0 && confirm(`Copiar projeção de ${months[idx-1]} para ${currentMonth}?`)) {
+                fullDB[currentYear][currentMonth] = JSON.parse(JSON.stringify(fullDB[currentYear][months[idx-1]]));
+                saveDataSilent();
+                renderTable();
+            }
+        }
+
+        function exportBackup() {
+            const agora = new Date();
+            const ano = agora.getFullYear();
+            const mes = String(agora.getMonth() + 1).padStart(2, '0');
+            const dia = String(agora.getDate()).padStart(2, '0');
+            const hora = String(agora.getHours()).padStart(2, '0');
+            const min = String(agora.getMinutes()).padStart(2, '0');
+            const nomeArquivo = `Gestão_Financeira_${ano}_${dia}-${mes}-${ano}_${hora}h${min}.txt`;
+            const blob = new Blob([JSON.stringify(fullDB)], {type: 'text/plain'});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            a.download = nomeArquivo; a.click();
+        }
+
+        function importBackup(event) {
+            const reader = new FileReader();
+            reader.onload = (e) => { 
+                fullDB = JSON.parse(e.target.result); 
+                saveDataSilent();
+                renderTable(); 
+                alert("Backup restaurado!");
+            };
+            reader.readAsText(event.target.files[0]);
+        }
+
+        function importarArquivoBanco() {
+            const fileInput = document.getElementById('fileExtrato');
+            if (!fileInput.files[0]) return alert("Selecione um arquivo!");
+            const reader = new FileReader();
+            const mesAtualIdx = months.indexOf(currentMonth) + 1;
+            reader.onload = function(e) {
+                const linhas = e.target.result.split('\n');
+                let novos = [];
+                linhas.forEach(linha => {
+                    const regData = /(\d{2})\/(\d{2})/;
+                    const regVal = /(-?\s?\d+[\d\.,]*,\d{2})/;
+                    const dMatch = linha.match(regData);
+                    const vMatch = linha.match(regVal);
+                    if (dMatch && vMatch && parseInt(dMatch[2]) === mesAtualIdx) {
+                        let v = parseFloat(vMatch[0].replace(/\s/g, '').replace('.', '').replace(',', '.'));
+                        let desc = linha.replace(regData, '').replace(regVal, '').replace(/[\t\s;]+/g, ' ').trim();
+                        desc = desc.replace(/^\/\d{4}/, '').replace(/^[\/\s]+/, '').trim();
+                        novos.push({ d: dMatch[1], desc: desc.toUpperCase(), e: v > 0 ? v.toString() : "", s: v < 0 ? Math.abs(v).toString() : "" });
+                    }
+                });
+                if (novos.length > 0) {
+                    fullDB[currentYear][currentMonth] = [...fullDB[currentYear][currentMonth].filter(r => r.d || r.desc || r.e || r.s), ...novos];
+                    saveDataSilent();
+                    ordenarPorDia();
+                    alert("Importado com sucesso!");
+                } else { alert("Nenhum dado deste mês encontrado."); }
+            };
+            reader.readAsText(fileInput.files[0], 'ISO-8859-1');
+        }
+
+
+        // ==================== ABA 2: GESTÃO DE INVESTIMENTOS ====================
+        let globalCDI = 10.75; 
+        let taxaUSD = 0;
+        let taxaEUR = 0;
+        let totais = {};
+
+        async function buscarDadosPublicos() {
+            const display = document.getElementById('display-cdi');
+            const dot = document.getElementById('status-dot');
+            const label = document.getElementById('label-fonte');
+            
+            try {
+                const r = await fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.11/dados/ultimos/1?formato=json');
+                const d = await r.json();
+                if(d && d.length > 0) {
+                    let taxaDiaria = parseFloat(d[0].valor);
+                    let taxaAnual = (Math.pow(1 + (taxaDiaria/100), 252) - 1) * 100;
+                    globalCDI = taxaAnual - 0.10; 
+                    display.innerText = globalCDI.toFixed(2) + "%";
+                    dot.className = "h-2 w-2 rounded-full bg-emerald-500 shrink-0";
+                    label.innerText = "BANCO CENTRAL (ONLINE)";
+                }
+            } catch (e) {
+                display.innerText = globalCDI.toFixed(2) + "%";
+                dot.className = "h-2 w-2 rounded-full bg-amber-500 shrink-0";
+                label.innerText = "BANCO CENTRAL (OFFLINE)";
+            }
+
+            try {
+                const rCambio = await fetch('https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL');
+                const dCambio = await rCambio.json();
+                taxaUSD = parseFloat(dCambio.USDBRL.bid);
+                taxaEUR = parseFloat(dCambio.EURBRL.bid);
+                
+                document.getElementById('top-usd').innerText = `R$ ${taxaUSD.toFixed(2)}`;
+                document.getElementById('top-eur').innerText = `R$ ${taxaEUR.toFixed(2)}`;
+                document.getElementById('cot-usd').innerText = `R$ ${taxaUSD.toFixed(2)}`;
+                document.getElementById('cot-eur').innerText = `R$ ${taxaEUR.toFixed(2)}`;
+            } catch (e) {
+                taxaUSD = 5.00;
+                taxaEUR = 5.40;
+            }
+
+            processarTudo();
+        }
+
+        function processarTudo() {
+            totais = {};
+            calcRF('master', globalCDI, 1.0); 
+            calcRF('mapfre', globalCDI, 1.0);
+            calcRF('prev', globalCDI, 0.95); 
+            calcRF('selic', globalCDI + 0.1, 1.0);
+            calcIsento('lci', globalCDI, 0.90); 
+            calcPoup();
+            calcMoedaCompleta('usd', taxaUSD);
+            calcMoedaCompleta('eur', taxaEUR);
+
+            const soma = Object.values(totais).reduce((a, b) => a + b, 0);
+            document.getElementById('grand-total').innerText = soma.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+        }
+
+        function calcRF(id, cdi, bench) {
+            const v = parseFloat(document.getElementById(`v-${id}`).value) || 0;
+            const d = document.getElementById(`d-${id}`).value;
+            const a = parseFloat(document.getElementById(`a-${id}`).value) || 0;
+            if (v <= 0 || !d) { atualizarDisplay(id, 0); return; }
+            const dias = Math.max(1, Math.ceil((new Date() - new Date(d)) / 86400000));
+            const meses = dias / 30.44;
+            const ir = dias > 720 ? 0.15 : dias > 360 ? 0.175 : dias > 180 ? 0.20 : 0.225;
+            const txD = Math.pow(((cdi * bench) / 100) + 1, 1/252) - 1;
+            const txM = Math.pow(((cdi * bench) / 100) + 1, 1/12) - 1;
+            const rendPrincipal = (v * Math.pow(1 + txD, dias)) - v;
+            const totalAportes = meses > 0 ? a * ((Math.pow(1 + txM, meses) - 1) / txM) : 0;
+            const lucroAportes = totalAportes - (a * meses);
+            const res = v + (rendPrincipal * (1 - ir)) + (a * meses) + (lucroAportes * (1 - ir));
+            atualizarDisplay(id, res);
+        }
+
+        function calcIsento(id, cdi, bench) {
+            const v = parseFloat(document.getElementById(`v-${id}`).value) || 0;
+            const d = document.getElementById(`d-${id}`).value;
+            const a = parseFloat(document.getElementById(`a-${id}`).value) || 0;
+            if (v <= 0 || !d) { atualizarDisplay(id, 0); return; }
+            const dias = Math.max(1, Math.ceil((new Date() - new Date(d)) / 86400000));
+            const meses = dias / 30.44;
+            const txD = Math.pow(((cdi * bench) / 100) + 1, 1/252) - 1;
+            const txM = Math.pow(((cdi * bench) / 100) + 1, 1/12) - 1;
+            const principalFinal = v * Math.pow(1 + txD, dias);
+            const aportesFinal = meses > 0 ? a * ((Math.pow(1 + txM, meses) - 1) / txM) : 0;
+            atualizarDisplay(id, principalFinal + aportesFinal);
+        }
+
+        function calcPoup() {
+            const v = parseFloat(document.getElementById('v-poup').value) || 0;
+            const d = document.getElementById('d-poup').value;
+            const a = parseFloat(document.getElementById('a-poup').value) || 0;
+            if (v <= 0 || !d) { atualizarDisplay('poup', 0); return; }
+            const meses = (new Date() - new Date(d)) / 2628000000;
+            let taxaPoup = globalCDI > 8.5 ? 0.005 : (globalCDI * 0.70 / 12 / 100);
+            const principalFinal = v * Math.pow(1 + taxaPoup, meses);
+            const aportesFinal = meses > 0 ? a * ((Math.pow(1 + taxaPoup, meses) - 1) / taxaPoup) : 0;
+            atualizarDisplay('poup', principalFinal + aportesFinal);
+        }
+
+        function calcMoedaCompleta(id, taxa) {
+            const v = parseFloat(document.getElementById(`v-${id}`).value) || 0;
+            const d = document.getElementById(`d-${id}`).value;
+            const a = parseFloat(document.getElementById(`a-${id}`).value) || 0;
+            if (v <= 0) { atualizarDisplay(id, 0); return; }
+            let totalMoeda = v;
+            if (d) {
+                const meses = Math.max(0, (new Date() - new Date(d)) / 2628000000);
+                totalMoeda += (a * meses);
+            }
+            const resBRL = totalMoeda * taxa;
+            atualizarDisplay(id, resBRL);
+        }
+
+        function atualizarDisplay(id, valor) {
+            totais[id] = valor;
+            document.getElementById(`res-total-${id}`).innerText = valor.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+        }
+
+        function salvarTudo() {
+            const f = (id) => document.getElementById(id).value;
+            const data = { 
+                n: f('nome-investidor'), 
+                vm: f('v-master'), dm: f('d-master'), am: f('a-master'),
+                vmap: f('v-mapfre'), dmap: f('d-mapfre'), amap: f('a-mapfre'),
+                vp: f('v-prev'), dp: f('d-prev'), ap: f('a-prev'),
+                vs: f('v-selic'), ds: f('d-selic'), as: f('a-selic'),
+                vl: f('v-lci'), dl: f('d-lci'), al: f('a-lci'),
+                vpo: f('v-poup'), dpo: f('d-poup'), apo: f('a-poup'),
+                v_usd: f('v-usd'), d_usd: f('d-usd'), a_usd: f('a-usd'),
+                v_eur: f('v-eur'), d_eur: f('d-eur'), a_eur: f('a-eur')
+            };
+            localStorage.setItem('terminal_vTOTAL_FINAL', JSON.stringify(data));
+            processarTudo();
+        }
+
+        function carregarDados(s) {
+            if(!s) return;
+            document.getElementById('nome-investidor').value = s.n || "";
+            const L = (id, val) => { if(document.getElementById(id)) document.getElementById(id).value = val || ""; };
+            L('v-master', s.vm); L('d-master', s.dm); L('a-master', s.am);
+            L('v-mapfre', s.vmap); L('d-mapfre', s.dmap); L('a-mapfre', s.amap);
+            L('v-prev', s.vp); L('d-prev', s.dp); L('a-prev', s.ap);
+            L('v-selic', s.vs); L('d-selic', s.ds); L('a-selic', s.as);
+            L('v-lci', s.vl); L('d-lci', s.dl); L('a-lci', s.al);
+            L('v-poup', s.vpo); L('d-poup', s.dpo); L('a-poup', s.apo);
+            L('v-usd', s.v_usd); L('d-usd', s.d_usd); L('a-usd', s.a_usd);
+            L('v-eur', s.v_eur); L('d-eur', s.d_eur); L('a-eur', s.a_eur);
+            processarTudo();
+        }
+
+        function exportarDados() {
+            const data = localStorage.getItem('terminal_vTOTAL_FINAL');
+            if(!data) return;
+            const agora = new Date();
+            const dataFmt = agora.toLocaleDateString('pt-BR').replace(/\//g, '-');
+            const horaFmt = agora.getHours() + 'h' + agora.getMinutes().toString().padStart(2, '0');
+            const nomeArquivo = `Gestão_de_Investimentos_2006_${dataFmt}_${horaFmt}.json`;
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([data], {type: "application/json"}));
+            a.download = nomeArquivo;
+            a.click();
+        }
+
+        function importarDados(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const data = JSON.parse(e.target.result);
+                localStorage.setItem('terminal_vTOTAL_FINAL', JSON.stringify(data));
+                carregarDados(data);
+                alert("Dados de investimentos importados!");
+            };
+            reader.readAsText(file);
+        }
+
+        // Inicialização Global
+        window.onload = function() {
+            initFluxo();
+            carregarDados(JSON.parse(localStorage.getItem('terminal_vTOTAL_FINAL')));
+            buscarDadosPublicos();
+        };
+    </script>
+</body>
+</html>

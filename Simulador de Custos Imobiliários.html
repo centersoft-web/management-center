@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador Completo de Custos e Ganho de Capital Imobiliário</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#035485',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        emerald: {
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        #printHeader { display: none; }
+
+        /* Impressão / Salvar PDF: somente apresentação, sem alterar cálculos */
+        @page {
+            size: A4 portrait;
+            margin: 12mm 11mm 13mm 11mm;
+        }
+        @media print {
+            header, footer, .no-print, .footer-tools, .actions-btn {
+                display: none !important;
+            }
+            html, body {
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #fff !important;
+                color: #0f172a !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            body {
+                font-size: 9.5pt !important;
+                line-height: 1.35 !important;
+                zoom: 0.95 !important;
+            }
+            #printHeader {
+                display: block !important;
+                text-align: left !important;
+                border-bottom: 2px solid #0f172a !important;
+                margin: 0 0 7mm 0 !important;
+                padding: 0 0 4mm 0 !important;
+            }
+            #printHeader h1 { font-size: 17pt !important; color: #0f172a !important; }
+            #printHeader p { font-size: 8.5pt !important; margin-top: 1.5mm !important; }
+            main {
+                display: block !important;
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            main > section {
+                width: 100% !important;
+                border: 0 !important;
+                padding-top: 0 !important;
+            }
+            main > section + section {
+                break-before: page !important;
+                page-break-before: always !important;
+            }
+            body.print-custos #secaoGcap { display: none !important; }
+            body.print-gcap #secaoCustos { display: none !important; }
+            body.print-gcap #secaoGcap {
+                break-before: auto !important;
+                page-break-before: auto !important;
+                border-top: 0 !important;
+                padding-top: 0 !important;
+            }
+            main > section > .mb-4 {
+                margin: 0 0 4mm 0 !important;
+                padding-bottom: 2mm !important;
+                border-bottom: 1px solid #cbd5e1 !important;
+            }
+            main > section > .mb-4 h2 { font-size: 13pt !important; margin: 0 !important; }
+            main > section > .mb-4 p { font-size: 8.5pt !important; margin-top: 1mm !important; }
+            main > section > .grid {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 5mm !important;
+                align-items: start !important;
+            }
+            .card-box {
+                border: 1px solid #cbd5e1 !important;
+                border-radius: 6px !important;
+                box-shadow: none !important;
+                background: #fff !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+            form.card-box, .card-box { padding-top: 4mm; }
+            input, select {
+                min-height: 0 !important;
+                border: 0 !important;
+                border-bottom: 1px solid #cbd5e1 !important;
+                border-radius: 0 !important;
+                background: transparent !important;
+                color: #0f172a !important;
+                font-size: 8.5pt !important;
+                font-weight: 700 !important;
+                padding: 1mm 0 !important;
+                box-shadow: none !important;
+                appearance: none !important;
+                -webkit-appearance: none !important;
+            }
+            label { font-size: 7.5pt !important; }
+            .space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 3mm !important; }
+            .space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 2.5mm !important; }
+            .space-y-3 > :not([hidden]) ~ :not([hidden]) { margin-top: 2mm !important; }
+            .space-y-2 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.3mm !important; }
+            .p-6 { padding: 4mm !important; }
+            .p-5 { padding: 4mm !important; }
+            .p-4 { padding: 3mm !important; }
+            .gap-8 { gap: 5mm !important; }
+            .gap-4 { gap: 3mm !important; }
+            .bg-gradient-to-br {
+                background: #eef6fb !important;
+                color: #0f172a !important;
+                border: 1.5px solid #64748b !important;
+            }
+            .bg-gradient-to-br * { color: #0f172a !important; }
+            .text-4xl, .text-3xl { font-size: 18pt !important; line-height: 1.15 !important; }
+            h2, h3, .flex.justify-between {
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+            #resultados.hidden { display: none !important; }
+            #boxUsufruto.hidden { display: none !important; }
+            i.fa-solid { color: #475569 !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
+<div id="printHeader"><h1 style="margin:0;font-size:22px;font-weight:bold;">Simulação Completa de Operação Imobiliária</h1><p style="margin:5px 0;font-size:12px;color:#64748b;">Gerado em: <span id="printDate"></span></p></div>
+<header class="bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white shadow-lg sticky top-0 z-50"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center gap-4"><div class="flex items-center gap-3"><div class="p-2 bg-brand-500/20 rounded-xl border border-brand-500/30"><i class="fa-solid fa-calculator text-2xl text-brand-500"></i></div><div><h1 class="text-xl sm:text-2xl font-bold">Simulador Imobiliário Completo</h1><p id="subtituloDinamico" class="text-xs text-slate-300">Custos de aquisição + ganho de capital</p></div></div><div class="flex gap-2 no-print">
+<button onclick="prepararImpressao('custos')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-4 py-2 rounded-lg"><i class="fa-solid fa-print"></i> Custos de Aquisição e Transmissão</button>
+<button onclick="prepararImpressao('gcap')" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs px-4 py-2 rounded-lg"><i class="fa-solid fa-print"></i> Ganho de Capital na Alienação</button>
+</div></div></header>
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow space-y-8">
+<section id="secaoCustos"><div class="mb-4"><h2 class="text-lg font-extrabold text-slate-900">1. Custos de Aquisição e Transmissão</h2><p class="text-xs text-slate-500">ITBI/ITCMD, escritura, registro e taxas.</p></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-8"><div class="lg:col-span-6 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 card-box"><form id="calcForm" class="space-y-6">
+                    
+                    <!-- Section 1: Imóvel e Transmissão (COMPRA) -->
+                    <div class="space-y-4">
+                        <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
+                            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-cart-shopping text-brand-600"></i> Imóvel e Transmissão (Compra)
+                            </h2>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Valor Declarado (R$)</label>
+                                <input type="number" id="valorImovel" step="0.01" min="0" placeholder="0,00" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">V. Venal Referência (R$)</label>
+                                <input type="number" id="valorVenalRef" step="0.01" min="0" placeholder="0,00" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Operação</label>
+                                <select id="tipoOperacao" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                                    <option value="compra">Compra e Venda (ITBI)</option>
+                                    <option value="doacao">Doação (ITCMD)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Cidade (SP)</label>
+                                <select id="cidadeITBI" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                                    <optgroup label="Capital e Grande SP">
+                                        <option value="sao_paulo" data-aliquota="3">São Paulo (3%)</option>
+					<option value="praia_grande" data-aliquota="2.5">Praia Grande (2,5%)</option>
+                                        <option value="guarulhos" data-aliquota="2.5">Guarulhos (2,5%)</option>
+                                        <option value="abc" data-aliquota="2">ABC (2%)</option>
+                                        <option value="osasco" data-aliquota="2">Osasco (2%)</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Alíquota (%)</label>
+                                <input type="number" id="aliquotaITBI" value="3" step="0.1" min="0" max="100" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Possui Usufruto?</label>
+                                <select id="temUsufruto" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                                    <option value="nao">Não</option>
+                                    <option value="sim">Sim</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Box Usufruto -->
+                        <div id="boxUsufruto" class="p-4 bg-brand-50/50 border border-brand-200 rounded-xl space-y-3 hidden">
+                            <h3 class="text-xs font-bold text-brand-900 uppercase">Partilha de Propriedade</h3>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nua-Propriedade (%)</label>
+                                    <input type="number" id="percNua" value="70" min="0" max="100" step="0.01" class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Usufruto (%)</label>
+                                    <input type="number" id="percUsuf" value="30" readonly class="w-full px-3 py-1.5 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-500 cursor-not-allowed">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form><div class="actions-btn flex gap-2 pt-4 border-t border-slate-100"><button id="btnCalcular" class="flex-1 bg-brand-600 text-white font-semibold text-xs px-4 py-2.5 rounded-lg">Calcular Custos</button><button id="btnLimpar" class="px-4 py-2.5 bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg">Limpar</button></div></div><div class="lg:col-span-6 space-y-4"><div class="bg-gradient-to-br from-brand-900 via-slate-900 to-slate-900 rounded-2xl p-6 text-white card-box"><span class="text-xs uppercase text-slate-300">Total estimado de custos</span><div id="resBalancoFinal" class="text-4xl font-extrabold text-brand-300 mt-1">R$ 0,00</div><div class="pt-3 mt-3 border-t border-white/10 text-xs">Soma Total: <strong id="resTotalFinal">R$ 0,00</strong></div></div><div id="resultados" class="space-y-4 hidden">
+                    
+                    <!-- Compra Box -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-3 card-box">
+                        <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-2">
+                            <i class="fa-solid fa-file-invoice-dollar text-brand-600"></i> Detalhamento de Custos (Compra)
+                        </h3>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between py-1 border-b border-slate-50">
+                                <span class="text-slate-600">ITBI / ITCMD (SP):</span>
+                                <strong id="resImposto" class="text-slate-900">R$ 0,00</strong>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-slate-50">
+                                <span id="labelEscritura" class="text-slate-600">Escritura:</span>
+                                <strong id="resEscritura" class="text-slate-900">R$ 0,00</strong>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-slate-50">
+                                <span class="text-slate-600">Registro Estimado (0,35%):</span>
+                                <strong id="resRegistro" class="text-slate-900">R$ 0,00</strong>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-slate-50">
+                                <span class="text-slate-600">Taxas Complementares:</span>
+                                <strong id="resTaxasComp" class="text-slate-900">R$ 400,00</strong>
+                            </div>
+                            <div class="flex justify-between py-2 pt-2 font-bold text-brand-900 bg-brand-50/50 px-2 rounded-lg">
+                                <span>Subtotal Compra (+3% Reserva):</span>
+                                <strong id="resSubtotalCompra">R$ 0,00</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                </div></div></div></section>
+<section id="secaoGcap" class="border-t border-slate-200 pt-8"><div class="mb-4"><h2 class="text-lg font-extrabold text-slate-900">2. Ganho de Capital na Alienação</h2><p class="text-xs text-slate-500">Venda ou permuta, redutores, reinvestimento e imposto estimado.</p></div><div class="grid grid-cols-1 lg:grid-cols-12 gap-8"><div class="lg:col-span-6 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 card-box"><form id="simuladorForm" class="space-y-6">
+                    
+                    <!-- Section: Dados da Operação -->
+                    <div class="space-y-4">
+                        <div class="border-b border-slate-100 pb-2 flex items-center justify-between">
+                            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-file-invoice-dollar text-brand-600"></i> Parâmetros da Alienação
+                            </h2>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2" for="tipoOperacao">Tipo de Operação</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+            Este e o unico imóvel que possui para sua alienação?
+        </label>
+        <select id="unicoImovel"
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+            <option value="nao">Não</option>
+            <option value="sim">Sim</option>
+        </select>
+    </div>
+
+    <div>
+        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+            Usou benefício fiscal nos últimos 5 anos?
+        </label>
+        <select id="usouIsencao5Anos"
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+            <option value="nao">Não</option>
+            <option value="sim">Sim</option>
+        </select>
+    </div>
+</div>
+								
+				<label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1 mt-4" for="tipoOperacao">Tipo de Venda</label>
+ 
+				<select id="tipoOperacaoGcap" onchange="toggleTornaInput()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                                    <option value="venda">Venda Simples</option>
+                                    <option value="permuta">Permuta com Recebimento de Torna</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1" for="custoAquisicao">Custo Total de Aquisição (R$)</label>
+                                <input type="number" id="custoAquisicao" step="0.01" min="0" placeholder="0,00" required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1" for="dataAquisicao">Data de Aquisição</label>
+                                <input type="date" id="dataAquisicao" required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div id="groupValorVenda">
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1" for="valorVenda">Valor de Alienação / Venda (R$)</label>
+                                <input type="number" id="valorVenda" step="0.01" min="0" placeholder="0,00" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                            </div>
+
+                            <div id="groupValorTorna" style="display: none;">
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1" for="valorTorna">Valor da Torna Recebida (R$)</label>
+                                <input type="number" id="valorTorna" step="0.01" min="0" placeholder="0,00" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                            </div>
+
+                            <div id="groupValorImovelPermutado" style="display: none;">
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1" for="valorImovelPermutado">Valor da Aquisição + Torna (R$)</label>
+                                <input type="text" id="valorImovelPermutado" value="R$ 0,00" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 font-bold text-sm cursor-not-allowed">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1" for="dataAlienacao">Data de Alienação / Venda</label>
+                                <input type="date" id="dataAlienacao" required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                                <div id="groupCustoTorna" style="display:none;" class="mt-2"><label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Custo de aquisição da torna</label><input type="text" id="custoTornaValor" value="R$ 0,00" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-slate-900 font-bold text-sm"></div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1" for="corretagem">Quais foram as despesas de corretagem (R$) para esta negociação</label>
+                                <input type="number" id="corretagem" step="0.01" min="0" placeholder="0,00" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1" for="reinvestimento">Valor reinvestido em imóvel residencial no Brasil, em até 180 dias (R$)</label>
+                                <input type="number" id="reinvestimento" step="0.01" min="0" placeholder="0,00" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                </form><div class="actions-btn flex gap-2 pt-4 border-t border-slate-100"><button type="button" onclick="calcularGanhoDeCapital()" class="flex-1 bg-brand-600 text-white font-semibold text-xs px-4 py-3 rounded-lg">Calcular Ganho de Capital</button><button type="button" id="btnLimparGcap" class="px-4 py-3 bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg">Limpar</button></div></div><div class="lg:col-span-6 space-y-4"><div class="bg-gradient-to-br from-brand-900 via-slate-900 to-slate-900 rounded-2xl p-6 text-white card-box"><span class="text-xs uppercase text-slate-300">Imposto de Renda Devido</span><div id="valImpostoFinal" class="text-4xl font-extrabold text-emerald-400 mt-1">R$ 0,00</div><div class="pt-3 mt-3 border-t border-white/10 text-xs">Ganho Tributável Final: <strong id="valRes5">R$ 0,00</strong></div></div><div id="resultadosGcap" class="space-y-4">
+                    
+                    <!-- Demonstrativo Box -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-3 card-box">
+                        <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-2">
+                            <i class="fa-solid fa-file-lines text-brand-600"></i> Demonstrativo de Apuração Estimativa
+                        </h3>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between py-1.5 border-b border-slate-50">
+                                <span class="text-slate-600">Ganho de Capital Bruto (Resultado 1):</span>
+                                <strong id="valRes1" class="text-slate-900">R$ 0,00</strong>
+                            </div>
+                            <div class="flex justify-between py-1.5 border-b border-slate-50">
+                                <span class="text-slate-600">Redução Lei nº 7.713/1988 (Pré-1988):</span>
+                                <strong id="valRed7713" class="text-slate-900">0,00% (R$ 0,00)</strong>
+                            </div>
+                            <div class="flex justify-between py-1.5 border-b border-slate-50">
+                                <span class="text-slate-600">Resultado Após Redução Pré-1988 (Res. 2):</span>
+                                <strong id="valRes2" class="text-slate-900">R$ 0,00</strong>
+                            </div>
+                            <div class="flex justify-between py-1.5 border-b border-slate-50">
+                                <span class="text-slate-600">Redução Lei nº 11.196/2005 - FR1:</span>
+                                <strong id="valFR1" class="text-slate-900">0,00% (R$ 0,00)</strong>
+                            </div>
+                            <div class="flex justify-between py-1.5 border-b border-slate-50">
+                                <span class="text-slate-600">Resultado Após FR1 (Resultado 3):</span>
+                                <strong id="valRes3" class="text-slate-900">R$ 0,00</strong>
+                            </div>
+                            <div class="flex justify-between py-1.5 border-b border-slate-50">
+                                <span class="text-slate-600">Redução Lei nº 11.196/2005 - FR2:</span>
+                                <strong id="valFR2" class="text-slate-900">0,00% (R$ 0,00)</strong>
+                            </div>
+                            <div class="flex justify-between py-1.5 border-b border-slate-50">
+                                <span class="text-slate-600">Ganho de Capital Após FR2 (Resultado 4):</span>
+                                <strong id="valRes4" class="text-slate-900">R$ 0,00</strong>
+                            </div>
+                            <div class="flex justify-between py-1.5 border-b border-slate-50">
+                                <span class="text-slate-600">Isenção Proporcional por Reinvestimento:</span>
+                                <strong id="valIsencaoReinvest" class="text-slate-900">0,00% (R$ 0,00)</strong>
+                            </div>
+                            <div class="flex justify-between py-2 pt-2 font-bold text-brand-900 bg-brand-50/50 px-2 rounded-lg">
+                                <span>Ganho de Capital Tributável Final (Res. 5):</span>
+                                <strong id="valRes5Sub">R$ 0,00</strong>
+                            </div>
+                            <div class="flex justify-between py-1.5 border-b border-slate-50">
+                                <span class="text-slate-600">Alíquota Aplicada:</span>
+                                <strong id="valAliquota" class="text-slate-900">0,00%</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                </div></div></div></section>
+</main><footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500"><p>Simulador integrado de custos imobiliários e ganho de capital.</p><p class="mt-1 text-slate-400">© Calc Center Soft.</p></footer>
+<script>
+        const configurarDataPadrao = () => {
+            const dataSistema = new Date();
+            const ano = dataSistema.getFullYear();
+            document.getElementById('subtituloDinamico').textContent = `Calc Center Soft — Parâmetros ${ano}`;
+        };
+
+        configurarDataPadrao();
+
+        const VALOR_UFESP_2026 = 38.42; 
+
+        const tabelasHistoricas = {
+            2026: [
+                { min: 0, max: 1524, total: 394.21 }, { min: 1524.01, max: 5761, total: 568.33 },
+                { min: 5761.01, max: 9603, total: 918.47 }, { min: 9603.01, max: 19210, total: 1270.33 },
+                { min: 19210.01, max: 38420, total: 1733.68 }, { min: 38420.01, max: 76840, total: 2104.28 },
+                { min: 76840.01, max: 115260, total: 2490.63 }, { min: 115260.01, max: 153680, total: 2899.13 },
+                { min: 153680.01, max: 192100, total: 3263.19 }, { min: 192100.01, max: 230520, total: 3607.49 },
+                { min: 230520.01, max: 268940, total: 4089.51 }, { min: 268940.01, max: 307360, total: 4460.02 },
+                { min: 307360.01, max: 330146, total: 4851.24 }, { min: 330146.01, max: 384200, total: 5200.09 },
+                { min: 384200.01, max: 768400, total: 5978.25 }, { min: 768400.01, max: 1152600, total: 6641.78 },
+                { min: 1152600.01, max: 1536800, total: 7342.01 }, { min: 1536800.01, max: 2345066, total: 8100.57 },
+                { min: 2345066.01, max: 3908444, total: 11014.73 }, { min: 3908444.01, max: 5862665, total: 14241.25 },
+                { min: 5862665.01, max: 7816887, total: 17467.79 }, { min: 7816887.01, max: 9771109, total: 20694.33 },
+                { min: 9771109.01, max: 11725331, total: 23920.87 }, { min: 11725331.01, max: 13679552, total: 27147.41 },
+                { min: 13679552.01, max: 15633774, total: 30373.95 }, { min: 15633774.01, max: 17587996, total: 33600.49 },
+                { min: 17587996.01, max: 19542217, total: 36827.03 }, { min: 19542217.01, max: 23450661, total: 43358.28 },
+                { min: 23450661.01, max: 27359105, total: 49889.52 }, { min: 27359105.01, max: 31267548, total: 56420.77 },
+                { min: 31267548.01, max: 35175992, total: 62952.01 }, { min: 35175992.01, max: Infinity, total: 69483.26 }
+            ]
+        };
+
+        const getEscrituraDinamica = (base) => {
+            let tabela = tabelasHistoricas[2026];
+            const faixa = tabela.find(f => base >= f.min && base <= f.max) || { total: 0 };
+            return faixa.total;
+        };
+
+        const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        function prepararImpressao(tipo) {
+            document.getElementById('printDate').innerText = new Date().toLocaleString('pt-BR');
+            document.body.classList.remove('print-custos', 'print-gcap');
+            document.body.classList.add(tipo === 'gcap' ? 'print-gcap' : 'print-custos');
+            window.print();
+        }
+
+        window.addEventListener('afterprint', () => {
+            document.body.classList.remove('print-custos', 'print-gcap');
+        });
+
+        document.getElementById('btnLimpar').onclick = () => {
+            document.getElementById('calcForm').reset();
+            configurarDataPadrao();
+            document.getElementById('boxUsufruto').classList.add('hidden');
+            document.getElementById('resultados').classList.add('hidden');
+            document.getElementById('resBalancoFinal').textContent = fmt(0);
+            document.getElementById('resTotalFinal').textContent = fmt(0);
+        };
+
+        document.getElementById('cidadeITBI').onchange = e => {
+            const aliq = e.target.options[e.target.selectedIndex].dataset.aliquota;
+            if(aliq) document.getElementById('aliquotaITBI').value = aliq;
+        };
+        
+        document.getElementById('temUsufruto').onchange = e => {
+            if (e.target.value === 'sim') {
+                document.getElementById('boxUsufruto').classList.remove('hidden');
+            } else {
+                document.getElementById('boxUsufruto').classList.add('hidden');
+            }
+        };
+
+        document.getElementById('percNua').oninput = e => {
+            const percNua = Math.min(100, Math.max(0, parseFloat(e.target.value) || 0));
+            e.target.value = percNua;
+            document.getElementById('percUsuf').value = 100 - percNua;
+        };
+
+        document.getElementById('btnCalcular').onclick = function() {
+            const vDecl = parseFloat(document.getElementById('valorImovel').value) || 0;
+            const vVenRef = parseFloat(document.getElementById('valorVenalRef').value) || 0;
+            const baseTransm = Math.max(vDecl, vVenRef);
+            let imposto = 0, esc = 0, reg = 0, txComp = 0;
+
+            if (vDecl > 0) {
+                txComp = 400;
+                const tipoOp = document.getElementById('tipoOperacao').value;
+                if (tipoOp === 'compra') {
+                    imposto = baseTransm * (parseFloat(document.getElementById('aliquotaITBI').value)/100);
+                } else {
+                    const limiteIsencao = 2500 * VALOR_UFESP_2026; 
+                    imposto = (vDecl <= limiteIsencao) ? 0 : vDecl * 0.04;
+                }
+
+                if (document.getElementById('temUsufruto').value === 'sim') {
+                    let pNua = (parseFloat(document.getElementById('percNua').value) || 0) / 100;
+                    let pUsuf = (parseFloat(document.getElementById('percUsuf').value) || 0) / 100;
+                    esc = getEscrituraDinamica(vDecl * pNua) + getEscrituraDinamica(vDecl * pUsuf);
+                    reg = vDecl * 0.0035;
+                } else {
+                    esc = getEscrituraDinamica(vDecl);
+                    reg = vDecl * 0.0035;
+                }
+            }
+
+            // Aplicação da Margem de 3% sobre os custos de compra
+            imposto = arredondarCentavos(imposto);
+            esc = arredondarCentavos(esc);
+            reg = arredondarCentavos(reg);
+            const baseCustosCompra = imposto + esc + reg + txComp;
+            const subtotalCompraComMargem = arredondarCentavos(baseCustosCompra * 1.03);
+            
+
+            document.getElementById('resImposto').textContent = fmt(imposto);
+            document.getElementById('resEscritura').textContent = fmt(esc);
+            document.getElementById('resRegistro').textContent = fmt(reg);
+            document.getElementById('resTaxasComp').textContent = fmt(txComp);
+            document.getElementById('resSubtotalCompra').textContent = fmt(subtotalCompraComMargem);
+            
+            const elBalanco = document.getElementById('resBalancoFinal');
+            elBalanco.textContent = fmt(subtotalCompraComMargem);
+            elBalanco.className = "text-3xl sm:text-4xl font-extrabold text-brand-300 mt-1";
+
+            document.getElementById('resTotalFinal').textContent = fmt(subtotalCompraComMargem);
+            document.getElementById('resultados').classList.remove('hidden');
+        }
+    
+
+
+        document.getElementById('btnLimparGcap').onclick = () => {
+            document.getElementById('simuladorForm').reset();
+            document.getElementById('groupValorVenda').style.display = 'block';
+            document.getElementById('groupValorTorna').style.display = 'none';
+            document.getElementById('groupValorImovelPermutado').style.display = 'none';
+            document.getElementById('groupCustoTorna').style.display = 'none';
+            document.getElementById('valorImovelPermutado').value = formatarMoeda(0);
+            document.getElementById('custoTornaValor').value = formatarMoeda(0);
+            document.getElementById('valImpostoFinal').textContent = formatarMoeda(0);
+            document.getElementById('valRes1').textContent = formatarMoeda(0);
+            document.getElementById('valRed7713').textContent = '0,00% (' + formatarMoeda(0) + ')';
+            document.getElementById('valRes2').textContent = formatarMoeda(0);
+            document.getElementById('valFR1').textContent = '0,000000% (' + formatarMoeda(0) + ')';
+            document.getElementById('valRes3').textContent = formatarMoeda(0);
+            document.getElementById('valFR2').textContent = '0,000000% (' + formatarMoeda(0) + ')';
+            document.getElementById('valRes4').textContent = formatarMoeda(0);
+            document.getElementById('valIsencaoReinvest').textContent = '0,00% (' + formatarMoeda(0) + ')';
+            document.getElementById('valRes5').textContent = formatarMoeda(0);
+            document.getElementById('valRes5Sub').textContent = formatarMoeda(0);
+            document.getElementById('valAliquota').textContent = '0,00%';
+        };
+        function toggleTornaInput() {
+            const tipo = document.getElementById('tipoOperacaoGcap').value;
+            const groupVenda = document.getElementById('groupValorVenda');
+            const groupTorna = document.getElementById('groupValorTorna');
+            const groupImovel = document.getElementById('groupValorImovelPermutado');
+            const groupCustoTorna = document.getElementById('groupCustoTorna');
+
+            if (tipo === 'permuta') {
+                groupVenda.style.display = 'none';
+                groupTorna.style.display = 'block';
+                groupImovel.style.display = 'block';
+                groupCustoTorna.style.display = 'block';
+                atualizarValorImovelPermutado();
+            } else {
+                groupVenda.style.display = 'block';
+                groupTorna.style.display = 'none';
+                groupImovel.style.display = 'none';
+                groupCustoTorna.style.display = 'none';
+                document.getElementById('custoTornaValor').value = formatarMoeda(0);
+            }
+        }
+
+        function arredondarCentavos(valor) {
+            return Math.round((valor + Number.EPSILON) * 100) / 100;
+        }
+        function contarMesesCalendarioInclusivos(inicio, fim) {
+            if (!(inicio instanceof Date) || !(fim instanceof Date) || fim < inicio) return 0;
+            return ((fim.getFullYear() - inicio.getFullYear()) * 12) + (fim.getMonth() - inicio.getMonth()) + 1;
+        }
+        function obterReducaoPre1988(ano) {
+            if (ano >= 1989) return 0;
+            if (ano <= 1969) return 1;
+            return (1989 - ano) * 0.05;
+        }
+        function calcularImpostoProgressivo(ganho) {
+            const base = Math.max(0, ganho);
+            const faixa1 = Math.min(base, 5000000);
+            const faixa2 = Math.min(Math.max(base - 5000000, 0), 5000000);
+            const faixa3 = Math.min(Math.max(base - 10000000, 0), 20000000);
+            const faixa4 = Math.max(base - 30000000, 0);
+            return arredondarCentavos(faixa1 * 0.15 + faixa2 * 0.175 + faixa3 * 0.20 + faixa4 * 0.225);
+        }
+        function obterAliquotaMarginal(ganho) {
+            if (ganho > 30000000) return 0.225;
+            if (ganho > 10000000) return 0.20;
+            if (ganho > 5000000) return 0.175;
+            return ganho > 0 ? 0.15 : 0;
+        }
+        function formatarMoeda(valor) {
+            return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function calcularCustoAquisicaoTorna(custoAquisicao, valorTorna) {
+            // Estimativa com os dados disponíveis no formulário.
+            const valorTotalPermuta = custoAquisicao + valorTorna;
+            if (custoAquisicao <= 0 || valorTorna <= 0 || valorTotalPermuta <= 0) return 0;
+            return arredondarCentavos(custoAquisicao * (valorTorna / valorTotalPermuta));
+        }
+        function atualizarValorImovelPermutado() {
+            const custoAquisicao = parseFloat(document.getElementById('custoAquisicao').value) || 0;
+            const valorTorna = parseFloat(document.getElementById('valorTorna').value) || 0;
+            const valorImovelPermutado = custoAquisicao + valorTorna;
+            const custoTorna = calcularCustoAquisicaoTorna(custoAquisicao, valorTorna);
+            document.getElementById('valorImovelPermutado').value = formatarMoeda(valorImovelPermutado);
+            document.getElementById('custoTornaValor').value = formatarMoeda(custoTorna);
+        }
+        document.getElementById('custoAquisicao').addEventListener('input', atualizarValorImovelPermutado);
+        document.getElementById('valorTorna').addEventListener('input', atualizarValorImovelPermutado);
+        function calcularGanhoDeCapital() {
+            const tipoOperacao = document.getElementById('tipoOperacaoGcap').value;
+            const custoAquisicao = parseFloat(document.getElementById('custoAquisicao').value) || 0;
+            const dataAquisicaoStr = document.getElementById('dataAquisicao').value;
+            const dataAlienacaoStr = document.getElementById('dataAlienacao').value;
+            const corretagem = parseFloat(document.getElementById('corretagem').value) || 0;
+            const reinvestimento = parseFloat(document.getElementById('reinvestimento').value) || 0;
+
+            if (!dataAquisicaoStr || !dataAlienacaoStr) {
+                alert('Por favor, informe as datas de aquisição e alienação.');
+                return;
+            }
+
+            const dataAquisicao = new Date(dataAquisicaoStr + 'T00:00:00');
+            const dataAlienacao = new Date(dataAlienacaoStr + 'T00:00:00');
+
+            if (dataAlienacao < dataAquisicao) {
+                alert('A data de alienação não pode ser anterior à data de aquisição.');
+                return;
+            }
+            if (custoAquisicao <= 0) {
+                alert('Informe um custo total de aquisição maior que zero.');
+                return;
+            }
+
+            let valorBaseOperacao = 0;
+            let resultado1 = 0;
+
+            if (tipoOperacao === 'venda') {
+                valorBaseOperacao = parseFloat(document.getElementById('valorVenda').value) || 0;
+                if (valorBaseOperacao <= 0) {
+                    alert('Informe um valor de alienação maior que zero.');
+                    return;
+                }
+                resultado1 = valorBaseOperacao - custoAquisicao - corretagem;
+            } else {
+                const valorTorna = parseFloat(document.getElementById('valorTorna').value) || 0;
+                if (valorTorna <= 0) {
+                    alert('Informe um valor de torna maior que zero.');
+                    return;
+                }
+                const valorImovelPermutado = custoAquisicao + valorTorna;
+                document.getElementById('valorImovelPermutado').value = formatarMoeda(valorImovelPermutado);
+                valorBaseOperacao = valorTorna;
+
+                if (valorImovelPermutado > 0) {
+                    const custoProporcionalTorna = calcularCustoAquisicaoTorna(custoAquisicao, valorTorna);
+                    document.getElementById('custoTornaValor').value = formatarMoeda(custoProporcionalTorna);
+                    resultado1 = valorTorna - custoProporcionalTorna - corretagem;
+                } else {
+                    document.getElementById('custoTornaValor').value = formatarMoeda(0);
+                    resultado1 = 0;
+                }
+            }
+
+            if (resultado1 < 0) resultado1 = 0;
+
+            // 1. Redução Lei nº 7.713/1988 (Pré-1988)
+            const anoAquisicao = dataAquisicao.getFullYear();
+            const fatorReducao88 = obterReducaoPre1988(anoAquisicao);
+            const percReducao88 = fatorReducao88 * 100;
+            const valorReducao88 = resultado1 * fatorReducao88;
+            let resultado2 = resultado1 - valorReducao88;
+
+            // 2. Fator de Redução FR1 (Jan/1996 a Nov/2005 - 0,60% a.m.)
+            const dataInicioFR1 = new Date('1996-01-01T00:00:00');
+            const dataFimFR1 = new Date('2005-11-30T00:00:00');
+
+            let m1 = 0;
+            let pInicio1 = dataAquisicao > dataInicioFR1 ? dataAquisicao : dataInicioFR1;
+            let pFim1 = dataAlienacao < dataFimFR1 ? dataAlienacao : dataFimFR1;
+
+            if (pFim1 >= pInicio1) {
+                m1 = contarMesesCalendarioInclusivos(pInicio1, pFim1);
+            }
+
+            const fr1 = Math.pow(1.0060, -m1);
+            const percReducaoFR1 = (1 - fr1) * 100;
+            let resultado3 = resultado2 * fr1;
+            const valorReducaoFR1 = resultado2 - resultado3;
+
+            // 3. Fator de Redução FR2 (Dez/2005 à Alienação - 0,35% a.m.)
+            const dataInicioFR2 = new Date('2005-12-01T00:00:00');
+            let m2 = 0;
+
+            if (dataAlienacao >= dataInicioFR2) {
+                const pInicio2 = dataAquisicao > dataInicioFR2 ? dataAquisicao : dataInicioFR2;
+                if (dataAlienacao >= pInicio2) m2 = contarMesesCalendarioInclusivos(pInicio2, dataAlienacao);
+            }
+
+            const fr2 = Math.pow(1.0035, -m2);
+            const percReducaoFR2 = (1 - fr2) * 100;
+            let resultado4 = resultado3 * fr2;
+            const valorReducaoFR2 = resultado3 - resultado4;
+
+            // 4. Isenção por Reinvestimento Residencial (180 Dias)
+            let percIsencao = 0;
+            const usouIsencao5Anos = document.getElementById('usouIsencao5Anos').value === 'sim';
+            const produtoVendaParaReinvestimento = Math.max(valorBaseOperacao - corretagem, 0);
+            if (!usouIsencao5Anos && produtoVendaParaReinvestimento > 0 && reinvestimento > 0) {
+                percIsencao = Math.min(reinvestimento / produtoVendaParaReinvestimento, 1);
+            }
+
+            const valorIsencao = resultado4 * percIsencao;
+            let resultado5 = resultado4 - valorIsencao;
+            if (resultado5 < 0) resultado5 = 0;
+
+           // 5. Isenção legal para alienação de imóvel até R$ 440.000,00
+                 const unicoImovel =
+    		document.getElementById('unicoImovel').value === 'sim';
+
+		const isencao440 =
+   	        tipoOperacao === 'venda' &&
+                valorBaseOperacao <= 440000 &&
+                unicoImovel &&
+                !usouIsencao5Anos;
+        let aliquota = 0;
+        let impostoDevido = 0;
+        if (isencao440) {
+            resultado5 = 0;
+        } else {
+            resultado5 = arredondarCentavos(resultado5);
+            aliquota = obterAliquotaMarginal(resultado5);
+            impostoDevido = calcularImpostoProgressivo(resultado5);
+        }
+
+
+            // Atualização da UI
+            document.getElementById('valRes1').innerText = formatarMoeda(resultado1);
+            document.getElementById('valRed7713').innerText = percReducao88.toFixed(2) + '% (' + formatarMoeda(valorReducao88) + ')';
+            document.getElementById('valRes2').innerText = formatarMoeda(resultado2);
+            
+            document.getElementById('valFR1').innerText = percReducaoFR1.toFixed(6) + '% (' + formatarMoeda(valorReducaoFR1) + ')';
+            document.getElementById('valRes3').innerText = formatarMoeda(resultado3);
+            
+            document.getElementById('valFR2').innerText = percReducaoFR2.toFixed(6) + '% (' + formatarMoeda(valorReducaoFR2) + ')';
+            document.getElementById('valRes4').innerText = formatarMoeda(resultado4);
+
+            if (isencao440) {
+
+    	    document.getElementById('valIsencaoReinvest').innerText =
+       	   'Isenção legal - único imóvel até R$ 440.000,00';
+
+            } else {
+
+           document.getElementById('valIsencaoReinvest').innerText =
+          (percIsencao * 100).toFixed(2) + '% (' +
+          formatarMoeda(valorIsencao) + ')';
+
+           }
+            document.getElementById('valRes5').innerText = formatarMoeda(resultado5);
+            document.getElementById('valRes5Sub').innerText = formatarMoeda(resultado5);
+            const aliquotaEfetiva = resultado5 > 0 ? (impostoDevido / resultado5) * 100 : 0;
+            document.getElementById('valAliquota').innerText = isencao440
+                ? '0,00% (isenção)'
+                : (aliquota * 100).toFixed(2) + '% marginal / ' + aliquotaEfetiva.toFixed(2) + '% efetiva';
+            document.getElementById('valImpostoFinal').innerText = formatarMoeda(impostoDevido);
+        }
+    </script></body></html>

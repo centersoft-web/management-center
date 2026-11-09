@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Trade</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#035485',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        emerald: {
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .loading-spin { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        #market-drawer { transform: translateX(100%); transition: transform 0.3s ease-in-out; z-index: 50; }
+        #market-drawer.open { transform: translateX(0); }
+        .drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); z-index: 40; }
+        .drawer-overlay.open { display: block; }
+
+        /* Estilos de Impressão */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; color: black !important; }
+            main { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+            header { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
+
+    <div id="overlay" class="drawer-overlay no-print" onclick="toggleDrawer()"></div>
+
+    <!-- Header Navbar -->
+    <header class="bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white shadow-lg sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-brand-500/20 rounded-xl border border-brand-500/30">
+                    <i class="fa-solid fa-chart-line text-2xl text-brand-500"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2">
+                        QuantumTrade
+                        <div id="status-api" class="h-2.5 w-2.5 rounded-full bg-rose-500" title="Status da Conexão API"></div>
+                    </h1>
+                    <div class="flex items-center gap-3 mt-0.5 text-xs text-slate-300 font-medium">
+                        <span class="flex items-center gap-1">
+                            <i class="fa-regular fa-clock text-brand-500"></i>
+                            <span id="clock" class="font-mono font-semibold">00:00:00</span>
+                        </span>
+                        <span>•</span>
+                        <span>Última Sinc: <span id="last-sync" class="font-semibold text-slate-200">Nunca</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controles de API e Ações do Header -->
+            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+                <div class="flex items-center bg-slate-800/90 border border-slate-700 rounded-lg p-1 gap-1">
+                    <input type="password" id="api-token" placeholder="API KEY (Brapi)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white placeholder-slate-400 focus:ring-1 focus:ring-brand-500 outline-none w-28 sm:w-36 font-mono">
+                    <button onclick="salvarToken()" class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold px-2.5 py-1 rounded transition shadow-sm">Conectar</button>
+                </div>
+
+                <details class="w-full sm:w-auto text-xs text-slate-200 bg-slate-800/90 border border-slate-700 rounded-lg px-3 py-2">
+                    <summary class="cursor-pointer font-bold text-brand-100">Como obter a chave da brapi?</summary>
+                    <ol class="mt-2 space-y-1 list-decimal list-inside text-slate-300">
+                        <li>Acesse <a href="https://brapi.dev/login" target="_blank" rel="noopener" class="text-sky-300 underline hover:text-sky-200">brapi.dev/login</a>.</li>
+                        <li>Crie uma conta ou entre.</li>
+                        <li>No dashboard, copie sua chave de API.</li>
+                        <li>Cole a chave no campo <strong>API KEY (Brapi)</strong> e clique em <strong>Conectar</strong>.</li>
+                    </ol>
+                </details>
+
+                <button onclick="sincronizarDadosMestres(true)" id="btn-sync-master" class="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate" id="sync-icon-master"></i> Atualizar LPA/VPA
+                </button>
+                
+                <button onclick="toggleDrawer()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-radar"></i> Radar
+                </button>
+
+                <button onclick="resetarEBucarNovosDados()" title="Resetar Banco Local" class="bg-rose-600/20 border border-rose-500/30 text-rose-300 hover:bg-rose-600 hover:text-white text-xs p-1.5 rounded-lg transition">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow">
+        <div class="space-y-6">
+
+            <!-- Card de Dados do Investidor e Patrimônio -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="space-y-2 w-full md:w-auto">
+                    <div>
+                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Investidor Titular</span>
+                        <h2 class="text-xl font-black uppercase text-slate-900 tracking-tight" id="print-name">INVESTIDOR</h2>
+                        <p class="text-xs font-mono font-semibold text-slate-500" id="print-cpf">000.000.000-00</p>
+                    </div>
+                    <div class="no-print flex flex-wrap gap-2 pt-1">
+                        <input type="text" id="u-name" oninput="salvarPerfil()" placeholder="Nome do Investidor" class="px-2.5 py-1 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 outline-none transition w-44">
+                        <input type="text" id="u-cpf" oninput="salvarPerfil()" placeholder="CPF / CNPJ" class="px-2.5 py-1 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 outline-none transition w-36">
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 text-white px-6 py-4 rounded-xl border border-slate-800 text-left md:text-right w-full md:w-auto flex flex-row md:flex-col justify-between items-center md:items-end shadow-sm">
+                    <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Patrimônio Atual</span>
+                    <span id="total-pat" class="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight font-mono">R$ 0,00</span>
+                    <span class="text-[10px] text-slate-400 font-mono mt-0.5 hidden md:block">Dados conforme última sincronização</span>
+                </div>
+            </div>
+
+            <!-- Resumo Inteligente da Carteira -->
+            <section class="grid grid-cols-2 lg:grid-cols-5 gap-3" aria-label="Resumo da carteira">
+                <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm"><span class="text-[10px] uppercase font-bold text-slate-400">Total investido</span><div id="card-investido" class="mt-1 text-lg font-black font-mono text-slate-900">R$ 0,00</div></div>
+                <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm"><span class="text-[10px] uppercase font-bold text-slate-400">Valor atual</span><div id="card-atual" class="mt-1 text-lg font-black font-mono text-brand-700">R$ 0,00</div></div>
+                <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm"><span class="text-[10px] uppercase font-bold text-slate-400">Resultado</span><div id="card-resultado" class="mt-1 text-lg font-black font-mono">R$ 0,00</div></div>
+                <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm"><span class="text-[10px] uppercase font-bold text-slate-400">Rentabilidade</span><div id="card-rentabilidade" class="mt-1 text-lg font-black font-mono">0,00%</div></div>
+                <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm col-span-2 lg:col-span-1"><span class="text-[10px] uppercase font-bold text-slate-400">Proventos informados</span><div id="card-proventos" class="mt-1 text-lg font-black font-mono text-emerald-700">R$ 0,00</div></div>
+            </section>
+            <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm no-print">
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-3">
+                    <div><h3 class="text-sm font-bold text-slate-900">Atualização automática</h3><p id="auto-status" class="text-xs text-slate-500 mt-1">Aguardando configuração.</p></div>
+                    <div class="flex flex-wrap items-end gap-2">
+                        <label class="text-[10px] font-bold uppercase text-slate-500">Intervalo
+                            <select id="auto-interval" class="block mt-1 border border-slate-300 rounded-lg px-2 py-1.5 text-xs">
+                                <option value="0">Desativada</option><option value="300000">5 min</option><option value="900000">15 min</option><option value="1800000">30 min</option><option value="3600000">1 hora</option>
+                            </select>
+                        </label>
+                        <button type="button" onclick="aplicarAtualizacaoAutomatica()" class="bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold px-3 py-2 rounded-lg">Aplicar</button>
+                        <button type="button" onclick="atualizarTudo(true)" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-lg"><i class="fa-solid fa-rotate"></i> Atualizar agora</button>
+                    </div>
+                </div>
+                <div class="mt-4"><div class="flex justify-between text-[10px] font-bold text-slate-500 uppercase mb-1"><span>Alocação atual</span><span id="allocation-label">Sem dados</span></div><div id="allocation-bar" class="h-3 rounded-full overflow-hidden bg-slate-100 flex"></div></div>
+            </section>
+            <!-- Abas de Categoria -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 p-3 shadow-sm no-print">
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="setAba('ACOES')" id="tab-ACOES" class="tab-btn py-2.5 px-3 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-xl text-xs text-slate-700 transition shadow-sm !border-brand-600 !text-brand-600 !bg-brand-50 shadow-inner flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-arrow-trend-up text-brand-600"></i> Ações
+                    </button>
+                    <button onclick="setAba('FIIS')" id="tab-FIIS" class="tab-btn py-2.5 px-3 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-xl text-xs text-slate-700 transition shadow-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-building text-slate-500"></i> FIIs
+                    </button>
+                    <button onclick="setAba('TUDO')" id="tab-TUDO" class="tab-btn py-2.5 px-3 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-xl text-xs text-slate-700 transition shadow-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-layer-group text-slate-500"></i> Ver Carteira Completa
+                    </button>
+                </div>
+            </div>
+
+            <!-- Painel de Lançamento de Ativo -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-4 no-print">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-circle-plus text-brand-600 text-lg"></i>
+                        <h3 class="text-sm font-bold text-slate-900">Lançar Novo Ativo na Carteira</h3>
+                    </div>
+                    <span class="text-[10px] text-slate-400 font-medium">Preencha os campos para adicionar</span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Ticker</label>
+                        <input type="text" id="in-ticker" placeholder="EX: PETR4" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-brand-700 uppercase focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" onblur="autoPreencher(this.value)">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Quantidade</label>
+                        <input type="number" id="in-qtd" placeholder="QTD" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Preço Médio</label>
+                        <input type="text" id="in-preco" placeholder="R$ 0,00" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">LPA / VPA</label>
+                        <input type="text" id="in-lpa" placeholder="LPA / VPA" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">VPA / P.VP REF</label>
+                        <input type="text" id="in-vpa" placeholder="VPA / P.VP" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Dividendos</label>
+                        <input type="text" id="in-div" placeholder="R$ 0,00" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Categoria</label>
+                        <select id="in-cat" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-bold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition cursor-pointer">
+                            <option value="ACOES">Ação</option>
+                            <option value="FIIS">FII</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-1">
+                    <button id="btn-add" onclick="addAtivo()" class="inline-flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-5 py-2 rounded-lg transition shadow-sm">
+                        <i class="fa-solid fa-plus"></i> Lançar Ativo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabela Dinâmica de Ativos -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-4">
+                <div class="overflow-x-auto rounded-xl border border-slate-200">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-900 text-white font-bold uppercase tracking-wider text-[11px]">
+                                <th class="py-3 px-3 w-[12%]">Ativo</th>
+                                <th class="py-3 px-3 w-[10%]">Custódia</th>
+                                <th class="py-3 px-3 w-[12%]">P. Médio</th>
+                                <th class="py-3 px-3 w-[12%]">P. Atual</th>
+                                <th class="py-3 px-3 w-[14%]">Total</th>
+                                <th class="py-3 px-3 w-[30%]">Indicadores Valuation</th>
+                                <th class="py-3 px-3 text-center w-[10%] no-print">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-ativos" class="divide-y divide-slate-100 bg-white font-medium text-slate-700">
+                            <!-- Linhas injetadas dinamicamente via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Botões de Ação de Rodapé -->
+                <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 no-print">
+                    <button onclick="exportarCarteira()" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-sm">
+                        <i class="fa-solid fa-file-export"></i> Exportar
+                    </button>
+                    <button onclick="document.getElementById('file-import').click()" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-sm">
+                        <i class="fa-solid fa-file-import"></i> Importar
+                    </button>
+                    <button onclick="window.print()" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-sm">
+                        <i class="fa-solid fa-file-pdf"></i> Gerar Relatório PDF
+                    </button>
+                    <input type="file" id="file-import" class="hidden" onchange="importarCarteira(this)">
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Radar de Mercado (Drawer Lateral) -->
+    <aside id="market-drawer" class="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl border-l border-slate-200 flex flex-col no-print">
+        <div class="p-4 border-b border-slate-200 bg-slate-900 text-white flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-chart-line text-brand-500"></i>
+                <h3 class="font-bold text-xs uppercase tracking-wider">Radar de Mercado</h3>
+            </div>
+            <button onclick="toggleDrawer()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-base"></i></button>
+        </div>
+        <div id="lista-mercado" class="flex-1 overflow-y-auto p-3 divide-y divide-slate-100"></div>
+    </aside>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500 no-print">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>Quantum Trade - Sistema Avançado de Controle de Carteira e Valuation de Ativos.</p>
+            <p class="mt-1 text-slate-400">&copy; Quantum Trade - Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        let abaAtiva = 'ACOES'; 
+        let precos = JSON.parse(localStorage.getItem('qt_precos_cache') || '{}'); 
+        let carteira = JSON.parse(localStorage.getItem('qt_full_cart') || '[]');
+        let editandoIndice = null;
+        
+        const DB_BASE = { 
+            ACOES: {
+                'PETR4': { l: 10.55, v: 31.25, d: 4.58 }, 'VALE3': { l: 8.42, v: 45.10, d: 6.20 },
+                'ITUB4': { l: 3.85, v: 19.40, d: 1.25 }, 'BBAS3': { l: 9.32, v: 56.10, d: 4.88 },
+                'BBDC4': { l: 1.62, v: 16.50, d: 0.90 }, 'ABEV3': { l: 0.96, v: 5.75, d: 0.73 },
+                'WEGE3': { l: 1.25, v: 5.10, d: 0.75 }, 'ITSA4': { l: 1.45, v: 7.90, d: 0.85 },
+                'JBSS3': { l: 1.95, v: 35.10, d: 1.50 }, 'TAEE11': { l: 3.25, v: 24.10, d: 3.10 }
+            }, 
+            FIIS: {
+                'MXRF11': { l: 0.12, v: 9.85, d: 1.15 }, 'HGLG11': { l: 1.15, v: 153.20, d: 13.20 },
+                'XPLG11': { l: 0.78, v: 112.10, d: 9.36 }, 'KNRI11': { l: 0.95, v: 159.40, d: 11.40 },
+                'KNIP11': { l: 1.10, v: 98.15, d: 12.00 }, 'XPML11': { l: 0.85, v: 114.20, d: 10.20 },
+                'VISC11': { l: 0.90, v: 116.10, d: 10.80 }, 'BTLG11': { l: 0.76, v: 98.40, d: 9.12 },
+                'HGRU11': { l: 0.88, v: 122.10, d: 10.56 }, 'CPTS11': { l: 0.08, v: 9.10, d: 0.96 }
+            } 
+        };
+
+        let DB = JSON.parse(localStorage.getItem('qt_db_custom')) || JSON.parse(JSON.stringify(DB_BASE));
+
+        function autoPreencher(ticker) {
+            if (!ticker) return;
+            const t = ticker.toUpperCase();
+            const cat = t.endsWith('11') ? 'FIIS' : 'ACOES';
+            document.getElementById('in-cat').value = cat;
+            const info = DB[cat][t];
+            const fields = ['in-lpa', 'in-vpa', 'in-div'];
+            if (info) {
+                document.getElementById('in-lpa').value = info.l ? info.l.toFixed(2) : "0.00";
+                document.getElementById('in-vpa').value = info.v ? info.v.toFixed(2) : "0.00";
+                document.getElementById('in-div').value = info.d ? info.d.toFixed(2) : "0.00";
+                fields.forEach(id => document.getElementById(id).style.borderColor = "#10b981");
+            } else {
+                fields.forEach(id => { document.getElementById(id).value = ""; document.getElementById(id).style.borderColor = "#cbd5e1"; });
+            }
+        }
+
+        function resetarEBucarNovosDados() {
+            if (confirm("Deseja limpar o banco local e restaurar os dados originais?")) {
+                DB = JSON.parse(JSON.stringify(DB_BASE));
+                localStorage.removeItem('qt_db_custom');
+                alert("Banco restaurado. Atualizando via API...");
+                sincronizarDadosMestres();
+            }
+        }
+
+        function getToken() { return (document.getElementById('api-token').value || localStorage.getItem('qt_full_token') || '').trim(); }
+        function setApiStatus(ok, message = '') {
+            document.getElementById('status-api').className = `h-2.5 w-2.5 rounded-full ${ok ? 'bg-emerald-500' : 'bg-rose-500'}`;
+            if (message) document.getElementById('auto-status').innerText = message;
+        }
+        async function brapiGet(path, params = {}) {
+            const url = new URL(`https://brapi.dev${path}`);
+            Object.entries(params).forEach(([k,v]) => { if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, v); });
+            const token = getToken();
+            const response = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {}, cache: 'no-store' });
+            if (!response.ok) {
+                const retry = response.headers.get('Retry-After');
+                let detalhe = '';
+                try {
+                    const erro = await response.json();
+                    detalhe = erro?.message || erro?.error || erro?.detail || '';
+                } catch (_) {
+                    try { detalhe = await response.text(); } catch (_) {}
+                }
+                throw new Error(`API ${response.status}${detalhe ? `: ${detalhe}` : ''}${retry ? `; tente novamente em ${retry}s` : ''}`);
+            }
+            return response.json();
+        }
+        function tickerDoResultado(raw) { return String(raw?.symbol || raw?.requestedSymbol || '').trim().toUpperCase(); }
+        function dadosDoResultado(raw) { return raw?.data || {}; }
+        function numeroValido(valor) {
+            if (valor === null || valor === undefined || valor === '') return null;
+            const n = Number(valor);
+            return Number.isFinite(n) ? n : null;
+        }
+        function tickersDaCarteira() {
+            return [...new Set(carteira.map(i => String(i.t || '').trim().toUpperCase()).filter(Boolean))];
+        }
+        function salvarCarteira() { localStorage.setItem('qt_full_cart', JSON.stringify(carteira)); }
+        function registrarSincronizacao() {
+            const agora = new Date().toLocaleString('pt-BR');
+            localStorage.setItem('qt_last_sync_master', agora);
+            document.getElementById('last-sync').innerText = agora;
+        }
+        async function atualizarCotacoes() {
+            const tickers = tickersDaCarteira();
+            if (!tickers.length) { updateUI(); return { ok: true, atualizados: 0, falhas: [] }; }
+
+            let atualizados = 0;
+            const falhas = [];
+
+            // O plano atual permite apenas um ativo por requisição.
+            for (const solicitado of tickers) {
+                try {
+                    const resposta = await brapiGet('/api/v2/stocks/quote', { symbols: solicitado });
+                    const raw = resposta?.results?.[0];
+                    if (!raw) throw new Error('cotação não encontrada');
+                    const tickerRetornado = tickerDoResultado(raw) || solicitado;
+                    const info = dadosDoResultado(raw);
+                    const preco = numeroValido(info.regularMarketPrice);
+                    if (preco === null) throw new Error('preço indisponível');
+                    // Guarda pelo ticker solicitado e pelo ticker retornado, se houver mudança de código.
+                    precos[solicitado] = preco;
+                    precos[tickerRetornado] = preco;
+                    atualizados++;
+                } catch (e) {
+                    console.warn(`Cotação não atualizada para ${solicitado}:`, e);
+                    falhas.push(`${solicitado} (${e.message})`);
+                }
+                await new Promise(resolve => setTimeout(resolve, 150));
+            }
+
+            localStorage.setItem('qt_precos_cache', JSON.stringify(precos));
+            updateUI();
+            if (!atualizados && falhas.length) {
+                throw new Error(`nenhuma cotação foi atualizada. ${falhas.slice(0,3).join('; ')}`);
+            }
+            return { ok: true, atualizados, falhas };
+        }
+        async function atualizarFundamentos() {
+            const tickers = [...new Set(carteira
+                .filter(i => (i.cat || 'ACOES') === 'ACOES')
+                .map(i => String(i.t || '').trim().toUpperCase())
+                .filter(Boolean))];
+            if (!tickers.length) return { ok: true, atualizados: 0, ignorados: 0, falhas: [] };
+
+            let atualizados = 0;
+            const falhas = [];
+
+            // Consulta individual para evitar erro 400 causado por ticker inválido
+            // ou por limite de símbolos por requisição do plano contratado.
+            for (const solicitado of tickers) {
+                try {
+                    const resposta = await brapiGet('/api/v2/stocks/statistics', { symbols: solicitado });
+                    const raw = resposta?.results?.[0];
+                    if (!raw) throw new Error('sem dados fundamentalistas');
+
+                    const tickerRetornado = tickerDoResultado(raw) || solicitado;
+                    const info = dadosDoResultado(raw);
+                    const lpa = numeroValido(info.trailingEps ?? info.earningsPerShare);
+                    const vpa = numeroValido(info.bookValue ?? info.bookValuePerShare);
+                    const dy = numeroValido(info.dividendYield);
+                    const preco = numeroValido(precos[tickerRetornado] ?? precos[solicitado]);
+
+                    if (lpa === null && vpa === null) throw new Error('LPA e VPA indisponíveis');
+
+                    const itemDB = DB.ACOES[solicitado] || (DB.ACOES[solicitado] = {l:0,v:0,d:0});
+                    if (lpa !== null) itemDB.l = lpa;
+                    if (vpa !== null) itemDB.v = vpa;
+                    if (dy !== null && preco !== null) itemDB.d = dy * preco;
+
+                    carteira.forEach(item => {
+                        if (String(item.t).trim().toUpperCase() !== solicitado) return;
+                        if (lpa !== null) item.l = lpa;
+                        if (vpa !== null) item.v = vpa;
+                        if (dy !== null && preco !== null) item.d = dy * preco;
+                    });
+                    atualizados++;
+                } catch (e) {
+                    console.warn(`Fundamentos não atualizados para ${solicitado}:`, e);
+                    falhas.push(`${solicitado} (${e.message})`);
+                }
+                await new Promise(resolve => setTimeout(resolve, 150));
+            }
+
+            localStorage.setItem('qt_db_custom', JSON.stringify(DB));
+            salvarCarteira();
+            updateUI();
+
+            if (!atualizados && falhas.length) {
+                throw new Error(`nenhum fundamento foi atualizado. ${falhas.slice(0,3).join('; ')}`);
+            }
+            return { ok: true, atualizados, ignorados: falhas.length, falhas };
+        }
+        async function atualizarTudo(manual = false) {
+            if (!getToken()) { if (manual) alert('Insira sua API KEY da brapi.'); return false; }
+            try {
+                const cot = await atualizarCotacoes();
+                registrarSincronizacao();
+                const avisoCot = cot.falhas?.length ? ` ${cot.falhas.length} ativo(s) sem cotação.` : '';
+                setApiStatus(true, `${cot.atualizados} cotação(ões) atualizada(s).${avisoCot}`);
+                return true;
+            } catch (e) {
+                console.error('Erro na atualização:', e);
+                setApiStatus(false, `Falha na atualização: ${e.message}`);
+                if (manual) alert(`Não foi possível atualizar: ${e.message}`);
+                return false;
+            }
+        }
+        async function sincronizarDadosMestres(manual = false) {
+            if (!getToken()) { if (manual) alert('Insira sua API KEY da brapi.'); return false; }
+            const btn = document.getElementById('btn-sync-master');
+            const icon = document.getElementById('sync-icon-master');
+            btn.disabled = true; icon.classList.add('loading-spin');
+            try {
+                const cot = await atualizarCotacoes();
+                const fund = await atualizarFundamentos();
+                registrarSincronizacao();
+                const aviso = fund.ignorados ? ` ${fund.ignorados} ativo(s) sem fundamentos disponíveis.` : '';
+                setApiStatus(true, `${cot.atualizados} cotação(ões) e LPA/VPA de ${fund.atualizados} ação(ões) atualizados.${aviso} FIIs mantêm os valores informados.`);
+                return true;
+            } catch (e) {
+                console.error('Erro na sincronização:', e);
+                setApiStatus(false, `Falha na sincronização: ${e.message}`);
+                if (manual) alert(`Não foi possível sincronizar: ${e.message}`);
+                return false;
+            } finally {
+                btn.disabled = false; icon.classList.remove('loading-spin');
+            }
+        }
+        function setAba(aba) {
+            abaAtiva = aba;
+            document.querySelectorAll('.tab-btn').forEach(el => { 
+                el.classList.remove('!border-brand-600', '!text-brand-600', '!bg-brand-50', 'shadow-inner');
+                const icon = el.querySelector('i');
+                if(icon) icon.className = icon.className.replace('text-brand-600', 'text-slate-500');
+            });
+            const target = document.getElementById(`tab-${aba}`);
+            if(target) { 
+                target.classList.add('!border-brand-600', '!text-brand-600', '!bg-brand-50', 'shadow-inner'); 
+                const icon = target.querySelector('i');
+                if(icon) icon.className = icon.className.replace('text-slate-500', 'text-brand-600');
+            }
+            updateUI();
+        }
+
+        async function toggleDrawer() {
+            const drawer = document.getElementById('market-drawer');
+            const abrindo = !drawer.classList.contains('open');
+            drawer.classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('open');
+            if (abrindo) await atualizarRadar();
+        }
+        function tickersDoRadar() {
+            if (abaAtiva === 'TUDO') return [...new Set([...Object.keys(DB.ACOES), ...Object.keys(DB.FIIS)])];
+            return Object.keys(DB[abaAtiva] || {});
+        }
+        async function atualizarRadar() {
+            const painel = document.getElementById('lista-mercado');
+            const tickers = tickersDoRadar();
+            const faltantes = tickers.filter(t => !Number.isFinite(Number(precos[t])));
+            updateUI();
+            if (!getToken() || !faltantes.length) return;
+
+            const aviso = document.createElement('div');
+            aviso.id = 'radar-loading';
+            aviso.className = 'p-3 mb-2 rounded-lg bg-brand-50 text-brand-700 text-xs font-semibold';
+            aviso.textContent = `Buscando ${faltantes.length} cotação(ões) do radar, uma por vez...`;
+            painel.prepend(aviso);
+
+            let atualizados = 0;
+            for (const solicitado of faltantes) {
+                try {
+                    const resposta = await brapiGet('/api/v2/stocks/quote', { symbols: solicitado });
+                    const raw = resposta?.results?.[0];
+                    const tickerRetornado = tickerDoResultado(raw) || solicitado;
+                    const preco = numeroValido(dadosDoResultado(raw).regularMarketPrice);
+                    if (preco !== null) {
+                        precos[solicitado] = preco;
+                        precos[tickerRetornado] = preco;
+                        atualizados++;
+                    }
+                } catch (e) {
+                    console.warn(`Radar não atualizado para ${solicitado}:`, e);
+                }
+                const status = document.getElementById('radar-loading');
+                if (status) status.textContent = `Radar: ${atualizados} de ${faltantes.length} nova(s) cotação(ões) recebida(s)...`;
+                await new Promise(resolve => setTimeout(resolve, 150));
+            }
+            localStorage.setItem('qt_precos_cache', JSON.stringify(precos));
+            updateUI();
+        }
+        function cleanNum(val) {
+            if (val === null || val === undefined || val === '') return 0;
+            let txt = String(val).trim().replace(/\s/g, '').replace(/R\$/gi, '');
+            if (txt.includes(',') && txt.includes('.')) txt = txt.replace(/\./g, '').replace(',', '.');
+            else txt = txt.replace(',', '.');
+            const n = Number(txt);
+            return Number.isFinite(n) ? n : 0;
+        }
+        async function fetchMercado() { return atualizarTudo(false); }
+        function updateUI() {
+            const container = document.getElementById('lista-ativos'); container.innerHTML = "";
+            const ativos = abaAtiva === 'TUDO' ? carteira : carteira.filter(item => (item.cat || 'ACOES') === abaAtiva);
+            
+            if (ativos.length === 0) {
+                container.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400 font-medium">Nenhum ativo encontrado nesta categoria.</td></tr>`;
+            }
+
+            ativos.forEach((item) => {
+                const idx = carteira.indexOf(item);
+                const cur = precos[item.t] || 0; 
+                const total = cleanNum(item.q) * cur; 
+                const lpa = cleanNum(item.l); 
+                const vpa = cleanNum(item.v); 
+                const div = cleanNum(item.d);
+                let indHtml = "";
+                const infoTxt = `<div class="text-slate-400 font-bold mb-1">[L: ${lpa.toFixed(2)} | V: ${vpa.toFixed(2)} | D: ${div.toFixed(2)}]</div>`;
+                if (item.cat === 'FIIS') {
+                    const pvp = (cur > 0 && vpa > 0) ? (cur / vpa).toFixed(2) : "0.00";
+                    const bazin = (div / 0.06);
+                    const mensalEst = (div / 12);
+                    indHtml = `${infoTxt}
+                               <div class="grid grid-cols-2 gap-x-2 gap-y-0.5">
+                                 <div>P/VP: <b class="${pvp <= 1.05 ? 'text-emerald-600' : 'text-rose-600'}">${pvp}</b></div>
+                                 <div>Bazin: <span class="${cur > bazin ? 'text-rose-600 font-bold' : 'text-slate-900 font-bold'}">R$ ${bazin.toFixed(2)}</span></div>
+                                 <div class="col-span-2 text-[10px] text-brand-600 font-semibold mt-0.5">Média Mensal: R$ ${mensalEst.toFixed(2)}</div>
+                               </div>`;
+                } else {
+                    const graham = Math.sqrt(22.5 * lpa * vpa);
+                    const bazin = (div / 0.06);
+                    indHtml = `${infoTxt}
+                               <div class="grid grid-cols-2 gap-x-2 gap-y-0.5">
+                                 <div>Graham: <span class="${cur > graham ? 'text-rose-600 font-bold' : 'text-slate-900 font-bold'}">R$ ${graham.toFixed(2)}</span></div>
+                                 <div>Bazin: <span class="${cur > bazin ? 'text-rose-600 font-bold' : 'text-slate-900 font-bold'}">R$ ${bazin.toFixed(2)}</span></div>
+                               </div>`;
+                }
+                
+                const tr = document.createElement('tr');
+                tr.className = `hover:bg-slate-50 transition border-b border-slate-100 ${cur >= cleanNum(item.p) ? 'border-l-4 border-l-emerald-500' : 'border-l-4 border-l-rose-500'}`;
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-slate-900">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-brand-700 font-extrabold text-sm">${item.t}</span>
+                            <span class="text-[9px] bg-slate-100 border border-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-bold uppercase no-print">${item.cat || 'ACOES'}</span>
+                        </div>
+                    </td>
+                    <td class="p-3 font-mono font-semibold text-slate-800">${item.q} UN</td>
+                    <td class="p-3 font-semibold text-slate-700">R$ ${cleanNum(item.p).toFixed(2)}</td>
+                    <td class="p-3 font-bold text-brand-600">R$ ${cur.toFixed(2)}</td>
+                    <td class="p-3 font-extrabold text-slate-900 font-mono">R$ ${total.toFixed(2)}</td>
+                    <td class="p-3 text-[11px] bg-slate-50/80 rounded-lg">${indHtml}</td>
+                    <td class="p-3 text-center no-print">
+                        <div class="flex justify-center items-center gap-1">
+                            <button onclick="editarAtivo(${idx})" class="p-1.5 text-brand-600 hover:bg-brand-50 rounded transition" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="delAtivo(${idx})" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded transition" title="Excluir"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </td>`;
+                container.appendChild(tr);
+            });
+
+            let pat = 0; carteira.forEach(i => pat += (cleanNum(i.q) * (precos[i.t] || 0)));
+            document.getElementById('total-pat').innerText = pat.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+            const investido = carteira.reduce((acc,i) => acc + cleanNum(i.q) * cleanNum(i.p), 0);
+            const resultado = pat - investido;
+            const rent = investido > 0 ? (resultado / investido) * 100 : 0;
+            const proventos = carteira.reduce((acc,i) => acc + cleanNum(i.q) * cleanNum(i.d), 0);
+            const moeda = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+            document.getElementById('card-investido').innerText = moeda(investido);
+            document.getElementById('card-atual').innerText = moeda(pat);
+            const rEl = document.getElementById('card-resultado'); rEl.innerText = moeda(resultado); rEl.className = `mt-1 text-lg font-black font-mono ${resultado >= 0 ? 'text-emerald-700' : 'text-rose-700'}`;
+            const rentEl = document.getElementById('card-rentabilidade'); rentEl.innerText = `${rent.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}%`; rentEl.className = `mt-1 text-lg font-black font-mono ${rent >= 0 ? 'text-emerald-700' : 'text-rose-700'}`;
+            document.getElementById('card-proventos').innerText = moeda(proventos);
+            const acoes = carteira.filter(i => (i.cat || 'ACOES') === 'ACOES').reduce((a,i)=>a+cleanNum(i.q)*(precos[i.t]||0),0);
+            const fiis = carteira.filter(i => i.cat === 'FIIS').reduce((a,i)=>a+cleanNum(i.q)*(precos[i.t]||0),0);
+            const ap = pat > 0 ? acoes/pat*100 : 0, fp = pat > 0 ? fiis/pat*100 : 0;
+            document.getElementById('allocation-bar').innerHTML = pat > 0 ? `<div class="bg-brand-600" style="width:${ap}%" title="Ações ${ap.toFixed(1)}%"></div><div class="bg-emerald-500" style="width:${fp}%" title="FIIs ${fp.toFixed(1)}%"></div>` : '';
+            document.getElementById('allocation-label').innerText = pat > 0 ? `Ações ${ap.toFixed(1)}% · FIIs ${fp.toFixed(1)}%` : 'Sem dados';
+            
+            const b = document.getElementById('lista-mercado'); b.innerHTML = "";
+            let tks = (abaAtiva === 'TUDO') ? [...new Set([...Object.keys(DB.ACOES), ...Object.keys(DB.FIIS)])] : Object.keys(DB[abaAtiva]);
+            tks.forEach(t => {
+                b.innerHTML += `
+                <div class="py-2.5 px-1 flex justify-between items-center hover:bg-slate-50 rounded transition">
+                    <div>
+                        <b class="text-slate-900 text-xs">${t}</b>
+                        <div class="text-brand-600 font-mono text-[11px] font-bold">${Number.isFinite(Number(precos[t])) ? Number(precos[t]).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : '<span class="text-slate-400">Aguardando cotação</span>'}</div>
+                    </div>
+                    <button onclick="document.getElementById('in-ticker').value='${t}'; autoPreencher('${t}'); toggleDrawer()" class="bg-brand-50 border border-brand-200 text-brand-700 hover:bg-brand-600 hover:text-white h-7 w-7 rounded-lg font-bold transition flex items-center justify-center text-sm">+</button>
+                </div>`;
+            });
+        }
+
+        function addAtivo() {
+            const t = document.getElementById('in-ticker').value.trim().toUpperCase();
+            const q = cleanNum(document.getElementById('in-qtd').value);
+            const p = cleanNum(document.getElementById('in-preco').value);
+            const l = cleanNum(document.getElementById('in-lpa').value);
+            const v = cleanNum(document.getElementById('in-vpa').value);
+            const d = cleanNum(document.getElementById('in-div').value);
+            const cat = document.getElementById('in-cat').value;
+            if (!/^[A-Z0-9]{4,12}$/.test(t)) return alert('Informe um ticker válido.');
+            if (!(q > 0)) return alert('Informe uma quantidade maior que zero.');
+            const registro = {t, q, p, l, v, d, cat};
+            if (editandoIndice === null) carteira.push(registro); else carteira[editandoIndice] = registro;
+            editandoIndice = null;
+            document.getElementById('btn-add').innerHTML = '<i class="fa-solid fa-plus"></i> Lançar Ativo';
+            salvarCarteira();
+            ["in-ticker","in-qtd","in-preco","in-lpa","in-vpa","in-div"].forEach(id => { document.getElementById(id).value = ''; document.getElementById(id).style.borderColor = '#cbd5e1'; });
+            updateUI();
+            atualizarTudo(false);
+        }
+        function editarAtivo(i) {
+            const item = carteira[i];
+            if (!item) return;
+            editandoIndice = i;
+            document.getElementById('in-ticker').value = item.t;
+            document.getElementById('in-qtd').value = item.q;
+            document.getElementById('in-preco').value = item.p;
+            document.getElementById('in-lpa').value = item.l;
+            document.getElementById('in-vpa').value = item.v;
+            document.getElementById('in-div').value = item.d;
+            document.getElementById('in-cat').value = item.cat || 'ACOES';
+            document.getElementById('btn-add').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar Alterações';
+            document.getElementById('in-ticker').focus();
+        }
+        function delAtivo(i) { if(confirm('Remover?')) { carteira.splice(i,1); editandoIndice = null; salvarCarteira(); updateUI(); } }
+        function salvarToken() { localStorage.setItem('qt_full_token', document.getElementById('api-token').value.trim()); atualizarTudo(true); }
+        function salvarPerfil() { 
+            const n = document.getElementById('u-name').value, c = document.getElementById('u-cpf').value;
+            localStorage.setItem('qt_full_u', n); localStorage.setItem('qt_full_c', c);
+            document.getElementById('print-name').innerText = n || "INVESTIDOR"; document.getElementById('print-cpf').innerText = c || "000.000.000-00";
+        }
+
+        function exportarCarteira() {
+            const agora = new Date();
+            const dia = String(agora.getDate()).padStart(2, '0');
+            const mes = String(agora.getMonth() + 1).padStart(2, '0');
+            const ano = agora.getFullYear();
+            const hora = String(agora.getHours()).padStart(2, '0');
+            const min = String(agora.getMinutes()).padStart(2, '0');
+
+            const dataHoraFmt = `${dia}-${mes}-${ano}_${hora}h${min}`;
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(carteira, null, 2));
+            const dl = document.createElement('a'); 
+            
+            dl.setAttribute("href", dataStr);
+            dl.setAttribute("download", `QuantumTrade_2006_${dataHoraFmt}.json`); 
+            
+            dl.click();
+        }
+
+        function importarCarteira(input) {
+            const reader = new FileReader();
+            reader.onload = () => { carteira = JSON.parse(reader.result); localStorage.setItem('qt_full_cart', JSON.stringify(carteira)); fetchMercado(); };
+            reader.readAsText(input.files[0]);
+        }
+
+        let autoTimer = null;
+        function aplicarAtualizacaoAutomatica() {
+            if (autoTimer) clearInterval(autoTimer);
+            const ms = Number(document.getElementById('auto-interval').value || 0);
+            localStorage.setItem('qt_auto_interval', String(ms));
+            const status = document.getElementById('auto-status');
+            if (!ms) { status.innerText = 'Atualização automática desativada.'; return; }
+            status.innerText = `Atualização ativa a cada ${document.getElementById('auto-interval').selectedOptions[0].text}. Funciona enquanto esta página estiver aberta.`;
+            autoTimer = setInterval(() => { if (!document.hidden) atualizarTudo(false); }, ms);
+        }
+        document.addEventListener('visibilitychange', () => { if (!document.hidden && Number(localStorage.getItem('qt_auto_interval') || 0) > 0) atualizarTudo(false); });
+        window.onload = () => {
+            document.getElementById('u-name').value = localStorage.getItem('qt_full_u') || ""; document.getElementById('u-cpf').value = localStorage.getItem('qt_full_c') || "";
+            document.getElementById('last-sync').innerText = localStorage.getItem('qt_last_sync_master') || "Nunca";
+            salvarPerfil(); 
+            if(localStorage.getItem('qt_full_token')) { 
+                document.getElementById('api-token').value = localStorage.getItem('qt_full_token'); 
+                fetchMercado(); 
+            }
+            setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('pt-BR'); }, 1000);
+            updateUI();
+            document.getElementById('auto-interval').value = localStorage.getItem('qt_auto_interval') || '0';
+            aplicarAtualizacaoAutomatica();
+        };
+    </script>
+</body>
+</html>
