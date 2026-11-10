@@ -561,7 +561,7 @@
         reader.onload = (e) => { 
             try { 
                 const d = JSON.parse(e.target.result); 
-                if (confirm("Importar dados?")) { localStorage.clear(); for (let k in d) localStorage.setItem(k, d[k]); location.reload(); } 
+                if (confirm("Importar dados?")) { for (let k in d) localStorage.setItem(k, d[k]); location.reload(); } 
             } catch (err) { alert("Erro."); } 
         }; reader.readAsText(file); 
     }
