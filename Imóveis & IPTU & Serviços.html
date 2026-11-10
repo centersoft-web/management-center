@@ -54,14 +54,22 @@
             background: #94a3b8;
         }
 
+        /* Popup pontual para copiar mensagem do WhatsApp */
+        #whatsapp-popup { display:none; position:fixed; inset:0; z-index:1000; align-items:center; justify-content:center; padding:1rem; background:rgba(15,23,42,.68); }
+        #whatsapp-popup.ativo { display:flex; }
+        .whatsapp-popup-box { width:min(620px,100%); padding:1.25rem; border-radius:.9rem; background:#fff; box-shadow:0 20px 50px rgba(0,0,0,.25); }
+        #whatsapp-texto { width:100%; min-height:300px; margin-top:.75rem; padding:.85rem; border:1px solid #cbd5e1; border-radius:.55rem; resize:vertical; font:14px/1.5 Arial,sans-serif; }
+        .whatsapp-popup-botoes { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:.6rem; margin-top:.85rem; }
+        .whatsapp-popup-botoes button { padding:.65rem 1rem; border:0; border-radius:.5rem; color:#fff; font-weight:700; cursor:pointer; }
+        .btn-whatsapp-copiar { background:#16a34a; } .btn-whatsapp-fechar { background:#475569; }
         /* Estilos de Impressão */
         @media print {
             .no-print { display: none !important; }
             body { background: white !important; color: black !important; zoom: 80%; }
             main { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
             header, nav { display: none !important; }
-            th:nth-child(1), td:nth-child(1),
-            th:nth-child(6), td:nth-child(6) { display: none !important; }
+            th:nth-child(1), td:nth-child(1) { display: none !important; }
+            tr.linha-comunicacao { display: none !important; }
             .table-container { border: none !important; box-shadow: none !important; }
             th, td { border-bottom: 1px solid #ddd !important; }
         }
@@ -135,6 +143,8 @@
         </div>
     </main>
 
+    <!-- Popup de mensagem para WhatsApp -->
+    <div id="whatsapp-popup" class="no-print" role="dialog" aria-modal="true" aria-labelledby="whatsapp-popup-titulo"><div class="whatsapp-popup-box"><div class="flex items-center justify-between gap-3"><h3 id="whatsapp-popup-titulo" class="text-lg font-bold text-slate-900">Mensagem para WhatsApp</h3><button type="button" onclick="fecharWhatsAppPopup()" class="text-slate-500 hover:text-slate-900 text-xl" aria-label="Fechar">&times;</button></div><p class="mt-1 text-xs text-slate-500">Copie o texto abaixo e cole na conversa desejada.</p><textarea id="whatsapp-texto" readonly></textarea><div class="whatsapp-popup-botoes"><button type="button" class="btn-whatsapp-fechar" onclick="fecharWhatsAppPopup()">Fechar</button><button type="button" class="btn-whatsapp-copiar" onclick="copiarTextoWhatsApp()">Copiar texto</button></div></div></div>
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500 no-print">
         <div class="max-w-7xl mx-auto px-4">
@@ -176,11 +186,12 @@
                         </div>
 
                         <!-- Form Cadastro -->
-                        <div class="no-print bg-slate-50 p-3.5 rounded-xl border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+                        <div class="no-print bg-slate-50 p-3.5 rounded-xl border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5">
                             <input type="text" id="${cat}F1" placeholder="${config.fields[0]}" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition">
                             <input type="text" id="${cat}F2" placeholder="${config.fields[1]}" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition">
                             <input type="text" id="${cat}F3" placeholder="${config.fields[2]}" ${cat === 'telefone' ? 'oninput="maskTel(this)" maxlength="15"' : ''} class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition">
                             <input type="text" id="${cat}F4" placeholder="${config.fields[3]}" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition">
+                            ${(cat === 'imoveis' || cat === 'condominios') ? `<input type="email" id="${cat}Email" placeholder="Email" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition">` : ''}
                             <button class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-sm flex items-center justify-center gap-1.5" onclick="addItem('${cat}')">
                                 <i class="fa-solid fa-plus-circle"></i> Adicionar
                             </button>
@@ -193,10 +204,11 @@
                                     <tr class="bg-slate-900 text-white font-bold uppercase tracking-wider text-[11px]">
                                         <th class="py-3 px-3 text-center w-[60px]">Ordem</th>
                                         <th class="py-3 px-3">${config.fields[0]}</th>
+                                        ${(cat === 'imoveis' || cat === 'condominios') ? '<th class="py-3 px-3">Email</th>' : ''}
                                         <th class="py-3 px-3">${config.fields[1]}</th>
                                         <th class="py-3 px-3">${config.fields[2]}</th>
                                         <th class="py-3 px-3">${config.fields[3]}</th>
-                                        <th class="py-3 px-3 text-center w-[180px]">Ações</th>
+                                        <th class="no-print py-3 px-3 text-center w-[180px]">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody id="body-${cat}" class="divide-y divide-slate-100 bg-white font-medium text-slate-700"></tbody>
@@ -272,10 +284,11 @@
                     <tr class="bg-amber-50/50">
                         <td></td>
                         <td class="p-2"><input type="text" id="edit-f1" value="${item.nome || ''}" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"></td>
+                        ${(type === 'imoveis' || type === 'condominios') ? `<td class="p-2"><input type="email" id="edit-email" value="${item.email || ''}" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"></td>` : ''}
                         <td class="p-2"><input type="text" id="edit-f2" value="${item.cidade || ''}" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"></td>
                         <td class="p-2"><input type="text" id="edit-f3" value="${item.insc || ''}" ${type === 'telefone' ? 'oninput="maskTel(this)" maxlength="15"' : ''} class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"></td>
                         <td class="p-2"><input type="text" id="edit-f4" value="${item.link || ''}" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"></td>
-                        <td class="p-2 text-center">
+                        <td class="no-print p-2 text-center">
                             <div class="flex items-center justify-center gap-1">
                                 <button class="bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold px-2 py-1 rounded transition" onclick="saveEdit('${type}', ${index})">Salvar</button>
                                 <button class="bg-slate-400 hover:bg-slate-500 text-white text-[11px] font-bold px-2 py-1 rounded transition" onclick="cancelEdit()">Cancelar</button>
@@ -297,6 +310,7 @@
                                 <span class="font-bold text-slate-900">${item.nome || ''}</span>
                             </div>
                         </td>
+                        ${(type === 'imoveis' || type === 'condominios') ? `<td class="p-2.5">${item.email || ''}</td>` : ''}
                         <td class="p-2.5">${item.cidade || ''}</td>
                         <td class="p-2.5">
                             <div class="flex items-center gap-2">
@@ -307,14 +321,33 @@
                         <td class="p-2.5">
                             ${item.link ? `<a href="${item.link}" target="_blank" class="inline-flex items-center gap-1 text-brand-600 hover:text-brand-800 font-semibold text-xs hover:underline"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Portal</a>` : '<span class="text-slate-400">-</span>'}
                         </td>
-                        <td class="p-2.5 text-center">
+                        ${(type === 'imoveis' || type === 'condominios') ? `
+                        <td class="no-print p-2.5 text-center">
                             <div class="flex items-center justify-center gap-1">
                                 <button class="text-emerald-600 hover:bg-emerald-50 p-1.5 rounded text-sm transition" title="Inserir Abaixo" onclick="insertRow('${type}', ${index})"><i class="fa-solid fa-circle-plus"></i></button>
                                 <button class="text-brand-600 hover:bg-brand-50 p-1.5 rounded text-sm transition" title="Editar" onclick="setEdit('${type}', ${index})"><i class="fa-solid fa-pen-to-square"></i></button>
                                 <button class="text-rose-600 hover:bg-rose-50 p-1.5 rounded text-sm transition" title="Excluir" onclick="removeItem('${type}', ${index})"><i class="fa-solid fa-trash-can"></i></button>
                             </div>
                         </td>
-                    </tr>`;
+                    </tr>
+                    <tr class="linha-comunicacao no-print bg-slate-50 border-b border-slate-200">
+                        <td colspan="7" class="p-2.5">
+                            <div class="flex flex-wrap items-center justify-center gap-2">
+                                <button class="border border-red-600 text-red-700 hover:bg-red-600 hover:text-white py-1.5 px-2.5 rounded text-[10px] font-bold uppercase transition" onclick="abrirGmail('${type}', ${index})"><i class="fa-solid fa-envelope"></i> Gmail</button>
+                                <button class="border border-green-600 text-green-700 hover:bg-green-600 hover:text-white py-1.5 px-2.5 rounded text-[10px] font-bold uppercase transition" onclick="abrirWhatsApp('${type}', ${index})"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
+                                <button class="border border-rose-500 text-rose-600 hover:bg-rose-500 hover:text-white py-1.5 px-2.5 rounded text-[10px] font-bold uppercase transition" onclick="abrirGmailAgradecimento('${type}', ${index})"><i class="fa-solid fa-envelope-circle-check"></i> Agradecer Gmail</button>
+                                <button class="border border-teal-600 text-teal-700 hover:bg-teal-600 hover:text-white py-1.5 px-2.5 rounded text-[10px] font-bold uppercase transition" onclick="abrirWhatsAppAgradecimento('${type}', ${index})"><i class="fa-brands fa-whatsapp"></i> Agradecer WhatsApp</button>
+                            </div>
+                        </td>
+                    </tr>` : `
+                        <td class="no-print p-2.5 text-center">
+                            <div class="flex items-center justify-center gap-1">
+                                <button class="text-emerald-600 hover:bg-emerald-50 p-1.5 rounded text-sm transition" title="Inserir Abaixo" onclick="insertRow('${type}', ${index})"><i class="fa-solid fa-circle-plus"></i></button>
+                                <button class="text-brand-600 hover:bg-brand-50 p-1.5 rounded text-sm transition" title="Editar" onclick="setEdit('${type}', ${index})"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button class="text-rose-600 hover:bg-rose-50 p-1.5 rounded text-sm transition" title="Excluir" onclick="removeItem('${type}', ${index})"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                        </td>
+                    </tr>`}`;
                 }
             });
         }
@@ -331,6 +364,7 @@
             item.cidade = newCidade;
             item.insc = document.getElementById('edit-f3').value;
             item.link = document.getElementById('edit-f4').value;
+            if (type === 'imoveis' || type === 'condominios') { item.email = document.getElementById('edit-email').value; }
 
             if (type === 'imoveis' || type === 'matriculas') {
                 const other = (type === 'imoveis') ? 'matriculas' : 'imoveis';
@@ -351,7 +385,8 @@
                 nome: f1Val, 
                 cidade: document.getElementById(type + 'F2').value, 
                 insc: document.getElementById(type + 'F3').value, 
-                link: document.getElementById(type + 'F4').value 
+                link: document.getElementById(type + 'F4').value,
+                email: (type === 'imoveis' || type === 'condominios') ? document.getElementById(type + 'Email').value : ''
             };
             data[type].push(newItem);
             
@@ -361,7 +396,7 @@
             }
             
             render();
-            ['F1', 'F2', 'F3', 'F4'].forEach(f => {
+            ['F1', 'F2', 'F3', 'F4', 'Email'].forEach(f => {
                 const el = document.getElementById(type + f);
                 if(el) el.value = '';
             });
@@ -369,7 +404,7 @@
 
         function insertRow(type, index) {
             const newId = Date.now();
-            const newItem = { id: newId, nome: "", cidade: "", insc: "", link: "" };
+            const newItem = { id: newId, nome: "", cidade: "", insc: "", link: "", email: "" };
             data[type].splice(index + 1, 0, newItem);
             if (type === 'imoveis' || type === 'matriculas') {
                 const other = (type === 'imoveis') ? 'matriculas' : 'imoveis';
@@ -390,6 +425,58 @@
             render();
         }
 
+        function saudacaoAtual() {
+            const hora = new Date().getHours();
+            return hora < 12 ? 'bom dia' : hora < 18 ? 'boa tarde' : 'boa noite';
+        }
+        function prepararMensagem(type, index, agradecimento, exigirEmail) {
+            const item = data[type][index];
+            if (!item) return null;
+            if (exigirEmail && !String(item.email || '').trim()) { alert('Preencha o Email.'); return null; }
+            const categoria = type === 'imoveis' ? 'IPTU' : 'Condomínio';
+            return { item, competencia: 'Dezembro / 2026', dataPagamento: '', valor: '', categoria, saudacao: saudacaoAtual() };
+        }
+        function montarMensagem(d, agradecimento, canal) {
+            const abertura = canal === 'whatsapp' ? `🙋🏻‍♂️Olá, ${d.saudacao} 🍀` : `${d.item.nome || ''}, ${d.saudacao} 🍀`;
+            const acao = agradecimento ? `Agradeço pela realização do pagamento do ${d.categoria}.` : `Segue em anexo o demonstrativo de pagamento do ${d.categoria}.`;
+            const dataRotulo = agradecimento ? 'Data do pagamento' : 'Data de pagamento';
+            const valorRotulo = agradecimento ? 'Valor recebido' : 'Valor a pagar';
+            const finalizacao = agradecimento ? `\n\nPagamento recebido e registrado com sucesso.` : `\n\nEm caso de dúvidas, fico à disposição.`;
+            return `${abertura}\n\n${acao}\n\nCompetência: ${d.competencia}\n${dataRotulo}: ${d.dataPagamento}\n${valorRotulo}: R$ ${d.valor}${finalizacao}\n\nObrigado Sempre !!✨🙌`;
+        }
+        function abrirGmail(type, index) {
+            const d = prepararMensagem(type, index, false, true); if (!d) return;
+            const assunto = `Demonstrativo de pagamento do ${d.categoria} - ${d.competencia}`;
+            abrirCompositorGmail(d.item.email, assunto, montarMensagem(d, false, 'gmail'));
+        }
+        function abrirGmailAgradecimento(type, index) {
+            const d = prepararMensagem(type, index, true, true); if (!d) return;
+            const assunto = `Agradecimento pelo pagamento do ${d.categoria} - ${d.competencia}`;
+            abrirCompositorGmail(d.item.email, assunto, montarMensagem(d, true, 'gmail'));
+        }
+        function abrirCompositorGmail(email, assunto, corpo) {
+            const url = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(email) + '&su=' + encodeURIComponent(assunto) + '&body=' + encodeURIComponent(corpo);
+            const janela = window.open(url, '_blank');
+            if (!janela) alert('O navegador bloqueou a abertura do Gmail. Permita pop-ups para este arquivo.');
+        }
+        function abrirWhatsApp(type, index) {
+            const d = prepararMensagem(type, index, false, false); if (!d) return;
+            document.getElementById('whatsapp-popup-titulo').textContent = 'Mensagem para WhatsApp';
+            document.getElementById('whatsapp-texto').value = montarMensagem(d, false, 'whatsapp');
+            document.getElementById('whatsapp-popup').classList.add('ativo');
+        }
+        function abrirWhatsAppAgradecimento(type, index) {
+            const d = prepararMensagem(type, index, true, false); if (!d) return;
+            document.getElementById('whatsapp-popup-titulo').textContent = 'Agradecimento para WhatsApp';
+            document.getElementById('whatsapp-texto').value = montarMensagem(d, true, 'whatsapp');
+            document.getElementById('whatsapp-popup').classList.add('ativo');
+        }
+        function fecharWhatsAppPopup() { document.getElementById('whatsapp-popup').classList.remove('ativo'); }
+        async function copiarTextoWhatsApp() {
+            const campo = document.getElementById('whatsapp-texto');
+            try { await navigator.clipboard.writeText(campo.value); alert('Texto copiado. Agora cole no WhatsApp.'); }
+            catch (erro) { campo.focus(); campo.select(); document.execCommand('copy'); alert('Texto copiado. Agora cole no WhatsApp.'); }
+        }
         function copiar(texto, btn) {
             if(!texto || texto === "-") return;
             navigator.clipboard.writeText(texto);
