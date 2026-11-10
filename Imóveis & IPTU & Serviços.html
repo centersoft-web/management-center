@@ -441,7 +441,7 @@
             const acao = agradecimento ? `Agradeço pela realização do pagamento do ${d.categoria}.` : `Segue em anexo o demonstrativo de pagamento do ${d.categoria}.`;
             const dataRotulo = agradecimento ? 'Data do pagamento' : 'Data de pagamento';
             const valorRotulo = agradecimento ? 'Valor recebido' : 'Valor a pagar';
-            const finalizacao = agradecimento ? `\n\nPagamento recebido e registrado com sucesso.` : `\n\nEm caso de dúvidas, fico à disposição.`;
+            const finalizacao = agradecimento ? `\n\nPagamento registrado com sucesso.✍️` : `\n\nEm caso de dúvidas, fico à disposição.`;
             return `${abertura}\n\n${acao}\n\nCompetência: ${d.competencia}\n${dataRotulo}: ${d.dataPagamento}\n${valorRotulo}: R$ ${d.valor}${finalizacao}\n\nObrigado Sempre !!✨🙌`;
         }
         function abrirGmail(type, index) {
