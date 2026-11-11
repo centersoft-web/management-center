@@ -112,44 +112,46 @@
             text-transform: uppercase;
         }
         #rent-rows tr td:nth-child(1)::before { content: "Ordem"; }
-        #rent-rows tr td:nth-child(2)::before { content: "Inquilino"; }
-        #rent-rows tr td:nth-child(3)::before { content: "E-mail"; }
-        #rent-rows tr td:nth-child(4)::before { content: "Data Pagto"; }
-        #rent-rows tr td:nth-child(5)::before { content: "Reajuste"; }
-        #rent-rows tr td:nth-child(6)::before { content: "CDC IPTU"; }
-        #rent-rows tr td:nth-child(7)::before { content: "Destino"; }
-        #rent-rows tr td:nth-child(8)::before { content: "Aluguel"; }
-        #rent-rows tr td:nth-child(9)::before { content: "Extras"; }
-        #rent-rows tr td:nth-child(10)::before { content: "Descrição do Extra"; }
-        #rent-rows tr td:nth-child(11)::before { content: "Subtotal"; }
-        #rent-rows tr td:nth-child(12)::before { content: "Ações"; }
+        #rent-rows tr td:nth-child(2)::before { content: "Inquilino/Contato"; }
+        #rent-rows tr td:nth-child(3)::before { content: "Unidade"; }
+        #rent-rows tr td:nth-child(4)::before { content: "E-mail"; }
+        #rent-rows tr td:nth-child(5)::before { content: "Data Pagto"; }
+        #rent-rows tr td:nth-child(6)::before { content: "Reajuste"; }
+        #rent-rows tr td:nth-child(7)::before { content: "CDC IPTU"; }
+        #rent-rows tr td:nth-child(8)::before { content: "Destino"; }
+        #rent-rows tr td:nth-child(9)::before { content: "Aluguel"; }
+        #rent-rows tr td:nth-child(10)::before { content: "Extras"; }
+        #rent-rows tr td:nth-child(11)::before { content: "Descrição do Extra"; }
+        #rent-rows tr td:nth-child(12)::before { content: "Subtotal"; }
+        #rent-rows tr td:nth-child(13)::before { content: "Ações"; }
 
         /* Dimensionamento individual dos campos */
         #rent-rows tr td:nth-child(1)  { grid-column: span 1; } /* Ordem */
-        #rent-rows tr td:nth-child(2)  { grid-column: span 3; } /* Inquilino */
-        #rent-rows tr td:nth-child(3)  { grid-column: span 3; } /* E-mail */
-        #rent-rows tr td:nth-child(4)  { grid-column: span 2; } /* Data Pagto */
-        #rent-rows tr td:nth-child(5)  { grid-column: span 1; } /* Reajuste */
-        #rent-rows tr td:nth-child(6)  { grid-column: span 2; } /* CDC IPTU */
-        #rent-rows tr td:nth-child(7)  { grid-column: 2 / 5; } /* Destino */
-        #rent-rows tr td:nth-child(8)  { grid-column: 5 / 12; grid-row: 2; width: 120px; justify-self: start; } /* Aluguel */
-        #rent-rows tr td:nth-child(9)  { grid-column: 5 / 12; grid-row: 2; width: 120px; justify-self: start; margin-left: 130px; } /* Extras */
-        #rent-rows tr td:nth-child(10) { grid-column: 5 / 11; grid-row: 2; min-width: 0; margin-left: 260px; } /* Descrição do Extra */
-        #rent-rows tr td:nth-child(11) { grid-column: 11 / 13; grid-row: 2; } /* Subtotal ampliado na segunda linha */
+        #rent-rows tr td:nth-child(2)  { grid-column: span 3; } /* Inquilino/Contato */
+        #rent-rows tr td:nth-child(3)  { grid-column: span 2; } /* Unidade */
+        #rent-rows tr td:nth-child(4)  { grid-column: span 3; } /* E-mail */
+        #rent-rows tr td:nth-child(5)  { grid-column: span 2; } /* Data Pagto */
+        #rent-rows tr td:nth-child(6)  { grid-column: span 1; } /* Reajuste */
+        #rent-rows tr td:nth-child(7)  { grid-column: 1 / 3; } /* CDC IPTU */
+        #rent-rows tr td:nth-child(8)  { grid-column: 3 / 5; } /* Destino */
+        #rent-rows tr td:nth-child(9)  { grid-column: 5 / 12; grid-row: 2; width: 120px; justify-self: start; } /* Aluguel */
+        #rent-rows tr td:nth-child(10) { grid-column: 5 / 12; grid-row: 2; width: 120px; justify-self: start; margin-left: 130px; } /* Extras */
+        #rent-rows tr td:nth-child(11) { grid-column: 5 / 11; grid-row: 2; min-width: 0; margin-left: 260px; } /* Descrição do Extra */
+        #rent-rows tr td:nth-child(12) { grid-column: 11 / 13; grid-row: 2; } /* Subtotal ampliado na segunda linha */
 
         /* Ações ocupam sozinhas a terceira linha */
-        #rent-rows tr td:nth-child(12) {
+        #rent-rows tr td:nth-child(13) {
             grid-column: 1 / -1;
             border-top: 1px solid #e2e8f0;
             padding-top: 0.75rem !important;
         }
-        #rent-rows tr td:nth-child(12) > div {
+        #rent-rows tr td:nth-child(13) > div {
             display: grid;
-            grid-template-columns: repeat(7, minmax(120px, 1fr)) auto;
+            grid-template-columns: repeat(6, minmax(120px, 1fr));
             align-items: center;
             gap: 0.5rem;
         }
-        #rent-rows tr td:nth-child(12) .row-controls {
+        #rent-rows tr td:nth-child(13) .row-controls {
             margin-top: 0 !important;
             white-space: nowrap;
         }
@@ -165,19 +167,19 @@
         }
         @media (max-width: 900px) {
             #rent-rows tr { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            #rent-rows tr td:not(:nth-child(12)) { grid-column: span 1; }
-            #rent-rows tr td:nth-child(8),
-            #rent-rows tr td:nth-child(9) { width: auto; justify-self: stretch; margin-left: 0; grid-row: auto; }
-            #rent-rows tr td:nth-child(10) { margin-left: 0; grid-row: auto; }
-            #rent-rows tr td:nth-child(11) { grid-row: auto; }
-            #rent-rows tr td:nth-child(12) > div { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            #rent-rows tr td:nth-child(12) .row-controls { grid-column: 1 / -1; }
+            #rent-rows tr td:not(:nth-child(13)) { grid-column: span 1; }
+            #rent-rows tr td:nth-child(9),
+            #rent-rows tr td:nth-child(10) { width: auto; justify-self: stretch; margin-left: 0; grid-row: auto; }
+            #rent-rows tr td:nth-child(11) { margin-left: 0; grid-row: auto; }
+            #rent-rows tr td:nth-child(12) { grid-row: auto; }
+            #rent-rows tr td:nth-child(13) > div { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            #rent-rows tr td:nth-child(13) .row-controls { grid-column: 1 / -1; }
         }
         @media (max-width: 520px) {
             #rent-rows tr { grid-template-columns: 1fr; }
-            #rent-rows tr td:not(:nth-child(12)) { grid-column: 1; }
-            #rent-rows tr td:nth-child(12) > div { grid-template-columns: 1fr; }
-            #rent-rows tr td:nth-child(12) .row-controls { grid-column: auto; }
+            #rent-rows tr td:not(:nth-child(13)) { grid-column: 1; }
+            #rent-rows tr td:nth-child(13) > div { grid-template-columns: 1fr; }
+            #rent-rows tr td:nth-child(13) .row-controls { grid-column: auto; }
         }
 
         /* Popup pontual para copiar mensagem do WhatsApp */
@@ -292,7 +294,8 @@
                         <thead>
                             <tr class="bg-slate-900 text-white font-bold uppercase tracking-wider text-[11px]">
                                 <th class="py-3 px-3 text-center w-[50px]">Ordem</th>
-                                <th class="py-3 px-3 w-[18%]">Inquilino</th>
+                                <th class="py-3 px-3 w-[18%]">Inquilino/Contato</th>
+                                <th class="py-3 px-3 w-[10%]">Unidade</th>
                                 <th class="py-3 px-3 w-[18%]">E-mail</th>
                                 <th class="py-3 px-3 w-[12%]">Data Pagto</th>
                                 <th class="py-3 px-3 w-[8%]">Reajuste</th>
@@ -360,6 +363,7 @@
                 </div>
             </td>
             <td class="p-2"><div class="row-tenant-title"></div><input type="text" class="in-name w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" oninput="updateRowTitle(this); saveData(false)"></td>
+            <td class="p-2"><input type="text" class="in-unidade w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" placeholder="Ex: Apto 12" oninput="saveData(false)"></td>
             <td class="p-2"><input type="text" class="in-email w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" placeholder="email1@gmail.com; email2@gmail.com" oninput="saveData(false)"></td>
             <td class="p-2"><input type="date" class="in-date w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" oninput="saveData(false)"></td>
             <td class="p-2"><input type="text" class="in-reajuste w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" placeholder="Ex: Mar" oninput="saveData(false)"></td>
@@ -378,6 +382,10 @@
                     <button class="btn-demo-row border border-green-600 text-green-700 hover:bg-green-600 hover:text-white py-1 px-1.5 rounded text-[10px] font-bold uppercase transition w-full text-center" onclick="abrirWhatsAppPopup(this.closest('tr').rowIndex - 1)"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
                     <button class="btn-demo-row border border-rose-500 text-rose-600 hover:bg-rose-500 hover:text-white py-1 px-1.5 rounded text-[10px] font-bold uppercase transition w-full text-center" onclick="abrirGmailAgradecimento(this.closest('tr').rowIndex - 1)"><i class="fa-solid fa-envelope-circle-check"></i> Agradecer Gmail</button>
                     <button class="btn-demo-row border border-teal-600 text-teal-700 hover:bg-teal-600 hover:text-white py-1 px-1.5 rounded text-[10px] font-bold uppercase transition w-full text-center" onclick="abrirWhatsAppAgradecimento(this.closest('tr').rowIndex - 1)"><i class="fa-brands fa-whatsapp"></i> Agradecer WhatsApp</button>
+                    <button class="btn-demo-row border border-sky-600 text-sky-700 hover:bg-sky-600 hover:text-white py-1 px-1.5 rounded text-[10px] font-bold uppercase transition w-full text-center" onclick="abrirGmailCobrancaIPTU(this.closest('tr').rowIndex - 1)"><i class="fa-solid fa-envelope-open-text"></i> Cobrança / IPTU E-mail</button>
+                    <button class="btn-demo-row border border-green-700 text-green-800 hover:bg-green-700 hover:text-white py-1 px-1.5 rounded text-[10px] font-bold uppercase transition w-full text-center" onclick="abrirWhatsAppCobrancaIPTU(this.closest('tr').rowIndex - 1)"><i class="fa-brands fa-whatsapp"></i> Cobrança / IPTU WhatsApp</button>
+                    <button class="btn-demo-row border border-indigo-600 text-indigo-700 hover:bg-indigo-600 hover:text-white py-1 px-1.5 rounded text-[10px] font-bold uppercase transition w-full text-center" onclick="abrirGmailCobrancaCondominio(this.closest('tr').rowIndex - 1)"><i class="fa-solid fa-envelope-open-text"></i> Cobrança / Condomínio E-mail</button>
+                    <button class="btn-demo-row border border-emerald-700 text-emerald-800 hover:bg-emerald-700 hover:text-white py-1 px-1.5 rounded text-[10px] font-bold uppercase transition w-full text-center" onclick="abrirWhatsAppCobrancaCondominio(this.closest('tr').rowIndex - 1)"><i class="fa-brands fa-whatsapp"></i> Cobrança / Condomínio WhatsApp</button>
                     <div class="row-controls flex gap-1 justify-center items-center mt-1">
                         <button class="btn-icon add text-brand-600 hover:bg-brand-50 p-1.5 rounded text-sm transition" title="Adicionar Linha" onclick="addRow(this)"><i class="fa-solid fa-circle-plus"></i></button>
                         <button class="btn-icon save text-emerald-600 hover:bg-emerald-50 p-1.5 rounded text-sm transition" title="Salvar" onclick="saveData(true)"><i class="fa-solid fa-circle-check"></i></button>
@@ -435,7 +443,7 @@
 
     function saveData(verbose) {
         const data = Array.from(document.querySelectorAll('#rent-rows tr')).map(row => ({
-            n: row.querySelector('.in-name').value, email: row.querySelector('.in-email').value, d: row.querySelector('.in-date').value,
+            n: row.querySelector('.in-name').value, unidade: row.querySelector('.in-unidade').value, email: row.querySelector('.in-email').value, d: row.querySelector('.in-date').value,
             r: row.querySelector('.in-reajuste').value, v: row.querySelector('.in-val').value, 
             e: row.querySelector('.in-extra').value, ed: row.querySelector('.in-extra-desc').value, dest: row.querySelector('.in-destino').value,
             cdc: row.querySelector('.in-cdc').value
@@ -457,6 +465,7 @@
                 row.innerHTML = createRowHTML();
                 row.querySelector('.in-name').value = d.n || '';
                 updateRowTitle(row.querySelector('.in-name')); 
+                row.querySelector('.in-unidade').value = d.unidade || '';
                 row.querySelector('.in-email').value = d.email || '';
                 row.querySelector('.in-date').value = d.d || ''; 
                 row.querySelector('.in-reajuste').value = d.r || ''; 
@@ -503,6 +512,7 @@
                 row.innerHTML = createRowHTML(); 
                 row.querySelector('.in-name').value = d.n || '';
                 updateRowTitle(row.querySelector('.in-name')); 
+                row.querySelector('.in-unidade').value = d.unidade || '';
                 row.querySelector('.in-email').value = d.email || '';
                 row.querySelector('.in-reajuste').value = d.r || ''; 
                 row.querySelector('.in-cdc').value = d.cdc || ''; 
@@ -576,7 +586,8 @@
         const dataFormatada=dataPagamento.split('-').reverse().join('/'), valorFormatado=subtotal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}), competencia=`${meses[currentMonthIdx]} / ${currentYear}`;
         const agora=new Date(), minutosAtuais=agora.getHours()*60+agora.getMinutes();
         const saudacao=minutosAtuais<=720?'bom dia':minutosAtuais<1080?'boa tarde':'boa noite';
-        const texto=`🙋🏻‍♂️Olá, ${saudacao} 🍀\n\n`+`Segue em anexo o demonstrativo de pagamento de aluguel.\n\n`+`Competência: ${competencia}\nData de pagamento: ${dataFormatada}\nValor a pagar: ${valorFormatado}\n\n`+`Em caso de dúvidas, fico à disposição.\n\n`+`Obrigado Sempre !!✨🙌`;
+        const texto=`🙋🏻‍♂️Olá ${nome}, ${saudacao} 🍀\n\n`+`Segue em anexo o demonstrativo de pagamento de aluguel.\n\n`+`Competência: ${competencia}\nData de pagamento: ${dataFormatada}\nValor a pagar: ${valorFormatado}\n\n`+`Em caso de dúvidas, fico à disposição.\n\n`+`Obrigado Sempre !!✨🙌`;
+        document.getElementById('whatsapp-popup-titulo').textContent='Mensagem para WhatsApp';
         document.getElementById('whatsapp-texto').value=texto; document.getElementById('whatsapp-popup').classList.add('ativo');
     }
     function fecharWhatsAppPopup(){ document.getElementById('whatsapp-popup').classList.remove('ativo'); }
@@ -649,7 +660,7 @@
     }
     function montarMensagemAgradecimento(dados, canal = 'gmail') {
         const abertura = canal === 'whatsapp'
-            ? `🙋🏻‍♂️Olá, ${dados.saudacao} 🍀`
+            ? `🙋🏻‍♂️Olá ${dados.nome}, ${dados.saudacao} 🍀`
             : `${dados.nome}, ${dados.saudacao} 🍀`;
         return `${abertura}\n\n` +
             `Agradeço pela realização do depósito/pagamento do aluguel.\n\n` +
@@ -674,12 +685,85 @@
         document.getElementById('whatsapp-texto').value = montarMensagemAgradecimento(dados, 'whatsapp');
         document.getElementById('whatsapp-popup').classList.add('ativo');
     }
+    function dadosCobrancaIPTU(rowIdx, exigirEmail = false) {
+        saveData(false);
+        const rows = document.querySelectorAll('#rent-rows tr');
+        if (!rows[rowIdx]) return null;
+        const row = rows[rowIdx];
+        const nome = row.querySelector('.in-name').value.trim();
+        const unidade = row.querySelector('.in-unidade').value.trim();
+        const emailTexto = row.querySelector('.in-email').value.trim();
+        const emails = emailTexto.split(';').map(item => item.trim()).filter(Boolean);
+        if (!nome) { alert('Preencha o nome do inquilino/contato.'); return null; }
+        if (!unidade) { alert('Preencha a unidade.'); return null; }
+        if (exigirEmail && emails.length === 0) { alert('Preencha pelo menos um e-mail do inquilino/contato.'); return null; }
+        if (exigirEmail) {
+            const emailInvalido = emails.find(item => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(item));
+            if (emailInvalido) { alert('E-mail inválido: ' + emailInvalido + '. Separe os destinatários com ponto e vírgula.'); return null; }
+        }
+        return {
+            nome,
+            unidade,
+            destinatarios: emails.join(','),
+            mes: meses[currentMonthIdx]
+        };
+    }
+    function montarMensagemCobrancaIPTU(dados) {
+        return `Olá, ${dados.nome}, tudo bem?\n\n` +
+            `Espero que esteja tudo ótimo por aí!\n\n` +
+            `Estou entrando em contato apenas para dar uma conferida rápida, pois notei por aqui que o pagamento do IPTU da sua unidade ainda não constou como realizado no mês de ${dados.mes}.\n\n` +
+            `Como imprevistos com boletos, bancos ou sistemas acontecem com todo mundo, quis te mandar uma mensagem para saber se está tudo bem ou se você precisa que eu te envie uma segunda via do boleto.\n\n` +
+            `Se já tiver feito o pagamento, por favor, desconsidere e peço desculpas pelo aviso — basta me enviar o comprovante quando puder para eu atualizar os registros por aqui.\n\n` +
+            `Um abraço, e obrigado pela atenção!`;
+    }
+    function abrirGmailCobrancaIPTU(rowIdx) {
+        const dados = dadosCobrancaIPTU(rowIdx, true);
+        if (!dados) return;
+        const assunto = `IPTU - ${dados.unidade} / Um alô rápido`;
+        const corpo = montarMensagemCobrancaIPTU(dados);
+        const urlGmail = 'https://mail.google.com/mail/?view=cm&fs=1' +
+            '&to=' + encodeURIComponent(dados.destinatarios) + '&su=' + encodeURIComponent(assunto) + '&body=' + encodeURIComponent(corpo);
+        const janela = window.open(urlGmail, '_blank');
+        if (!janela) alert('O navegador bloqueou a abertura do Gmail. Permita pop-ups para este arquivo.');
+    }
+    function abrirWhatsAppCobrancaIPTU(rowIdx) {
+        const dados = dadosCobrancaIPTU(rowIdx, false);
+        if (!dados) return;
+        document.getElementById('whatsapp-popup-titulo').textContent = `Cobrança / IPTU - ${dados.unidade}`;
+        document.getElementById('whatsapp-texto').value = montarMensagemCobrancaIPTU(dados);
+        document.getElementById('whatsapp-popup').classList.add('ativo');
+    }
+    function montarMensagemCobrancaCondominio(dados) {
+        return `Olá, ${dados.nome}, tudo bem?\n\n` +
+            `Espero que esteja tudo ótimo por aí!\n\n` +
+            `Estou entrando em contato apenas para dar uma conferida rápida, pois notei por aqui que o pagamento do condomínio da sua unidade ainda não constou como realizado no mês de ${dados.mes}.\n\n` +
+            `Como imprevistos com boletos, bancos ou sistemas acontecem com todo mundo, quis te mandar uma mensagem para saber se está tudo bem ou se você precisa que eu te envie uma segunda via do boleto.\n\n` +
+            `Se já tiver feito o pagamento, por favor, desconsidere e peço desculpas pelo aviso — basta me enviar o comprovante quando puder para eu atualizar os registros por aqui.\n\n` +
+            `Um abraço, e obrigado pela atenção!`;
+    }
+    function abrirGmailCobrancaCondominio(rowIdx) {
+        const dados = dadosCobrancaIPTU(rowIdx, true);
+        if (!dados) return;
+        const assunto = `Condomínio - ${dados.unidade} / Um alô rápido`;
+        const corpo = montarMensagemCobrancaCondominio(dados);
+        const urlGmail = 'https://mail.google.com/mail/?view=cm&fs=1' +
+            '&to=' + encodeURIComponent(dados.destinatarios) + '&su=' + encodeURIComponent(assunto) + '&body=' + encodeURIComponent(corpo);
+        const janela = window.open(urlGmail, '_blank');
+        if (!janela) alert('O navegador bloqueou a abertura do Gmail. Permita pop-ups para este arquivo.');
+    }
+    function abrirWhatsAppCobrancaCondominio(rowIdx) {
+        const dados = dadosCobrancaIPTU(rowIdx, false);
+        if (!dados) return;
+        document.getElementById('whatsapp-popup-titulo').textContent = `Cobrança / Condomínio - ${dados.unidade}`;
+        document.getElementById('whatsapp-texto').value = montarMensagemCobrancaCondominio(dados);
+        document.getElementById('whatsapp-popup').classList.add('ativo');
+    }
     function gerarDemonstrativo(rowIdx) {
         saveData(false);
         const rows = document.querySelectorAll('#rent-rows tr');
         if(!rows[rowIdx]) return;
         const row = rows[rowIdx];
-        const nome = row.querySelector('.in-name').value || "(Inquilino)";
+        const unidade = row.querySelector('.in-unidade').value || "(Unidade)";
         const reajuste = row.querySelector('.in-reajuste').value;
         const cdc = row.querySelector('.in-cdc').value || 'Não informado';
         const destino = row.querySelector('.in-destino').value || 'Não informado';
@@ -718,7 +802,7 @@
             <div class="demo-header"><h1>Demonstrativo de Aluguel</h1></div>
             <div class="demo-section">
                 <div><h4>Locador</h4><p><strong>${locador}</strong></p></div>
-                <div style="text-align: right;"><h4>Inquilino</h4><p><strong>${nome.toUpperCase()}</strong></p></div>
+                <div style="text-align: right;"><h4>Unidade</h4><p><strong>${unidade.toUpperCase()}</strong></p></div>
             </div>
             <div class="demo-section">
                 <div><h4>Mês de Referência</h4><p>${meses[mesRefIdx]} / ${anoRef}</p></div>
@@ -755,9 +839,9 @@
     function gerarExtratoIndividual(rowIdx) {
         saveData(false);
         const rows = document.querySelectorAll('#rent-rows tr');
-        const nomeInquilino = rows[rowIdx].querySelector('.in-name').value;
+        const unidadeSelecionada = rows[rowIdx].querySelector('.in-unidade').value;
         const locador = document.getElementById('locador-nome').value || '(Locador)';
-        if(!nomeInquilino) return alert("Por favor, preencha o nome do inquilino.");
+        if(!unidadeSelecionada) return alert("Por favor, preencha a unidade.");
         let htmlExtrato = `
             <style>
                 .extrato-wrapper { font-family: Arial, sans-serif; padding: 40px; color: #333; background: white; border: none !important; box-shadow: none !important; max-width: 900px; margin: 0 auto; }
@@ -775,7 +859,7 @@
                 <h2 style="text-align: center; border-bottom: 2px solid #1a2a3a; padding-bottom: 10px;">Extrato Anual Consolidado para Declaração no IR</h2>
                 <div style="margin: 20px 0; line-height: 1.6;">
                     <p><strong>LOCADOR:</strong> ${locador.toUpperCase()}</p>
-                    <p><strong>INQUILINO:</strong> ${nomeInquilino.toUpperCase()}</p>
+                    <p><strong>UNIDADE:</strong> ${unidadeSelecionada.toUpperCase()}</p>
                     <p><strong>ANO DE REFERÊNCIA:</strong> ${currentYear}</p>
                 </div>
                 <table style="width:100%; border-collapse: collapse; margin-top: 20px; border: 1.5px solid #000;">
@@ -788,7 +872,7 @@
         let encontrou = false;
         for(let i=0; i<12; i++) {
             const dados = JSON.parse(localStorage.getItem(`data_${currentYear}_mes_${i}`) || '[]');
-            const reg = dados.find(r => r.n && r.n.trim().toUpperCase() === nomeInquilino.trim().toUpperCase());
+            const reg = dados.find(r => r.unidade && r.unidade.trim().toUpperCase() === unidadeSelecionada.trim().toUpperCase());
             if(reg) {
                 encontrou = true;
                 const v = (parseFloat(reg.v)||0) + (parseFloat(reg.e)||0);
@@ -800,7 +884,7 @@
                 </tr>`;
             }
         }
-        if(!encontrou) return alert("Sem dados para este inquilino.");
+        if(!encontrou) return alert("Sem dados para esta unidade.");
         htmlExtrato += `
                 <tr style="font-weight:bold; background:#eee;">
                     <td colspan="2" style="padding:12px; text-align:right; border:1.5px solid #000;">TOTAL ACUMULADO NO ANO:</td>
@@ -823,7 +907,7 @@
         if(!rows[rowIdx]) return;
         const row = rows[rowIdx];
         
-        const nome = row.querySelector('.in-name').value || "(Inquilino)";
+        const unidade = row.querySelector('.in-unidade').value || "(Unidade)";
         const val = parseFloat(row.querySelector('.in-val').value) || 0;
         const extra = parseFloat(row.querySelector('.in-extra').value) || 0;
         const total = val + extra;
@@ -855,7 +939,7 @@
                 <div class="recibo-val">${total.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</div>
             </div>
             <div class="recibo-body">
-                Recebi(emos) de <strong>${nome.toUpperCase()}</strong>, a importância supra de <strong>${total.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</strong>, referente ao pagamento do aluguel e encargos do mês de <strong>${meses[currentMonthIdx]} / ${currentYear}</strong>.
+                Recebi(emos) da unidade <strong>${unidade.toUpperCase()}</strong>, a importância supra de <strong>${total.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</strong>, referente ao pagamento do aluguel e encargos do mês de <strong>${meses[currentMonthIdx]} / ${currentYear}</strong>.
                 <br><br>
                 Para maior clareza, firmo(amos) o presente recibo.
             </div>
@@ -898,7 +982,7 @@
                 const total = (parseFloat(r.v)||0) + (parseFloat(r.e)||0);
                 if(r.n || total > 0) {
                     has = true; sub += total; totalGeral += total;
-                    rHtml += `<tr><td><strong>${r.n.toUpperCase()}</strong></td><td style="text-align:center">${r.d?r.d.split('-').reverse().join('/'):'--'}</td><td style="text-align:right">${(parseFloat(r.v)||0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right">${(parseFloat(r.e)||0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right; font-weight:bold">${total.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td></tr>`;
+                    rHtml += `<tr><td><strong>${(r.n || '').toUpperCase()}</strong></td><td style="text-align:center">${r.d?r.d.split('-').reverse().join('/'):'--'}</td><td style="text-align:right">${(parseFloat(r.v)||0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right">${(parseFloat(r.e)||0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right; font-weight:bold">${total.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td></tr>`;
                 }
             });
             return has ? `<tr class="rep-month-title"><td colspan="5">${meses[idx].toUpperCase()}</td></tr>` + rHtml + `<tr><td colspan="4" style="text-align:right; font-weight:bold">Subtotal:</td><td style="text-align:right; font-weight:bold">${sub.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</td></tr>` : '';
