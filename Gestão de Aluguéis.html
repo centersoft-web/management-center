@@ -118,13 +118,14 @@
         #rent-rows tr td:nth-child(5)::before { content: "Data Pagto"; }
         #rent-rows tr td:nth-child(6)::before { content: "Reajuste"; }
         #rent-rows tr td:nth-child(7)::before { content: "CDC IPTU"; }
-        #rent-rows tr td:nth-child(8)::before { content: "Destino"; }
-        #rent-rows tr td:nth-child(9)::before { content: "Aluguel"; }
-        #rent-rows tr td:nth-child(10)::before { content: "Extras"; }
-        #rent-rows tr td:nth-child(11)::before { content: "Descrição do Extra"; }
-        #rent-rows tr td:nth-child(12)::before { content: "Aluguel Recebido"; }
-        #rent-rows tr td:nth-child(13)::before { content: "Subtotal"; }
-        #rent-rows tr td:nth-child(14)::before { content: "Ações"; }
+        #rent-rows tr td:nth-child(8)::before { content: ""; }
+        #rent-rows tr td:nth-child(9)::before { content: "Depósito"; }
+        #rent-rows tr td:nth-child(10)::before { content: "Aluguel"; }
+        #rent-rows tr td:nth-child(11)::before { content: "Extras"; }
+        #rent-rows tr td:nth-child(12)::before { content: "Descrição do Extra"; }
+        #rent-rows tr td:nth-child(13)::before { content: "Aluguel Recebido"; }
+        #rent-rows tr td:nth-child(14)::before { content: "Subtotal"; }
+        #rent-rows tr td:nth-child(15)::before { content: "Ações"; }
 
         /* Dimensionamento individual dos campos */
         #rent-rows tr td:nth-child(1)  { grid-column: span 1; }
@@ -134,20 +135,21 @@
         #rent-rows tr td:nth-child(5)  { grid-column: span 2; }
         #rent-rows tr td:nth-child(6)  { grid-column: span 1; }
         #rent-rows tr td:nth-child(7)  { grid-column: span 2; }
-        #rent-rows tr td:nth-child(8)  { grid-column: 2 / 4; grid-row: 2; }  /* Destino */
-        #rent-rows tr td:nth-child(9)  { grid-column: 4 / 6; grid-row: 2; }  /* Aluguel */
-        #rent-rows tr td:nth-child(10) { grid-column: 6 / 8; grid-row: 2; }  /* Extras */
-        #rent-rows tr td:nth-child(11) { grid-column: 8 / 11; grid-row: 2; } /* Descrição */
-        #rent-rows tr td:nth-child(12) { grid-column: 11 / 13; grid-row: 2; } /* Aluguel Recebido */
-        #rent-rows tr td:nth-child(13) { grid-column: 11 / 13; grid-row: 3; } /* Subtotal */
-        #rent-rows tr td:nth-child(14) { grid-column: 1 / -1; border-top: 1px solid #e2e8f0; padding-top: 0.75rem !important; }
-        #rent-rows tr td:nth-child(14) > div {
+        #rent-rows tr td:nth-child(8)  { grid-column: 1 / 2; grid-row: 2; }  /* Controles rápidos */
+        #rent-rows tr td:nth-child(9)  { grid-column: 2 / 4; grid-row: 2; }  /* Depósito */
+        #rent-rows tr td:nth-child(10) { grid-column: 4 / 6; grid-row: 2; }  /* Aluguel */
+        #rent-rows tr td:nth-child(11) { grid-column: 6 / 8; grid-row: 2; }  /* Extras */
+        #rent-rows tr td:nth-child(12) { grid-column: 8 / 11; grid-row: 2; } /* Descrição */
+        #rent-rows tr td:nth-child(13) { grid-column: 11 / 13; grid-row: 2; } /* Aluguel Recebido */
+        #rent-rows tr td:nth-child(14) { grid-column: 11 / 13; grid-row: 3; } /* Subtotal */
+        #rent-rows tr td:nth-child(15) { grid-column: 1 / -1; border-top: 1px solid #e2e8f0; padding-top: 0.75rem !important; }
+        #rent-rows tr td:nth-child(15) > div {
             display: grid;
             grid-template-columns: repeat(6, minmax(120px, 1fr));
             align-items: center;
             gap: 0.5rem;
         }
-        #rent-rows tr td:nth-child(14) .row-controls {
+        #rent-rows tr td:nth-child(15) .row-controls {
             margin-top: 0 !important;
             white-space: nowrap;
         }
@@ -162,7 +164,7 @@
             background: #f0f9ff;
         }
         /* Subtotal compacto na terceira linha, com rótulo e valor lado a lado */
-        #rent-rows tr td:nth-child(13) {
+        #rent-rows tr td:nth-child(14) {
             flex-direction: row;
             align-items: center;
             justify-content: flex-end;
@@ -170,7 +172,7 @@
             min-height: 1.75rem;
             padding: 0.2rem 0.6rem !important;
         }
-        #rent-rows tr td:nth-child(13)::before {
+        #rent-rows tr td:nth-child(14)::before {
             content: "Total :";
             margin: 0;
             font-size: 0.7rem;
@@ -181,16 +183,16 @@
         }
         @media (max-width: 900px) {
             #rent-rows tr { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            #rent-rows tr td:not(:nth-child(14)) { grid-column: span 1; }
-            #rent-rows tr td:nth-child(8), #rent-rows tr td:nth-child(9), #rent-rows tr td:nth-child(10), #rent-rows tr td:nth-child(11), #rent-rows tr td:nth-child(12), #rent-rows tr td:nth-child(13) { width: auto; justify-self: stretch; margin-left: 0; grid-row: auto; }
-            #rent-rows tr td:nth-child(14) > div { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            #rent-rows tr td:nth-child(14) .row-controls { grid-column: 1 / -1; }
+            #rent-rows tr td:not(:nth-child(15)) { grid-column: span 1; }
+            #rent-rows tr td:nth-child(8), #rent-rows tr td:nth-child(9), #rent-rows tr td:nth-child(10), #rent-rows tr td:nth-child(11), #rent-rows tr td:nth-child(12), #rent-rows tr td:nth-child(13), #rent-rows tr td:nth-child(14) { width: auto; justify-self: stretch; margin-left: 0; grid-row: auto; }
+            #rent-rows tr td:nth-child(15) > div { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            #rent-rows tr td:nth-child(15) .row-controls { grid-column: 1 / -1; }
         }
         @media (max-width: 520px) {
             #rent-rows tr { grid-template-columns: 1fr; }
-            #rent-rows tr td:not(:nth-child(14)) { grid-column: 1; }
-            #rent-rows tr td:nth-child(14) > div { grid-template-columns: 1fr; }
-            #rent-rows tr td:nth-child(14) .row-controls { grid-column: auto; }
+            #rent-rows tr td:not(:nth-child(15)) { grid-column: 1; }
+            #rent-rows tr td:nth-child(15) > div { grid-template-columns: 1fr; }
+            #rent-rows tr td:nth-child(15) .row-controls { grid-column: auto; }
         }
 
         /* Popup pontual para copiar mensagem do WhatsApp */
@@ -311,7 +313,7 @@
                                 <th class="py-3 px-3 w-[12%]">Data Pagto</th>
                                 <th class="py-3 px-3 w-[8%]">Reajuste</th>
                                 <th class="py-3 px-3 w-[10%]">CDC IPTU</th>
-                                <th class="py-3 px-3 w-[12%]">Destino</th>
+                                <th class="py-3 px-3 w-[12%]">Depósito</th>
                                 <th class="py-3 px-3 w-[10%]">Aluguel</th>
                                 <th class="py-3 px-3 w-[10%]">Extras</th>
                                 <th class="py-3 px-3 w-[14%]">Descrição do Extra</th>
@@ -380,6 +382,13 @@
             <td class="p-2"><input type="date" class="in-date w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" oninput="saveData(false)"></td>
             <td class="p-2"><input type="text" class="in-reajuste w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" placeholder="Ex: Mar" oninput="saveData(false)"></td>
             <td class="p-2"><input type="text" class="in-cdc w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" placeholder="000-0" oninput="saveData(false)"></td>
+            <td class="p-2 quick-row-controls">
+                <div class="row-controls flex gap-1 justify-center items-center">
+                    <button class="btn-icon add text-brand-600 hover:bg-brand-50 p-1.5 rounded text-sm transition" title="Adicionar Linha" aria-label="Adicionar Linha" onclick="addRow(this)"><i class="fa-solid fa-circle-plus"></i></button>
+                    <button class="btn-icon save text-emerald-600 hover:bg-emerald-50 p-1.5 rounded text-sm transition" title="Editar" aria-label="Editar" onclick="saveData(true)"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button class="btn-icon del text-rose-600 hover:bg-rose-50 p-1.5 rounded text-sm transition" title="Excluir" aria-label="Excluir" onclick="deleteRow(this)"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+            </td>
             <td class="p-2"><input type="text" class="in-destino w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" placeholder="Pix" oninput="saveData(false)"></td>
             <td class="p-2"><input type="number" step="0.01" class="in-val w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-medium text-slate-800 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" oninput="autoCalc(this)"></td>
             <td class="p-2"><input type="number" step="0.01" class="in-extra w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-medium text-slate-800 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" oninput="autoCalc(this)"></td>
@@ -399,11 +408,8 @@
                     <button class="btn-demo-row border border-green-700 text-green-800 hover:bg-green-700 hover:text-white py-1 px-1.5 rounded text-[10px] font-bold uppercase transition w-full text-center" onclick="abrirWhatsAppCobrancaIPTU(this.closest('tr').rowIndex - 1)"><i class="fa-brands fa-whatsapp"></i> Cobrança / IPTU WhatsApp</button>
                     <button class="btn-demo-row border border-indigo-600 text-indigo-700 hover:bg-indigo-600 hover:text-white py-1 px-1.5 rounded text-[10px] font-bold uppercase transition w-full text-center" onclick="abrirGmailCobrancaCondominio(this.closest('tr').rowIndex - 1)"><i class="fa-solid fa-envelope-open-text"></i> Cobrança / Condomínio E-mail</button>
                     <button class="btn-demo-row border border-emerald-700 text-emerald-800 hover:bg-emerald-700 hover:text-white py-1 px-1.5 rounded text-[10px] font-bold uppercase transition w-full text-center" onclick="abrirWhatsAppCobrancaCondominio(this.closest('tr').rowIndex - 1)"><i class="fa-brands fa-whatsapp"></i> Cobrança / Condomínio WhatsApp</button>
-                    <div class="row-controls flex gap-1 justify-center items-center mt-1">
-                        <button class="btn-icon add text-brand-600 hover:bg-brand-50 p-1.5 rounded text-sm transition" title="Adicionar Linha" onclick="addRow(this)"><i class="fa-solid fa-circle-plus"></i></button>
-                        <button class="btn-icon save text-emerald-600 hover:bg-emerald-50 p-1.5 rounded text-sm transition" title="Salvar" onclick="saveData(true)"><i class="fa-solid fa-circle-check"></i></button>
-                        <button class="btn-icon del text-rose-600 hover:bg-rose-50 p-1.5 rounded text-sm transition" title="Excluir" onclick="deleteRow(this)"><i class="fa-solid fa-trash-can"></i></button>
-                    </div>
+                    <button class="btn-demo-row border border-blue-700 text-blue-800 hover:bg-blue-700 hover:text-white py-1 px-1.5 rounded text-[10px] font-bold uppercase transition w-full text-center" onclick="abrirGmailCobrancaAluguel(this.closest('tr').rowIndex - 1)"><i class="fa-solid fa-envelope-open-text"></i> Cobrança / Aluguel E-mail</button>
+                    <button class="btn-demo-row border border-lime-700 text-lime-800 hover:bg-lime-700 hover:text-white py-1 px-1.5 rounded text-[10px] font-bold uppercase transition w-full text-center" onclick="abrirWhatsAppCobrancaAluguel(this.closest('tr').rowIndex - 1)"><i class="fa-brands fa-whatsapp"></i> Cobrança / Aluguel WhatsApp</button>
                 </div>
             </td>`;
     }
@@ -770,6 +776,31 @@
         if (!dados) return;
         document.getElementById('whatsapp-popup-titulo').textContent = `Cobrança / Condomínio - ${dados.unidade}`;
         document.getElementById('whatsapp-texto').value = montarMensagemCobrancaCondominio(dados);
+        document.getElementById('whatsapp-popup').classList.add('ativo');
+    }
+    function montarMensagemCobrancaAluguel(dados) {
+        return `Olá, ${dados.nome}, tudo bem?\n\n` +
+            `Espero que esteja tudo ótimo por aí!\n\n` +
+            `Estou entrando em contato apenas para dar uma conferida rápida, pois notei por aqui que o pagamento do aluguel da sua unidade ainda não constou como realizado no mês de ${dados.mes}.\n\n` +
+            `Como imprevistos com boletos, bancos ou sistemas acontecem com todo mundo, quis te mandar uma mensagem para saber se está tudo bem ou se você precisa que eu te envie uma segunda via do boleto.\n\n` +
+            `Se já tiver feito o pagamento, por favor, desconsidere e peço desculpas pelo aviso — basta me enviar o comprovante quando puder para eu atualizar os registros por aqui.\n\n` +
+            `Um abraço, e obrigado pela atenção!`;
+    }
+    function abrirGmailCobrancaAluguel(rowIdx) {
+        const dados = dadosCobrancaIPTU(rowIdx, true);
+        if (!dados) return;
+        const assunto = `Aluguel - ${dados.unidade} / Um alô rápido`;
+        const corpo = montarMensagemCobrancaAluguel(dados);
+        const urlGmail = 'https://mail.google.com/mail/?view=cm&fs=1' +
+            '&to=' + encodeURIComponent(dados.destinatarios) + '&su=' + encodeURIComponent(assunto) + '&body=' + encodeURIComponent(corpo);
+        const janela = window.open(urlGmail, '_blank');
+        if (!janela) alert('O navegador bloqueou a abertura do Gmail. Permita pop-ups para este arquivo.');
+    }
+    function abrirWhatsAppCobrancaAluguel(rowIdx) {
+        const dados = dadosCobrancaIPTU(rowIdx, false);
+        if (!dados) return;
+        document.getElementById('whatsapp-popup-titulo').textContent = `Cobrança / Aluguel - ${dados.unidade}`;
+        document.getElementById('whatsapp-texto').value = montarMensagemCobrancaAluguel(dados);
         document.getElementById('whatsapp-popup').classList.add('ativo');
     }
     function gerarDemonstrativo(rowIdx) {
