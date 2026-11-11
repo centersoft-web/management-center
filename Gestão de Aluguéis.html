@@ -123,9 +123,10 @@
         #rent-rows tr td:nth-child(10)::before { content: "Aluguel"; }
         #rent-rows tr td:nth-child(11)::before { content: "Extras"; }
         #rent-rows tr td:nth-child(12)::before { content: "Descrição do Extra"; }
-        #rent-rows tr td:nth-child(13)::before { content: "Aluguel Recebido"; }
-        #rent-rows tr td:nth-child(14)::before { content: "Subtotal"; }
-        #rent-rows tr td:nth-child(15)::before { content: "Ações"; }
+        #rent-rows tr td:nth-child(13)::before { content: "IR retido na fonte"; }
+        #rent-rows tr td:nth-child(14)::before { content: "Aluguel Recebido"; }
+        #rent-rows tr td:nth-child(15)::before { content: "Subtotal"; }
+        #rent-rows tr td:nth-child(16)::before { content: "Ações"; }
 
         /* Dimensionamento individual dos campos */
         #rent-rows tr td:nth-child(1)  { grid-column: span 1; }
@@ -140,16 +141,17 @@
         #rent-rows tr td:nth-child(10) { grid-column: 4 / 6; grid-row: 2; }  /* Aluguel */
         #rent-rows tr td:nth-child(11) { grid-column: 6 / 8; grid-row: 2; }  /* Extras */
         #rent-rows tr td:nth-child(12) { grid-column: 8 / 11; grid-row: 2; } /* Descrição */
-        #rent-rows tr td:nth-child(13) { grid-column: 11 / 13; grid-row: 2; } /* Aluguel Recebido */
-        #rent-rows tr td:nth-child(14) { grid-column: 11 / 13; grid-row: 3; } /* Subtotal */
-        #rent-rows tr td:nth-child(15) { grid-column: 1 / -1; border-top: 1px solid #e2e8f0; padding-top: 0.75rem !important; }
-        #rent-rows tr td:nth-child(15) > div {
+        #rent-rows tr td:nth-child(13) { grid-column: 11 / 13; grid-row: 2; } /* IR retido */
+        #rent-rows tr td:nth-child(14) { grid-column: 9 / 11; grid-row: 3; }  /* Aluguel Recebido */
+        #rent-rows tr td:nth-child(15) { grid-column: 11 / 13; grid-row: 3; } /* Total */
+        #rent-rows tr td:nth-child(16) { grid-column: 1 / -1; border-top: 1px solid #e2e8f0; padding-top: 0.75rem !important; }
+        #rent-rows tr td:nth-child(16) > div {
             display: grid;
             grid-template-columns: repeat(6, minmax(120px, 1fr));
             align-items: center;
             gap: 0.5rem;
         }
-        #rent-rows tr td:nth-child(15) .row-controls {
+        #rent-rows tr td:nth-child(16) .row-controls {
             margin-top: 0 !important;
             white-space: nowrap;
         }
@@ -164,15 +166,15 @@
             background: #f0f9ff;
         }
         /* Subtotal compacto na terceira linha, com rótulo e valor lado a lado */
-        #rent-rows tr td:nth-child(14) {
+        #rent-rows tr td:nth-child(15) {
             flex-direction: row;
             align-items: center;
             justify-content: flex-end;
             gap: 0.45rem;
-            min-height: 1.75rem;
-            padding: 0.2rem 0.6rem !important;
+            min-height: 2.35rem;
+            padding: 0.55rem 0.7rem !important;
         }
-        #rent-rows tr td:nth-child(14)::before {
+        #rent-rows tr td:nth-child(15)::before {
             content: "Total :";
             margin: 0;
             font-size: 0.7rem;
@@ -183,16 +185,16 @@
         }
         @media (max-width: 900px) {
             #rent-rows tr { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            #rent-rows tr td:not(:nth-child(15)) { grid-column: span 1; }
-            #rent-rows tr td:nth-child(8), #rent-rows tr td:nth-child(9), #rent-rows tr td:nth-child(10), #rent-rows tr td:nth-child(11), #rent-rows tr td:nth-child(12), #rent-rows tr td:nth-child(13), #rent-rows tr td:nth-child(14) { width: auto; justify-self: stretch; margin-left: 0; grid-row: auto; }
-            #rent-rows tr td:nth-child(15) > div { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            #rent-rows tr td:nth-child(15) .row-controls { grid-column: 1 / -1; }
+            #rent-rows tr td:not(:nth-child(16)) { grid-column: span 1; }
+            #rent-rows tr td:nth-child(8), #rent-rows tr td:nth-child(9), #rent-rows tr td:nth-child(10), #rent-rows tr td:nth-child(11), #rent-rows tr td:nth-child(12), #rent-rows tr td:nth-child(13), #rent-rows tr td:nth-child(14), #rent-rows tr td:nth-child(15) { width: auto; justify-self: stretch; margin-left: 0; grid-row: auto; }
+            #rent-rows tr td:nth-child(16) > div { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            #rent-rows tr td:nth-child(16) .row-controls { grid-column: 1 / -1; }
         }
         @media (max-width: 520px) {
             #rent-rows tr { grid-template-columns: 1fr; }
-            #rent-rows tr td:not(:nth-child(15)) { grid-column: 1; }
-            #rent-rows tr td:nth-child(15) > div { grid-template-columns: 1fr; }
-            #rent-rows tr td:nth-child(15) .row-controls { grid-column: auto; }
+            #rent-rows tr td:not(:nth-child(16)) { grid-column: 1; }
+            #rent-rows tr td:nth-child(16) > div { grid-template-columns: 1fr; }
+            #rent-rows tr td:nth-child(16) .row-controls { grid-column: auto; }
         }
 
         /* Popup pontual para copiar mensagem do WhatsApp */
@@ -317,6 +319,7 @@
                                 <th class="py-3 px-3 w-[10%]">Aluguel</th>
                                 <th class="py-3 px-3 w-[10%]">Extras</th>
                                 <th class="py-3 px-3 w-[14%]">Descrição do Extra</th>
+                                <th class="py-3 px-3 w-[12%]">IR retido na fonte</th>
                                 <th class="py-3 px-3 w-[12%]">Aluguel Recebido</th>
                                 <th class="py-3 px-3 w-[10%]">Subtotal</th>
                                 <th class="py-3 px-3 text-center w-[160px]">Ações</th>
@@ -393,6 +396,7 @@
             <td class="p-2"><input type="number" step="0.01" class="in-val w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-medium text-slate-800 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" oninput="autoCalc(this)"></td>
             <td class="p-2"><input type="number" step="0.01" class="in-extra w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-medium text-slate-800 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" oninput="autoCalc(this)"></td>
             <td class="p-2"><input type="text" class="in-extra-desc w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" placeholder="Ex: Condomínio" oninput="saveData(false)"></td>
+            <td class="p-2"><input type="number" step="0.01" class="in-ir w-full px-2 py-1.5 bg-amber-50 border border-amber-300 rounded-md text-xs font-semibold text-amber-800 focus:ring-2 focus:ring-amber-500 focus:bg-white outline-none transition" oninput="autoCalc(this)"></td>
             <td class="p-2"><input type="number" step="0.01" class="in-recebido w-full px-2 py-1.5 bg-emerald-50 border border-emerald-300 rounded-md text-xs font-semibold text-emerald-800 focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition" oninput="autoCalc(this)"></td>
             <td class="row-total p-2 font-extrabold text-brand-700 text-xs">R$ 0,00</td>
             <td class="p-2">
@@ -462,6 +466,12 @@
 
     function autoCalc(inputEl) {
         const row = inputEl.closest('tr');
+        if (!inputEl.classList.contains('in-recebido')) {
+            const aluguel = parseFloat(row.querySelector('.in-val').value) || 0;
+            const extras = parseFloat(row.querySelector('.in-extra').value) || 0;
+            const ir = parseFloat(row.querySelector('.in-ir').value) || 0;
+            row.querySelector('.in-recebido').value = (aluguel + extras - ir).toFixed(2);
+        }
         const recebido = parseFloat(row.querySelector('.in-recebido').value) || 0;
         row.querySelector('.row-total').innerText = recebido.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
         saveData(false);
@@ -472,7 +482,7 @@
             n: row.querySelector('.in-name').value, unidade: row.querySelector('.in-unidade').value, email: row.querySelector('.in-email').value, d: row.querySelector('.in-date').value,
             r: row.querySelector('.in-reajuste').value, v: row.querySelector('.in-val').value, 
             e: row.querySelector('.in-extra').value, ed: row.querySelector('.in-extra-desc').value, dest: row.querySelector('.in-destino').value,
-            recebido: row.querySelector('.in-recebido').value, cdc: row.querySelector('.in-cdc').value
+            ir: row.querySelector('.in-ir').value, recebido: row.querySelector('.in-recebido').value, cdc: row.querySelector('.in-cdc').value
         }));
         localStorage.setItem(`data_${currentYear}_mes_${currentMonthIdx}`, JSON.stringify(data));
         updateAnnualTotal(); 
@@ -498,9 +508,10 @@
                 row.querySelector('.in-val').value = d.v || ''; 
                 row.querySelector('.in-extra').value = d.e || ''; 
                 row.querySelector('.in-extra-desc').value = d.ed || '';
+                row.querySelector('.in-ir').value = d.ir || '';
                 row.querySelector('.in-destino').value = d.dest || '';
                 row.querySelector('.in-cdc').value = d.cdc || '';
-                const recebido = d.recebido !== undefined ? (parseFloat(d.recebido)||0) : ((parseFloat(d.v)||0)+(parseFloat(d.e)||0));
+                const recebido = d.recebido !== undefined ? (parseFloat(d.recebido)||0) : ((parseFloat(d.v)||0)+(parseFloat(d.e)||0)-(parseFloat(d.ir)||0));
                 row.querySelector('.in-recebido').value = recebido.toFixed(2);
                 row.querySelector('.row-total').innerText = recebido.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
                 tbody.appendChild(row);
@@ -524,7 +535,7 @@
 
     function changeYear() { saveData(false); currentYear = document.getElementById('current-year-select').value; localStorage.setItem('selected_year', currentYear); loadMonthData(currentMonthIdx); updateAnnualTotal(); }
     function saveLocador() { localStorage.setItem('locador_nome', document.getElementById('locador-nome').value); }
-    function updateAnnualTotal() { let t = 0; for(let i=0; i<12; i++){ JSON.parse(localStorage.getItem(`data_${currentYear}_mes_${i}`)||'[]').forEach(x => t += x.recebido !== undefined ? (parseFloat(x.recebido)||0) : ((parseFloat(x.v)||0)+(parseFloat(x.e)||0))); } document.getElementById('grand-annual-total').innerText = t.toLocaleString('pt-BR', {style:'currency', currency:'BRL'}); document.getElementById('label-year-badge').innerText = currentYear; }
+    function updateAnnualTotal() { let t = 0; for(let i=0; i<12; i++){ JSON.parse(localStorage.getItem(`data_${currentYear}_mes_${i}`)||'[]').forEach(x => t += x.recebido !== undefined ? (parseFloat(x.recebido)||0) : ((parseFloat(x.v)||0)+(parseFloat(x.e)||0)-(parseFloat(x.ir)||0))); } document.getElementById('grand-annual-total').innerText = t.toLocaleString('pt-BR', {style:'currency', currency:'BRL'}); document.getElementById('label-year-badge').innerText = currentYear; }
     
     function copyFromPreviousMonth() { 
         if(currentMonthIdx === 0) return alert("Não há mês anterior."); 
@@ -546,8 +557,9 @@
                 row.querySelector('.in-val').value = d.v || ''; 
                 row.querySelector('.in-extra').value = d.e || ''; 
                 row.querySelector('.in-extra-desc').value = d.ed || '';
+                row.querySelector('.in-ir').value = d.ir || '';
                 row.querySelector('.in-destino').value = d.dest || ''; 
-                const recebido = d.recebido !== undefined ? (parseFloat(d.recebido)||0) : ((parseFloat(d.v)||0)+(parseFloat(d.e)||0));
+                const recebido = d.recebido !== undefined ? (parseFloat(d.recebido)||0) : ((parseFloat(d.v)||0)+(parseFloat(d.e)||0)-(parseFloat(d.ir)||0));
                 row.querySelector('.in-recebido').value = recebido.toFixed(2);
                 if(d.d) { 
                     const dia = d.d.split('-')[2]; 
@@ -609,7 +621,7 @@
     function abrirWhatsAppPopup(rowIdx) {
         saveData(false); const rows=document.querySelectorAll('#rent-rows tr'); if(!rows[rowIdx]) return;
         const row=rows[rowIdx], nome=row.querySelector('.in-name').value.trim(), dataPagamento=row.querySelector('.in-date').value;
-        const subtotal=(parseFloat(row.querySelector('.in-val').value)||0)+(parseFloat(row.querySelector('.in-extra').value)||0);
+        const subtotal=(parseFloat(row.querySelector('.in-val').value)||0)+(parseFloat(row.querySelector('.in-extra').value)||0)-(parseFloat(row.querySelector('.in-ir').value)||0);
         if(!nome) return alert('Preencha o nome do inquilino.'); if(!dataPagamento) return alert('Preencha a Data de Pagamento.');
         const dataFormatada=dataPagamento.split('-').reverse().join('/'), valorFormatado=subtotal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}), competencia=`${meses[currentMonthIdx]} / ${currentYear}`;
         const agora=new Date(), minutosAtuais=agora.getHours()*60+agora.getMinutes();
@@ -632,7 +644,8 @@
         const dataPagamento = row.querySelector('.in-date').value;
         const aluguel = parseFloat(row.querySelector('.in-val').value) || 0;
         const extras = parseFloat(row.querySelector('.in-extra').value) || 0;
-        const subtotal = aluguel + extras;
+        const ir = parseFloat(row.querySelector('.in-ir').value) || 0;
+        const subtotal = aluguel + extras - ir;
         const locador = document.getElementById('locador-nome').value.trim() || 'Locador';
         if (!nome) return alert('Preencha o nome do inquilino.');
         if (emails.length === 0) return alert('Preencha pelo menos um e-mail do inquilino.');
@@ -666,7 +679,7 @@
         const emailTexto = row.querySelector('.in-email').value.trim();
         const emails = emailTexto.split(';').map(item => item.trim()).filter(Boolean);
         const dataPagamento = row.querySelector('.in-date').value;
-        const subtotal = (parseFloat(row.querySelector('.in-val').value) || 0) + (parseFloat(row.querySelector('.in-extra').value) || 0);
+        const subtotal = (parseFloat(row.querySelector('.in-val').value) || 0) + (parseFloat(row.querySelector('.in-extra').value) || 0) - (parseFloat(row.querySelector('.in-ir').value) || 0);
         const locador = document.getElementById('locador-nome').value.trim() || 'Locador';
         if (!nome) { alert('Preencha o nome do inquilino.'); return null; }
         if (exigirEmail && emails.length === 0) { alert('Preencha pelo menos um e-mail do inquilino.'); return null; }
@@ -865,8 +878,9 @@
         const destino = row.querySelector('.in-destino').value || 'Não informado';
         const val = parseFloat(row.querySelector('.in-val').value) || 0;
         const extra = parseFloat(row.querySelector('.in-extra').value) || 0;
+        const ir = parseFloat(row.querySelector('.in-ir').value) || 0;
         const extraDesc = row.querySelector('.in-extra-desc').value.trim() || 'Não informado';
-        const total = val + extra;
+        const total = val + extra - ir;
         const dataF = row.querySelector('.in-date').value ? row.querySelector('.in-date').value.split('-').reverse().join('/') : 'A Combinar';
         const locador = document.getElementById('locador-nome').value || '(Locador)';
         let mesRefIdx = currentMonthIdx - 1; let anoRef = currentYear; 
@@ -909,6 +923,7 @@
                 <tbody>
                     <tr><td>Aluguel Mensal de Imóvel</td><td style="text-align: right;">${val.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td></tr>
                     <tr><td>Encargos / Extras / Descontos / Retenção IR<br><span style="font-size: 0.85rem; color: #555;"><strong>Discriminação:</strong> ${extraDesc}</span></td><td style="text-align: right;" class="${extra < 0 ? 'val-negativo' : ''}">${extra.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td></tr>
+                    <tr><td>IR retido na fonte</td><td style="text-align: right;" class="${ir > 0 ? 'val-negativo' : ''}">-${ir.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td></tr>
                     <tr style="font-weight: bold; background: #eee !important;">
                         <td>TOTAL GERAL A RECEBER</td>
                         <td style="text-align: right;">${total.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</td>
@@ -963,6 +978,7 @@
                         <th style="padding:12px; text-align:left; border:1px solid #000; font-size: 0.9rem;">MÊS</th>
                         <th style="padding:12px; text-align:center; border:1px solid #000; font-size: 0.9rem;">DATA PAGTO</th>
                         <th style="padding:12px; text-align:right; border:1px solid #000; font-size: 0.9rem;">ALUGUEL RECEBIDO</th>
+                        <th style="padding:12px; text-align:right; border:1px solid #000; font-size: 0.9rem;">IR RETIDO</th>
                     </tr></thead><tbody>`;
         let totalAnual = 0;
         let encontrou = false;
@@ -977,6 +993,7 @@
                     <td style="padding:10px; border:1px solid #000;">${meses[i].toUpperCase()}</td>
                     <td style="padding:10px; border:1px solid #000; text-align:center;">${reg.d ? reg.d.split('-').reverse().join('/') : '--'}</td>
                     <td style="padding:10px; border:1px solid #000; text-align:right;">${v.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td style="padding:10px; border:1px solid #000; text-align:right;">${(parseFloat(reg.ir)||0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
                 </tr>`;
             }
         }
@@ -985,6 +1002,7 @@
                 <tr style="font-weight:bold; background:#eee;">
                     <td colspan="2" style="padding:12px; text-align:right; border:1.5px solid #000;">TOTAL ACUMULADO NO ANO:</td>
                     <td style="padding:12px; text-align:right; border:1.5px solid #000;">${totalAnual.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</td>
+                    <td style="padding:12px; text-align:right; border:1.5px solid #000;">${(() => { let totalIR = 0; for(let m=0; m<12; m++){ const regs = JSON.parse(localStorage.getItem(`data_${currentYear}_mes_${m}`) || '[]'); const item = regs.find(r => r.unidade && r.unidade.trim().toUpperCase() === unidadeSelecionada.trim().toUpperCase()); if(item) totalIR += parseFloat(item.ir)||0; } return totalIR.toLocaleString('pt-BR', {style:'currency', currency:'BRL'}); })()}</td>
                 </tr></tbody></table>
                 <div class="signature-block">
                     <p class="signature-name">${locador}</p>
@@ -1008,7 +1026,8 @@
         const emails = emailTexto.split(';').map(item => item.trim()).filter(Boolean);
         const aluguel = parseFloat(row.querySelector('.in-val').value) || 0;
         const extras = parseFloat(row.querySelector('.in-extra').value) || 0;
-        const total = aluguel + extras;
+        const ir = parseFloat(row.querySelector('.in-ir').value) || 0;
+        const total = aluguel + extras - ir;
         if (!nome) { alert('Preencha o nome do inquilino/contato.'); return null; }
         if (!unidade) { alert('Preencha a unidade.'); return null; }
         if (exigirEmail && emails.length === 0) { alert('Preencha pelo menos um e-mail do inquilino/contato.'); return null; }
@@ -1062,7 +1081,8 @@
         const unidade = row.querySelector('.in-unidade').value || "(Unidade)";
         const val = parseFloat(row.querySelector('.in-val').value) || 0;
         const extra = parseFloat(row.querySelector('.in-extra').value) || 0;
-        const total = val + extra;
+        const ir = parseFloat(row.querySelector('.in-ir').value) || 0;
+        const total = val + extra - ir;
         const locador = document.getElementById('locador-nome').value || '(Locador)';
         const dataF = new Date().toLocaleDateString('pt-BR');
 
@@ -1112,6 +1132,7 @@
         const area = document.getElementById('print-area');
         const locador = (document.getElementById('locador-nome').value || 'Não informado').toUpperCase();
         let totalGeral = 0;
+        let totalIRGeral = 0;
         let html = `
         <style>
             .rep-container { font-family: Arial, sans-serif; background: white; padding: 20px; }
@@ -1125,23 +1146,23 @@
         <div class="rep-container">
             <div class="rep-header"><h3>RELATÓRIO DE RECEBIMENTOS - ${type.toUpperCase()}</h3><p>LOCADOR: ${locador} | ANO: ${currentYear}</p></div>
             <table class="rep-table">
-                <thead><tr><th style="text-align:left">Unidade</th><th>Data</th><th style="text-align:right">Aluguel</th><th style="text-align:right">Extras</th><th style="text-align:right">Aluguel recebido</th><th style="text-align:right">Subtotal</th></tr></thead>
+                <thead><tr><th style="text-align:left">Unidade</th><th>Data</th><th style="text-align:right">Aluguel</th><th style="text-align:right">Extras</th><th style="text-align:right">Aluguel recebido</th><th style="text-align:right">Subtotal</th><th style="text-align:right">IR retido</th></tr></thead>
                 <tbody>`;
         const getMonthDataForPrint = (idx) => {
             const data = JSON.parse(localStorage.getItem(`data_${currentYear}_mes_${idx}`) || '[]');
             let rHtml = ''; let sub = 0; let has = false;
             data.forEach(r => {
-                const total = r.recebido !== undefined ? (parseFloat(r.recebido)||0) : ((parseFloat(r.v)||0) + (parseFloat(r.e)||0));
+                const total = r.recebido !== undefined ? (parseFloat(r.recebido)||0) : ((parseFloat(r.v)||0) + (parseFloat(r.e)||0) - (parseFloat(r.ir)||0));
                 if(r.unidade || total > 0) {
-                    has = true; sub += total; totalGeral += total;
-                    rHtml += `<tr><td><strong>${(r.unidade || '').toUpperCase()}</strong></td><td style="text-align:center">${r.d?r.d.split('-').reverse().join('/'):'--'}</td><td style="text-align:right">${(parseFloat(r.v)||0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right">${(parseFloat(r.e)||0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right; font-weight:bold">${total.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right; font-weight:bold">${total.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td></tr>`;
+                    has = true; sub += total; totalGeral += total; totalIRGeral += parseFloat(r.ir) || 0;
+                    rHtml += `<tr><td><strong>${(r.unidade || '').toUpperCase()}</strong></td><td style="text-align:center">${r.d?r.d.split('-').reverse().join('/'):'--'}</td><td style="text-align:right">${(parseFloat(r.v)||0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right">${(parseFloat(r.e)||0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right; font-weight:bold">${total.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right; font-weight:bold">${total.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right">${(parseFloat(r.ir)||0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td></tr>`;
                 }
             });
-            return has ? `<tr class="rep-month-title"><td colspan="6">${meses[idx].toUpperCase()}</td></tr>` + rHtml + `<tr><td colspan="5" style="text-align:right; font-weight:bold">Subtotal:</td><td style="text-align:right; font-weight:bold">${sub.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</td></tr>` : '';
+            return has ? `<tr class="rep-month-title"><td colspan="7">${meses[idx].toUpperCase()}</td></tr>` + rHtml + `<tr><td colspan="5" style="text-align:right; font-weight:bold">Subtotal:</td><td style="text-align:right; font-weight:bold">${sub.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</td><td></td></tr>` : '';
         };
         if(type === 'mensal') html += getMonthDataForPrint(currentMonthIdx);
         else for(let i=0; i<12; i++) html += getMonthDataForPrint(i);
-        html += `</tbody></table><p style="text-align:right; font-weight:bold; font-size: 12pt; border-top: 2px solid #000; padding-top:10px;">TOTAL GERAL: ${totalGeral.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</p></div>`;
+        html += `</tbody></table><p style="text-align:right; font-weight:bold; font-size: 12pt; border-top: 2px solid #000; padding-top:10px;">TOTAL GERAL: ${totalGeral.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</p><p style="text-align:right; font-weight:bold; font-size: 12pt;">TOTAL IR RETIDO NA FONTE: ${totalIRGeral.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</p></div>`;
         area.innerHTML = html; window.print();
     }
     window.onload = init;
