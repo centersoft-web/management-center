@@ -126,29 +126,21 @@
         #rent-rows tr td:nth-child(13)::before { content: "Subtotal"; }
         #rent-rows tr td:nth-child(14)::before { content: "Ações"; }
 
-        /* Primeira linha: identificação, contato, vencimento e CDC IPTU */
-        #rent-rows tr td:nth-child(1)  { grid-column: span 1; } /* Ordem */
-        #rent-rows tr td:nth-child(2)  { grid-column: span 2; } /* Inquilino/Contato reduzido */
-        #rent-rows tr td:nth-child(3)  { grid-column: span 2; } /* Unidade */
-        #rent-rows tr td:nth-child(4)  { grid-column: span 3; } /* E-mail */
-        #rent-rows tr td:nth-child(5)  { grid-column: span 2; } /* Data Pagto */
-        #rent-rows tr td:nth-child(6)  { grid-column: span 1; } /* Reajuste */
-        #rent-rows tr td:nth-child(7)  { grid-column: span 1; } /* CDC IPTU no final */
-
-        /* Segunda linha: dados financeiros */
-        #rent-rows tr td:nth-child(8)  { grid-column: 1 / 3; grid-row: 2; } /* Destino */
-        #rent-rows tr td:nth-child(9)  { grid-column: 3 / 4; grid-row: 2; } /* Aluguel */
-        #rent-rows tr td:nth-child(10) { grid-column: 4 / 5; grid-row: 2; } /* Extras */
-        #rent-rows tr td:nth-child(11) { grid-column: 5 / 9; grid-row: 2; min-width: 0; } /* Descrição */
-        #rent-rows tr td:nth-child(12) { grid-column: 9 / 11; grid-row: 2; } /* Aluguel Recebido */
-        #rent-rows tr td:nth-child(13) { grid-column: 11 / 13; grid-row: 2; } /* Subtotal */
-
-        /* Ações ocupam sozinhas a terceira linha */
-        #rent-rows tr td:nth-child(14) {
-            grid-column: 1 / -1;
-            border-top: 1px solid #e2e8f0;
-            padding-top: 0.75rem !important;
-        }
+        /* Dimensionamento individual dos campos */
+        #rent-rows tr td:nth-child(1)  { grid-column: span 1; }
+        #rent-rows tr td:nth-child(2)  { grid-column: span 2; }
+        #rent-rows tr td:nth-child(3)  { grid-column: span 2; }
+        #rent-rows tr td:nth-child(4)  { grid-column: span 3; }
+        #rent-rows tr td:nth-child(5)  { grid-column: span 2; }
+        #rent-rows tr td:nth-child(6)  { grid-column: span 1; }
+        #rent-rows tr td:nth-child(7)  { grid-column: span 1; }
+        #rent-rows tr td:nth-child(8)  { grid-column: 1 / 3; grid-row: 2; }
+        #rent-rows tr td:nth-child(9)  { grid-column: 3 / 4; grid-row: 2; }
+        #rent-rows tr td:nth-child(10) { grid-column: 4 / 5; grid-row: 2; }
+        #rent-rows tr td:nth-child(11) { grid-column: 5 / 9; grid-row: 2; min-width: 0; }
+        #rent-rows tr td:nth-child(12) { grid-column: 9 / 11; grid-row: 2; }
+        #rent-rows tr td:nth-child(13) { grid-column: 11 / 13; grid-row: 2; }
+        #rent-rows tr td:nth-child(14) { grid-column: 1 / -1; border-top: 1px solid #e2e8f0; padding-top: 0.75rem !important; }
         #rent-rows tr td:nth-child(14) > div {
             display: grid;
             grid-template-columns: repeat(6, minmax(120px, 1fr));
@@ -172,12 +164,7 @@
         @media (max-width: 900px) {
             #rent-rows tr { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             #rent-rows tr td:not(:nth-child(14)) { grid-column: span 1; }
-            #rent-rows tr td:nth-child(8),
-            #rent-rows tr td:nth-child(9),
-            #rent-rows tr td:nth-child(10),
-            #rent-rows tr td:nth-child(11),
-            #rent-rows tr td:nth-child(12),
-            #rent-rows tr td:nth-child(13) { width: auto; justify-self: stretch; margin-left: 0; grid-row: auto; }
+            #rent-rows tr td:nth-child(8), #rent-rows tr td:nth-child(9), #rent-rows tr td:nth-child(10), #rent-rows tr td:nth-child(11), #rent-rows tr td:nth-child(12), #rent-rows tr td:nth-child(13) { width: auto; justify-self: stretch; margin-left: 0; grid-row: auto; }
             #rent-rows tr td:nth-child(14) > div { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             #rent-rows tr td:nth-child(14) .row-controls { grid-column: 1 / -1; }
         }
@@ -481,8 +468,8 @@
                 row.querySelector('.in-extra-desc').value = d.ed || '';
                 row.querySelector('.in-destino').value = d.dest || '';
                 row.querySelector('.in-cdc').value = d.cdc || '';
-                const recebido = d.recebido !== undefined ? (parseFloat(d.recebido) || 0) : ((parseFloat(d.v)||0) + (parseFloat(d.e)||0));
-                row.querySelector('.in-recebido').value = recebido || '';
+                const recebido = d.recebido !== undefined ? (parseFloat(d.recebido)||0) : ((parseFloat(d.v)||0)+(parseFloat(d.e)||0));
+                row.querySelector('.in-recebido').value = recebido.toFixed(2);
                 row.querySelector('.row-total').innerText = recebido.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
                 tbody.appendChild(row);
             });
@@ -528,13 +515,13 @@
                 row.querySelector('.in-extra').value = d.e || ''; 
                 row.querySelector('.in-extra-desc').value = d.ed || '';
                 row.querySelector('.in-destino').value = d.dest || ''; 
-                const recebido = d.recebido !== undefined ? (parseFloat(d.recebido) || 0) : ((parseFloat(d.v)||0) + (parseFloat(d.e)||0));
-                row.querySelector('.in-recebido').value = recebido || '';
+                const recebido = d.recebido !== undefined ? (parseFloat(d.recebido)||0) : ((parseFloat(d.v)||0)+(parseFloat(d.e)||0));
+                row.querySelector('.in-recebido').value = recebido.toFixed(2);
                 if(d.d) { 
                     const dia = d.d.split('-')[2]; 
                     const mesCorrente = (currentMonthIdx + 1).toString().padStart(2, '0'); 
                     row.querySelector('.in-date').value = `${currentYear}-${mesCorrente}-${dia}`; 
-                }
+                } 
                 row.querySelector('.row-total').innerText = recebido.toLocaleString('pt-BR', {style:'currency', currency:'BRL'}); 
                 tbody.appendChild(row); 
             }); 
@@ -884,7 +871,7 @@
             const reg = dados.find(r => r.unidade && r.unidade.trim().toUpperCase() === unidadeSelecionada.trim().toUpperCase());
             if(reg) {
                 encontrou = true;
-                const v = reg.recebido !== undefined ? (parseFloat(reg.recebido)||0) : ((parseFloat(reg.v)||0) + (parseFloat(reg.e)||0));
+                const v = reg.recebido !== undefined ? (parseFloat(reg.recebido)||0) : ((parseFloat(reg.v)||0)+(parseFloat(reg.e)||0));
                 totalAnual += v;
                 htmlExtrato += `<tr>
                     <td style="padding:10px; border:1px solid #000;">${meses[i].toUpperCase()}</td>
@@ -988,10 +975,10 @@
             const data = JSON.parse(localStorage.getItem(`data_${currentYear}_mes_${idx}`) || '[]');
             let rHtml = ''; let sub = 0; let has = false;
             data.forEach(r => {
-                const recebido = r.recebido !== undefined ? (parseFloat(r.recebido)||0) : ((parseFloat(r.v)||0) + (parseFloat(r.e)||0));
-                if(r.unidade || recebido > 0) {
-                    has = true; sub += recebido; totalGeral += recebido;
-                    rHtml += `<tr><td><strong>${(r.unidade || '').toUpperCase()}</strong></td><td style="text-align:center">${r.d?r.d.split('-').reverse().join('/'):'--'}</td><td style="text-align:right">${(parseFloat(r.v)||0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right">${(parseFloat(r.e)||0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right; font-weight:bold">${recebido.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right; font-weight:bold">${recebido.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td></tr>`;
+                const total = r.recebido !== undefined ? (parseFloat(r.recebido)||0) : ((parseFloat(r.v)||0) + (parseFloat(r.e)||0));
+                if(r.unidade || total > 0) {
+                    has = true; sub += total; totalGeral += total;
+                    rHtml += `<tr><td><strong>${(r.unidade || '').toUpperCase()}</strong></td><td style="text-align:center">${r.d?r.d.split('-').reverse().join('/'):'--'}</td><td style="text-align:right">${(parseFloat(r.v)||0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right">${(parseFloat(r.e)||0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right; font-weight:bold">${total.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right; font-weight:bold">${total.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td></tr>`;
                 }
             });
             return has ? `<tr class="rep-month-title"><td colspan="6">${meses[idx].toUpperCase()}</td></tr>` + rHtml + `<tr><td colspan="5" style="text-align:right; font-weight:bold">Subtotal:</td><td style="text-align:right; font-weight:bold">${sub.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</td></tr>` : '';
