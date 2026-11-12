@@ -155,7 +155,7 @@
 
     <script>
         const categoryConfig = {
-            imoveis: { label: "Imóveis & IPTU", icon: "fa-house", fields: ["Nome", "Cidade", "Inscrição", "Link"] },
+            imoveis: { label: "Imóveis & IPTU", icon: "fa-house", fields: ["Nome", "Cidade", "Inscrição", "Cadastro IPTU", "Consulta IPTU"] },
             matriculas: { label: "Matrículas (Reg. Imóveis)", icon: "fa-scroll", fields: ["Nome", "Cidade", "Matrícula", "Link"] },
             condominios: { label: "Condomínios", icon: "fa-city", fields: ["Condomínio", "Cidade", "Ref/Inscrição", "Link"] },
             luz: { label: "Luz", icon: "fa-bolt", fields: ["Identificação", "Cidade", "Instalação", "Link"] },
@@ -191,6 +191,7 @@
                             <input type="text" id="${cat}F2" placeholder="${config.fields[1]}" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition">
                             <input type="text" id="${cat}F3" placeholder="${config.fields[2]}" ${cat === 'telefone' ? 'oninput="maskTel(this)" maxlength="15"' : ''} class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition">
                             <input type="text" id="${cat}F4" placeholder="${config.fields[3]}" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition">
+                            ${cat === 'imoveis' ? `<input type="text" id="${cat}F5" placeholder="${config.fields[4]}" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition">` : ''}
                             ${false ? `<input type="email" id="${cat}Email" placeholder="Email" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition">` : ''}
                             <button class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-sm flex items-center justify-center gap-1.5" onclick="addItem('${cat}')">
                                 <i class="fa-solid fa-plus-circle"></i> Adicionar
@@ -203,11 +204,12 @@
                                 <thead>
                                     <tr class="bg-slate-900 text-white font-bold uppercase tracking-wider text-[11px]">
                                         <th class="py-3 px-3 text-center w-[60px]">Ordem</th>
-                                        <th class="py-3 px-3">${config.fields[0]}</th>
+                                        <th class="py-3 px-3 text-left">${config.fields[0]}</th>
                                         ${false ? '<th class="py-3 px-3">Email</th>' : ''}
-                                        <th class="py-3 px-3">${config.fields[1]}</th>
-                                        <th class="py-3 px-3">${config.fields[2]}</th>
-                                        <th class="py-3 px-3">${config.fields[3]}</th>
+                                        <th class="py-3 px-3 text-left">${config.fields[1]}</th>
+                                        <th class="py-3 px-3 text-left">${config.fields[2]}</th>
+                                        <th class="py-3 pl-0 px-3 text-left">${config.fields[3]}</th>
+                                        ${cat === 'imoveis' ? `<th class="py-3 pl-0 px-3 text-left">${config.fields[4]}</th>` : ''}
                                         <th class="no-print py-3 px-3 text-center w-[180px]">Ações</th>
                                     </tr>
                                 </thead>
@@ -287,7 +289,8 @@
                         ${false ? `<td class="p-2"><input type="email" id="edit-email" value="${item.email || ''}" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"></td>` : ''}
                         <td class="p-2"><input type="text" id="edit-f2" value="${item.cidade || ''}" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"></td>
                         <td class="p-2"><input type="text" id="edit-f3" value="${item.insc || ''}" ${type === 'telefone' ? 'oninput="maskTel(this)" maxlength="15"' : ''} class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"></td>
-                        <td class="p-2"><input type="text" id="edit-f4" value="${item.link || ''}" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"></td>
+                        <td class="p-2"><input type="text" id="edit-f4" value="${type === 'imoveis' ? (item.cadastroIptu || '') : (item.link || '')}" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"></td>
+                        ${type === 'imoveis' ? `<td class="p-2"><input type="text" id="edit-f5" value="${item.link || ''}" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"></td>` : ''}
                         <td class="no-print p-2 text-center">
                             <div class="flex items-center justify-center gap-1">
                                 <button class="bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold px-2 py-1 rounded transition" onclick="saveEdit('${type}', ${index})">Salvar</button>
@@ -319,8 +322,11 @@
                             </div>
                         </td>
                         <td class="p-2.5">
-                            ${item.link ? `<a href="${item.link}" target="_blank" class="inline-flex items-center gap-1 text-brand-600 hover:text-brand-800 font-semibold text-xs hover:underline"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Portal</a>` : '<span class="text-slate-400">-</span>'}
+                            ${(type === 'imoveis' ? item.cadastroIptu : item.link) ? `<a href="${type === 'imoveis' ? item.cadastroIptu : item.link}" target="_blank" class="inline-flex items-center gap-1 text-brand-600 hover:text-brand-800 font-semibold text-xs hover:underline"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Portal</a>` : '<span class="text-slate-400">-</span>'}
                         </td>
+                        ${type === 'imoveis' ? `<td class="p-2.5">
+                            ${item.link ? `<a href="${item.link}" target="_blank" class="inline-flex items-center gap-1 text-brand-600 hover:text-brand-800 font-semibold text-xs hover:underline"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Portal</a>` : '<span class="text-slate-400">-</span>'}
+                        </td>` : ''}
                         ${false ? `
                         <td class="no-print p-2.5 text-center">
                             <div class="flex items-center justify-center gap-1">
@@ -365,7 +371,12 @@
             item.nome = newNome;
             item.cidade = newCidade;
             item.insc = document.getElementById('edit-f3').value;
-            item.link = document.getElementById('edit-f4').value;
+            if (type === 'imoveis') {
+                item.cadastroIptu = document.getElementById('edit-f4').value;
+                item.link = document.getElementById('edit-f5').value;
+            } else {
+                item.link = document.getElementById('edit-f4').value;
+            }
 
             if (type === 'imoveis' || type === 'matriculas') {
                 const other = (type === 'imoveis') ? 'matriculas' : 'imoveis';
@@ -386,7 +397,8 @@
                 nome: f1Val, 
                 cidade: document.getElementById(type + 'F2').value, 
                 insc: document.getElementById(type + 'F3').value, 
-                link: document.getElementById(type + 'F4').value,
+                link: type === 'imoveis' ? document.getElementById(type + 'F5').value : document.getElementById(type + 'F4').value,
+                cadastroIptu: type === 'imoveis' ? document.getElementById(type + 'F4').value : '',
                 email: ''
             };
             data[type].push(newItem);
@@ -397,7 +409,7 @@
             }
             
             render();
-            ['F1', 'F2', 'F3', 'F4', 'Email'].forEach(f => {
+            ['F1', 'F2', 'F3', 'F4', 'F5', 'Email'].forEach(f => {
                 const el = document.getElementById(type + f);
                 if(el) el.value = '';
             });
@@ -405,7 +417,7 @@
 
         function insertRow(type, index) {
             const newId = Date.now();
-            const newItem = { id: newId, nome: "", cidade: "", insc: "", link: "", email: "" };
+            const newItem = { id: newId, nome: "", cidade: "", insc: "", cadastroIptu: "", link: "", email: "" };
             data[type].splice(index + 1, 0, newItem);
             if (type === 'imoveis' || type === 'matriculas') {
                 const other = (type === 'imoveis') ? 'matriculas' : 'imoveis';
