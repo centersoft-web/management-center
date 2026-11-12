@@ -276,6 +276,7 @@
             <input type="password" id="senhaNova" placeholder="Nova Senha">
             <button class="primary-btn" onclick="salvarNovaSenha()">Gravar</button>
             <button class="primary-btn" onclick="abrirAvisoBackupPelasConfiguracoes()" style="margin-top: 10px; border-color: rgba(212,175,55,0.55); font-size: 0.65rem;">⚠️ Política de Uso e Backup</button>
+            <button class="primary-btn" onclick="abrirLimpezaDados()" style="margin-top: 10px; border-color: #ff4d4d; color: #ff6b6b; font-size: 0.65rem;">🗑️ Limpar Todos os Dados</button>
             <button class="primary-btn" onclick="fecharConfig()" style="border-color: #444; color: #888; margin-top: 10px;">Voltar</button>
         </div>
     </div>
@@ -312,6 +313,26 @@
                 <div style="border-left: 3px solid #ff4d4d; padding: 10px 12px; margin-bottom: 12px; border-radius: 2px;"><strong style="color: #ff6b6b;">3. Isenção de Responsabilidade:</strong><br>O sistema, seus desenvolvedores e mantenedores <strong>não se responsabilizam por perda, corrupção ou eliminação de dados</strong> decorrentes de limpeza do navegador, formatação do dispositivo, falhas do sistema operacional, ação de antivírus ou ausência de cópias de segurança.</div>
             </div>
             <button class="primary-btn" onclick="fecharAvisoBackup()">Estou Ciente e De Acordo</button>
+        </div>
+    </div>
+
+    <div id="limpeza-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.96); display: none; align-items: center; justify-content: center; z-index: 2100; backdrop-filter: blur(10px);">
+        <div class="glass-card" style="width: 560px; max-width: 92%; border: 1px solid #ff4d4d; text-align: left; padding: 30px;">
+            <h3 style="font-family: 'Cinzel'; margin-bottom: 15px; font-size: 1.05rem; color: #ff6b6b; text-align: center;">⚠️ LIMPAR TODOS OS DADOS</h3>
+            <div style="font-size: 0.78rem; line-height: 1.55; color: #cbd5e1; margin-bottom: 20px; max-height: 390px; overflow-y: auto; padding-right: 7px;">
+                <p style="margin-bottom: 12px;"><strong style="color: #ff6b6b;">Esta ação é permanente e não pode ser desfeita.</strong> Faça backup antes de continuar.</p>
+                <p style="margin-bottom: 8px;"><strong>Serão removidos:</strong></p>
+                <ul style="margin: 0 0 14px 20px;">
+                    <li>dados de Aluguéis;</li><li>dados de Imóveis e IPTU;</li><li>dados de Contratos;</li><li>dados financeiros;</li><li>dados de Contas Bancárias;</li><li>dados de Cartões e Parcelas;</li><li>dados de Investimentos e demais módulos;</li><li>senha interna de acesso ao sistema;</li><li>dados temporários e bancos locais dos módulos.</li>
+                </ul>
+                <p style="margin-bottom: 8px;"><strong>O sistema de limpeza não inclui, não acessa e não afeta:</strong></p>
+                <ul style="margin: 0 0 14px 20px;">
+                    <li>senha do Gmail;</li><li>senha da conta Microsoft;</li><li>senhas salvas pelo Chrome, Edge ou outro navegador;</li><li>senhas do gerenciador de senhas;</li><li>senhas de bancos ou de outros sites.</li>
+                </ul>
+                <p>Ao continuar, ainda será necessário digitar exatamente <strong style="color: #ff6b6b;">APAGAR TUDO</strong> para concluir.</p>
+            </div>
+            <button class="primary-btn" onclick="confirmarLimpezaDados()" style="border-color: #ff4d4d; color: #ff6b6b;">Continuar para a confirmação final</button>
+            <button class="primary-btn" onclick="fecharLimpezaDados()" style="border-color: #444; color: #888; margin-top: 10px;">Cancelar</button>
         </div>
     </div>
 
@@ -464,6 +485,53 @@
         function fecharAvisoBackup() {
             document.getElementById('backup-modal').style.display = 'none';
             abrirConfig();
+        }
+
+
+        function abrirLimpezaDados() {
+            fecharConfig();
+            document.getElementById('limpeza-modal').style.display = 'flex';
+        }
+
+        function fecharLimpezaDados() {
+            document.getElementById('limpeza-modal').style.display = 'none';
+            abrirConfig();
+        }
+
+        async function confirmarLimpezaDados() {
+            const confirmacao = prompt('Confirmação final: digite exatamente APAGAR TUDO para excluir permanentemente todos os dados locais do sistema.');
+            if (confirmacao !== 'APAGAR TUDO') {
+                alert('Confirmação inválida. Nenhum dado foi apagado.');
+                return;
+            }
+
+            try {
+                goHome();
+                localStorage.clear();
+                sessionStorage.clear();
+
+                if (window.indexedDB && typeof indexedDB.databases === 'function') {
+                    const bancos = await indexedDB.databases();
+                    await Promise.all(bancos.filter(banco => banco.name).map(banco => new Promise((resolve, reject) => {
+                        const requisicao = indexedDB.deleteDatabase(banco.name);
+                        requisicao.onsuccess = () => resolve();
+                        requisicao.onerror = () => reject(
+                            requisicao.error || new Error(`Não foi possível excluir o banco "${banco.name}".`)
+                        );
+                        requisicao.onblocked = () => reject(
+                            new Error(`A exclusão do banco "${banco.name}" foi bloqueada. Feche as outras abas ou janelas deste sistema e tente novamente.`)
+                        );
+                    })));
+                }
+
+                SENHA_MESTRE = '';
+                document.getElementById('limpeza-modal').style.display = 'none';
+                alert('✅ Limpeza concluída com sucesso! Todos os dados locais do sistema foram removidos. O sistema será recarregado.');
+                location.reload();
+            } catch (erro) {
+                console.error('Falha ao limpar os dados locais:', erro);
+                alert('Não foi possível concluir toda a limpeza. Feche os módulos abertos e tente novamente.');
+            }
         }
 
         document.getElementById('senhaSistema').addEventListener('keypress', event => {
