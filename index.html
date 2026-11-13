@@ -103,7 +103,6 @@
             pointer-events: none;
         }
 
-        /* O M permanece fixo no topo esquerdo */
         .logo-btn {
             font-family: 'Cinzel', serif;
             width: 32px;
@@ -136,18 +135,9 @@
             justify-content: space-between;
         }
 
-        /* Distribui os módulos por quase toda a altura disponível. */
-        .sidebar-left .module-area {
-            padding-bottom: 4px;
-        }
+        .sidebar-left .module-area { padding-bottom: 4px; }
+        .sidebar-right .module-area { padding-top: 0; padding-bottom: 0; }
 
-        .sidebar-right .module-area {
-            padding-top: 0;
-            padding-bottom: 0;
-        }
-
-        /* Somente os módulos adicionais são distribuídos no espaço superior.
-           Configuração e bloqueio permanecem agrupados no rodapé. */
         .sidebar-right #right-modules {
             display: flex;
             flex: 1;
@@ -249,6 +239,28 @@
             padding: 20px;
         }
 
+        /* Itens do checklist de limpeza */
+        .limpeza-linha {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 8px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.82rem;
+            color: #cbd5e1;
+            transition: background 0.15s;
+        }
+        .limpeza-linha:hover { background: rgba(212, 175, 55, 0.08); }
+        .limpeza-linha input[type="checkbox"] {
+            width: 15px;
+            height: 15px;
+            min-width: 15px;
+            margin: 0;
+            cursor: pointer;
+            accent-color: #d4af37;
+        }
+
         @media (max-height: 700px) {
             .sidebar { padding: 8px 0; }
             .logo-btn { margin-bottom: 8px; }
@@ -276,7 +288,7 @@
             <input type="password" id="senhaNova" placeholder="Nova Senha">
             <button class="primary-btn" onclick="salvarNovaSenha()">Gravar</button>
             <button class="primary-btn" onclick="abrirAvisoBackupPelasConfiguracoes()" style="margin-top: 10px; border-color: rgba(212,175,55,0.55); font-size: 0.65rem;">⚠️ Política de Uso e Backup</button>
-            <button class="primary-btn" onclick="abrirLimpezaDados()" style="margin-top: 10px; border-color: #ff4d4d; color: #ff6b6b; font-size: 0.65rem;">🗑️ Limpar Todos os Dados</button>
+            <button class="primary-btn" onclick="abrirLimpezaDados()" style="margin-top: 10px; border-color: #ff4d4d; color: #ff6b6b; font-size: 0.65rem;">🗑️ Limpar Dados por Módulo</button>
             <button class="primary-btn" onclick="fecharConfig()" style="border-color: #444; color: #888; margin-top: 10px;">Voltar</button>
         </div>
     </div>
@@ -317,21 +329,31 @@
     </div>
 
     <div id="limpeza-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.96); display: none; align-items: center; justify-content: center; z-index: 2100; backdrop-filter: blur(10px);">
-        <div class="glass-card" style="width: 560px; max-width: 92%; border: 1px solid #ff4d4d; text-align: left; padding: 30px;">
-            <h3 style="font-family: 'Cinzel'; margin-bottom: 15px; font-size: 1.05rem; color: #ff6b6b; text-align: center;">⚠️ LIMPAR TODOS OS DADOS</h3>
-            <div style="font-size: 0.78rem; line-height: 1.55; color: #cbd5e1; margin-bottom: 20px; max-height: 390px; overflow-y: auto; padding-right: 7px;">
+        <div class="glass-card" style="width: 620px; max-width: 94%; border: 1px solid #ff4d4d; text-align: left; padding: 30px;">
+            <h3 style="font-family: 'Cinzel'; margin-bottom: 15px; font-size: 1.05rem; color: #ff6b6b; text-align: center;">⚠️ LIMPAR DADOS POR MÓDULO</h3>
+            <div style="font-size: 0.78rem; line-height: 1.55; color: #cbd5e1; margin-bottom: 20px; max-height: 440px; overflow-y: auto; padding-right: 7px;">
                 <p style="margin-bottom: 12px;"><strong style="color: #ff6b6b;">Esta ação é permanente e não pode ser desfeita.</strong> Faça backup antes de continuar.</p>
-                <p style="margin-bottom: 8px;"><strong>Serão removidos:</strong></p>
-                <ul style="margin: 0 0 14px 20px;">
-                    <li>dados de Aluguéis;</li><li>dados de Imóveis e IPTU;</li><li>dados de Contratos;</li><li>dados financeiros;</li><li>dados de Contas Bancárias;</li><li>dados de Cartões e Parcelas;</li><li>dados de Investimentos e demais módulos;</li><li>senha interna de acesso ao sistema;</li><li>dados temporários e bancos locais dos módulos.</li>
-                </ul>
+
+                <p style="margin-bottom: 8px;"><strong>Marque os módulos cujos dados deseja apagar:</strong></p>
+
+                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                    <button type="button" onclick="selecionarTodosModulosLimpeza(true)" style="flex:1; padding: 6px; font-size: 0.62rem; background: transparent; border: 1px solid var(--accent); color: var(--accent); cursor: pointer; font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.08em;">Marcar Todos</button>
+                    <button type="button" onclick="selecionarTodosModulosLimpeza(false)" style="flex:1; padding: 6px; font-size: 0.62rem; background: transparent; border: 1px solid #555; color: #999; cursor: pointer; font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.08em;">Desmarcar Todos</button>
+                </div>
+
+                <div id="lista-modulos-limpeza" style="border: 1px solid rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 2px; margin-bottom: 16px; background: rgba(0,0,0,0.3);"></div>
+
                 <p style="margin-bottom: 8px;"><strong>O sistema de limpeza não inclui, não acessa e não afeta:</strong></p>
                 <ul style="margin: 0 0 14px 20px;">
-                    <li>senha do Gmail;</li><li>senha da conta Microsoft;</li><li>senhas salvas pelo Chrome, Edge ou outro navegador;</li><li>senhas do gerenciador de senhas;</li><li>senhas de bancos ou de outros sites.</li>
+                    <li>senha do Gmail;</li>
+                    <li>senha da conta Microsoft;</li>
+                    <li>senhas salvas pelo Chrome, Edge ou outro navegador;</li>
+                    <li>senhas do gerenciador de senhas;</li>
+                    <li>senhas de bancos ou de outros sites.</li>
                 </ul>
                 <p>Ao continuar, ainda será necessário digitar exatamente <strong style="color: #ff6b6b;">APAGAR TUDO</strong> para concluir.</p>
             </div>
-            <button class="primary-btn" onclick="confirmarLimpezaDados()" style="border-color: #ff4d4d; color: #ff6b6b;">Continuar para a confirmação final</button>
+            <button class="primary-btn" onclick="confirmarLimpezaDados()" style="border-color: #ff4d4d; color: #ff6b6b;">Apagar dados dos módulos marcados</button>
             <button class="primary-btn" onclick="fecharLimpezaDados()" style="border-color: #444; color: #888; margin-top: 10px;">Cancelar</button>
         </div>
     </div>
@@ -341,7 +363,6 @@
          * CADASTRO DOS MÓDULOS
          * Os 9 primeiros aparecem à esquerda.
          * Do 10º ao 17º aparecem automaticamente à direita.
-         * Para inserir outro módulo, acrescente um novo objeto ao final da lista.
          */
         const MODULOS = [
             { icone: '💰', nome: 'Aluguéis', arquivo: 'Gestão de Aluguéis.html' },
@@ -360,13 +381,7 @@
             { icone: '💼', nome: 'Cálculo Trabalhista', arquivo: 'Calculo Trabalhista.html' },
             { icone: '🔨', nome: 'Controle de Reforma', arquivo: 'Controle de Reforma.html' },
             { icone: '⚖️', nome: 'Calculadora Comparativa', arquivo: 'Calculadora Comparativa.html' },
-            { icone: '🕘', nome: 'Agenda de Tarefas', arquivo: 'Agenda de Tarefas.html' },
-
-            /* EXEMPLO: novos módulos serão distribuídos automaticamente.
-            ,{ icone: '📁', nome: 'Documentos', arquivo: 'Documentos.html' }
-            ,{ icone: '📅', nome: 'Agenda', arquivo: 'Agenda.html' }
-            ,{ icone: '⚖️', nome: 'Jurídico', arquivo: 'Juridico.html' } // 10º: vai para a direita
-            */
+            { icone: '🕘', nome: 'Agenda de Tarefas', arquivo: 'Agenda de Tarefas.html' }
         ];
 
         const LIMITE_ESQUERDA = 9;
@@ -374,6 +389,189 @@
         let SENHA_MESTRE = localStorage.getItem('senhaMaster') !== null
             ? localStorage.getItem('senhaMaster')
             : '';
+
+        /* ═══════════════════════════════════════════════════════════════
+         * ESCOPO DE DADOS POR MÓDULO (whitelist seletiva)
+         *
+         * Cada módulo tem seu próprio bloco. Ao limpar, o usuário escolhe
+         * quais blocos apagar. SOMENTE as chaves/prefixos/bancos do módulo
+         * selecionado são removidos.
+         *
+         * COMO COMPLETAR (uma vez por módulo):
+         *   1. Abra o módulo pelo index.html.
+         *   2. Use-o: cadastre, edite, exclua, exporte, reimporte.
+         *   3. F12 → Console → auditarEscopo()
+         *   4. Se aparecer chave/bando "não mapeado" que pertence a este
+         *      módulo, adicione no bloco correspondente abaixo.
+         *   5. Repita nos 17 módulos.
+         * ═══════════════════════════════════════════════════════════════ */
+        const ESCOPO_DADOS = {
+            sistema: {
+                rotulo: '🔐 Senha interna do sistema',
+                chaves: ['senhaMaster'],
+                prefixos: [],
+                indexedDB: []
+            },
+            alugueis: {
+                rotulo: '💰 Aluguéis',
+                chaves: ['alugueis', 'aluguel', 'inquilinos', 'recebimentos_aluguel'],
+                prefixos: ['aluguel_', 'inquilino_'],
+                indexedDB: []
+            },
+            imoveis: {
+                rotulo: '🏠 Imóveis & IPTU',
+                chaves: ['imoveis', 'iptu', 'imoveis_servicos'],
+                prefixos: ['imovel_', 'iptu_'],
+                indexedDB: []
+            },
+            contratos: {
+                rotulo: '🧾 Gestão de Contratos',
+                chaves: ['contratos'],
+                prefixos: ['contrato_'],
+                indexedDB: []
+            },
+            financeiro: {
+                rotulo: '📊 Financeiro Global',
+                chaves: ['financeiro', 'financeiro_lancamentos', 'transacoes'],
+                prefixos: ['financeiro_', 'lancamento_', 'transacao_'],
+                indexedDB: []
+            },
+            contas: {
+                rotulo: '🏦 Contas Bancárias',
+                chaves: ['contas', 'contas_bancarias', 'bancos', 'saldos_contas'],
+                prefixos: ['conta_bancaria_', 'conta_'],
+                indexedDB: []
+            },
+            cartoes_credito: {
+                rotulo: '💳 Cartões de Crédito',
+                chaves: ['cartoes'],
+                prefixos: ['cartao_credito_'],
+                indexedDB: []
+            },
+            cartoes_parcelas: {
+                rotulo: '💳 Cartões & Parcelas',
+                chaves: ['cartoes_parcelas', 'parcelas', 'parcelamentos'],
+                prefixos: ['parcela_', 'parcelamento_'],
+                indexedDB: []
+            },
+            quantum: {
+                rotulo: '📈 Quantum Trade',
+                chaves: ['quantum', 'quantum_trade', 'investimentos', 'trades'],
+                prefixos: ['quantum_', 'trade_', 'investimento_'],
+                indexedDB: []
+            },
+            frota: {
+                rotulo: '🚗 Frota',
+                chaves: ['frota', 'veiculos', 'manutencoes', 'abastecimentos'],
+                prefixos: ['veiculo_', 'manutencao_', 'abastecimento_'],
+                indexedDB: []
+            },
+            calc_financeira: {
+                rotulo: '📈 Calculadora Financeira',
+                chaves: ['calculadora_financeira', 'historico_calc_financeira'],
+                prefixos: ['calc_financeira_'],
+                indexedDB: []
+            },
+            custos_imob: {
+                rotulo: '🏘️ Custos Imobiliários',
+                chaves: ['custos_imobiliarios', 'simulador_imob'],
+                prefixos: [],
+                indexedDB: []
+            },
+            doacao: {
+                rotulo: '💷 Simulador de Doação',
+                chaves: ['doacao', 'simulador_doacao', 'custos_doacao'],
+                prefixos: ['doacao_'],
+                indexedDB: []
+            },
+            irpf: {
+                rotulo: '🧮 Simulador PF x PJ',
+                chaves: ['irpf', 'simulador_irpf', 'pf_pj', 'comparativo_pf_pj'],
+                prefixos: ['irpf_', 'pf_pj_'],
+                indexedDB: []
+            },
+            trabalhista: {
+                rotulo: '💼 Cálculo Trabalhista',
+                chaves: ['trabalhista', 'calculo_trabalhista', 'rescisao'],
+                prefixos: ['trabalhista_', 'rescisao_'],
+                indexedDB: []
+            },
+            reforma: {
+                rotulo: '🔨 Controle de Reforma',
+                chaves: ['reforma', 'reforma_itens', 'orcamento_reforma'],
+                prefixos: ['reforma_'],
+                indexedDB: []
+            },
+            comparativa: {
+                rotulo: '⚖️ Calculadora Comparativa',
+                chaves: ['comparativa', 'calc_comparativa'],
+                prefixos: ['comparativa_'],
+                indexedDB: []
+            },
+            agenda: {
+                rotulo: '🕘 Agenda de Tarefas',
+                chaves: ['agenda', 'tarefas', 'agenda_tarefas'],
+                prefixos: ['agenda_', 'tarefa_'],
+                indexedDB: []
+            }
+        };
+
+        /* ═══════════════════════════════════════════════════════════════
+         * AUDITORIA DE ESCOPO
+         * Rode no console (F12) com cada módulo aberto para descobrir
+         * quais chaves ainda não estão mapeadas para nenhum módulo.
+         * ═══════════════════════════════════════════════════════════════ */
+        function auditarEscopo() {
+            const todas = Object.keys(localStorage);
+            const mapeadas = [];
+            const naoMapeadas = [];
+
+            todas.forEach(k => {
+                let moduloId = null;
+                for (const [id, cfg] of Object.entries(ESCOPO_DADOS)) {
+                    if (cfg.chaves.includes(k)) { moduloId = id; break; }
+                }
+                if (!moduloId) {
+                    for (const [id, cfg] of Object.entries(ESCOPO_DADOS)) {
+                        if (cfg.prefixos.some(p => k.startsWith(p))) { moduloId = id; break; }
+                    }
+                }
+                if (moduloId) mapeadas.push({ chave: k, modulo: moduloId });
+                else naoMapeadas.push(k);
+            });
+
+            console.log('%c=== AUDITORIA DE ESCOPO ===', 'font-weight:bold; color:#d4af37;');
+            console.log('Total no localStorage:', todas.length);
+            if (mapeadas.length) console.table(mapeadas);
+            else console.log('✅ Nenhuma chave mapeada ainda (normal se o sistema está vazio).');
+            console.log('⚠️ Não mapeadas (NÃO serão apagadas por nenhum módulo):', naoMapeadas);
+            console.log('');
+            console.log('Para cada chave em ⚠️ que seja do Management Center, adicione-a');
+            console.log('no bloco do módulo correspondente (ESCOPO_DADOS.<modulo>.chaves)');
+            console.log('ou em prefixos (para chaves dinâmicas tipo "x_123").');
+
+            if (window.indexedDB && typeof indexedDB.databases === 'function') {
+                indexedDB.databases().then(bancos => {
+                    const nomes = bancos.map(b => b.name).filter(Boolean);
+                    const mapeadosDB = [];
+                    const naoMapeadosDB = [];
+                    nomes.forEach(n => {
+                        let achou = null;
+                        for (const [id, cfg] of Object.entries(ESCOPO_DADOS)) {
+                            if (cfg.indexedDB.includes(n)) { achou = id; break; }
+                        }
+                        if (achou) mapeadosDB.push({ banco: n, modulo: achou });
+                        else naoMapeadosDB.push(n);
+                    });
+                    console.log('%c=== IndexedDB ===', 'font-weight:bold; color:#d4af37;');
+                    if (mapeadosDB.length) console.table(mapeadosDB);
+                    else console.log('✅ Nenhum banco mapeado.');
+                    if (naoMapeadosDB.length) console.warn('⚠️ Bancos NÃO mapeados:', naoMapeadosDB);
+                });
+            }
+
+            return naoMapeadas;
+        }
 
         function criarBotaoModulo(modulo) {
             const botao = document.createElement('button');
@@ -487,9 +685,39 @@
             abrirConfig();
         }
 
+        /* ═══════════════════════════════════════════════════════════════
+         * CHECKLIST DE MÓDULOS NO MODAL DE LIMPEZA
+         * ═══════════════════════════════════════════════════════════════ */
+        function montarCheckboxesLimpeza() {
+            const alvo = document.getElementById('lista-modulos-limpeza');
+            alvo.innerHTML = '';
+
+            Object.entries(ESCOPO_DADOS).forEach(([id, cfg]) => {
+                const linha = document.createElement('label');
+                linha.className = 'limpeza-linha';
+
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.value = id;
+                cb.checked = true;
+
+                const texto = document.createElement('span');
+                texto.textContent = cfg.rotulo;
+
+                linha.appendChild(cb);
+                linha.appendChild(texto);
+                alvo.appendChild(linha);
+            });
+        }
+
+        function selecionarTodosModulosLimpeza(marcar) {
+            document.querySelectorAll('#lista-modulos-limpeza input[type="checkbox"]')
+                .forEach(cb => cb.checked = marcar);
+        }
 
         function abrirLimpezaDados() {
             fecharConfig();
+            montarCheckboxesLimpeza();
             document.getElementById('limpeza-modal').style.display = 'flex';
         }
 
@@ -498,39 +726,160 @@
             abrirConfig();
         }
 
+        /* ═══════════════════════════════════════════════════════════════
+         * LIMPEZA SELETIVA POR MÓDULO
+         *
+         * - Apaga SOMENTE as chaves dos módulos marcados no checklist.
+         * - Preserva dados de outros apps (mesmo em file://).
+         * - Sites externos (Gmail, bancos...) são inatingíveis por origem.
+         * - Exige senha se houver senha mestra cadastrada.
+         * - Aguarda o iframe descarregar antes de mexer no IndexedDB.
+         * - Relata falhas parciais item a item (allSettled).
+         * - A importação posterior continua funcionando normalmente.
+         * ═══════════════════════════════════════════════════════════════ */
         async function confirmarLimpezaDados() {
-            const confirmacao = prompt('Confirmação final: digite exatamente APAGAR TUDO para excluir permanentemente todos os dados locais do sistema.');
+            // 1) Coleta a seleção
+            const marcados = [...document.querySelectorAll(
+                '#lista-modulos-limpeza input[type="checkbox"]:checked'
+            )].map(cb => cb.value);
+
+            if (marcados.length === 0) {
+                alert('Selecione ao menos um módulo para apagar.');
+                return;
+            }
+
+            // 2) Senha obrigatória se houver senha mestra cadastrada
+            if (SENHA_MESTRE !== '') {
+                const senha = prompt('Senha mestra para autorizar a limpeza:');
+                if (senha === null) return;
+                if (senha !== SENHA_MESTRE) {
+                    alert('Senha incorreta. Limpeza cancelada.');
+                    return;
+                }
+            }
+
+            // 3) Confirmação por texto
+            const rotulos = marcados.map(id => (ESCOPO_DADOS[id] && ESCOPO_DADOS[id].rotulo) || id);
+            const confirmacao = prompt(
+                'Confirmação final: digite exatamente APAGAR TUDO para excluir permanentemente os dados do(s) módulo(s):\n\n' +
+                rotulos.join('\n') +
+                '\n\nDigite APAGAR TUDO para continuar.'
+            );
             if (confirmacao !== 'APAGAR TUDO') {
                 alert('Confirmação inválida. Nenhum dado foi apagado.');
                 return;
             }
 
+            const falhas = [];
+
+            // 4) Fecha o iframe e espera o unload (libera IndexedDB)
             try {
-                goHome();
-                localStorage.clear();
-                sessionStorage.clear();
-
-                if (window.indexedDB && typeof indexedDB.databases === 'function') {
-                    const bancos = await indexedDB.databases();
-                    await Promise.all(bancos.filter(banco => banco.name).map(banco => new Promise((resolve, reject) => {
-                        const requisicao = indexedDB.deleteDatabase(banco.name);
-                        requisicao.onsuccess = () => resolve();
-                        requisicao.onerror = () => reject(
-                            requisicao.error || new Error(`Não foi possível excluir o banco "${banco.name}".`)
-                        );
-                        requisicao.onblocked = () => reject(
-                            new Error(`A exclusão do banco "${banco.name}" foi bloqueada. Feche as outras abas ou janelas deste sistema e tente novamente.`)
-                        );
-                    })));
+                const frame = document.getElementById('content-frame');
+                if (frame && frame.style.display !== 'none' && frame.src && frame.src !== 'about:blank') {
+                    await new Promise(resolve => {
+                        frame.addEventListener('load', () => resolve(), { once: true });
+                        frame.src = 'about:blank';
+                        setTimeout(resolve, 1500);
+                    });
                 }
+                goHome();
+            } catch (e) {
+                falhas.push('fechamento do iframe: ' + e.message);
+            }
 
-                SENHA_MESTRE = '';
-                document.getElementById('limpeza-modal').style.display = 'none';
-                alert('✅ Limpeza concluída com sucesso! Todos os dados locais do sistema foram removidos. O sistema será recarregado.');
+            // 5) Monta as listas a partir apenas dos módulos marcados
+            const chavesSel = new Set();
+            const prefixosSel = new Set();
+            const bancosSel = new Set();
+
+            marcados.forEach(id => {
+                const cfg = ESCOPO_DADOS[id];
+                if (!cfg) return;
+                cfg.chaves.forEach(k => chavesSel.add(k));
+                cfg.prefixos.forEach(p => prefixosSel.add(p));
+                cfg.indexedDB.forEach(b => bancosSel.add(b));
+            });
+
+            const chavesArr = [...chavesSel];
+            const prefixosArr = [...prefixosSel];
+            const bancosArr = [...bancosSel];
+
+            // 6) Remove do localStorage / sessionStorage — SÓ chaves do escopo marcado
+            try {
+                Object.keys(localStorage).forEach(k => {
+                    if (chavesSel.has(k) || prefixosArr.some(p => k.startsWith(p))) {
+                        try { localStorage.removeItem(k); }
+                        catch (e) { falhas.push('localStorage "' + k + '": ' + e.message); }
+                    }
+                });
+                Object.keys(sessionStorage).forEach(k => {
+                    if (chavesSel.has(k) || prefixosArr.some(p => k.startsWith(p))) {
+                        try { sessionStorage.removeItem(k); }
+                        catch (e) { falhas.push('sessionStorage "' + k + '": ' + e.message); }
+                    }
+                });
+            } catch (e) {
+                falhas.push('Web Storage: ' + e.message);
+            }
+
+            // 7) IndexedDB — SÓ bancos dos módulos marcados
+            if (bancosArr.length && window.indexedDB) {
+                const resultados = await Promise.allSettled(
+                    bancosArr.map(nome => new Promise((resolve, reject) => {
+                        const req = indexedDB.deleteDatabase(nome);
+                        req.onsuccess = () => resolve(nome);
+                        req.onerror = () => reject(req.error || new Error('erro desconhecido'));
+                        req.onblocked = () => reject(new Error('bloqueado por outra aba'));
+                    }))
+                );
+                resultados.forEach((r, i) => {
+                    if (r.status === 'rejected') {
+                        falhas.push('IndexedDB "' + bancosArr[i] + '": ' + r.reason.message);
+                    }
+                });
+            }
+
+            // 8) Cache Storage / Service Workers
+            if ('caches' in window) {
+                try {
+                    const chaves = await caches.keys();
+                    await Promise.allSettled(chaves.map(k => caches.delete(k)));
+                } catch (e) { falhas.push('Cache Storage: ' + e.message); }
+            }
+            if ('serviceWorker' in navigator) {
+                try {
+                    const regs = await navigator.serviceWorker.getRegistrations();
+                    await Promise.allSettled(regs.map(r => r.unregister()));
+                } catch (e) { falhas.push('Service Workers: ' + e.message); }
+            }
+
+            // 9) Se o módulo 'sistema' foi apagado, zera a senha em memória
+            if (marcados.includes('sistema')) SENHA_MESTRE = '';
+
+            document.getElementById('limpeza-modal').style.display = 'none';
+
+            // 10) Auditoria pós-limpeza: sobrou algo do escopo marcado?
+            const residuais = Object.keys(localStorage).filter(k =>
+                chavesSel.has(k) || prefixosArr.some(p => k.startsWith(p))
+            );
+            if (residuais.length) {
+                falhas.push('resíduos no localStorage: ' + residuais.join(', '));
+            }
+
+            // 11) Relatório
+            if (falhas.length) {
+                alert(
+                    '⚠️ Limpeza PARCIAL nos módulos:\n- ' + rotulos.join('\n- ') +
+                    '\n\nItens que não puderam ser removidos:\n- ' + falhas.join('\n- ') +
+                    '\n\nFeche outras abas/janelas do sistema e tente novamente.\n' +
+                    'Para inspecionar o que restou, rode auditarEscopo() no console.'
+                );
+            } else {
+                alert(
+                    '✅ Limpeza concluída nos módulos:\n- ' + rotulos.join('\n- ') +
+                    '\n\nO sistema será recarregado.'
+                );
                 location.reload();
-            } catch (erro) {
-                console.error('Falha ao limpar os dados locais:', erro);
-                alert('Não foi possível concluir toda a limpeza. Feche os módulos abertos e tente novamente.');
             }
         }
 
