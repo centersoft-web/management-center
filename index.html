@@ -282,12 +282,16 @@
     </div>
 
     <div id="config-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 2000;">
-        <div class="glass-card" style="width: 300px; border: 1px solid var(--accent);">
+        <div class="glass-card" style="width: 300px; border: 1px solid var(--accent); max-height: 92vh; overflow-y: auto;">
             <h3 style="font-family: 'Cinzel'; margin-bottom: 20px; font-size: 0.9rem;">Segurança</h3>
             <input type="password" id="senhaAtual" placeholder="Senha Atual">
             <input type="password" id="senhaNova" placeholder="Nova Senha">
             <button class="primary-btn" onclick="salvarNovaSenha()">Gravar</button>
             <button class="primary-btn" onclick="abrirAvisoBackupPelasConfiguracoes()" style="margin-top: 10px; border-color: rgba(212,175,55,0.55); font-size: 0.65rem;">⚠️ Política de Uso e Backup</button>
+            <button class="primary-btn" onclick="backupCompleto()" style="margin-top: 10px; border-color: #4dafff; color: #6bc4ff; font-size: 0.65rem;">📥 Backup Completo</button>
+            <button class="primary-btn" onclick="abrirBackupPorModulo()" style="margin-top: 10px; border-color: #4dafff; color: #6bc4ff; font-size: 0.65rem;">📥 Backup por Módulo</button>
+            <button class="primary-btn" onclick="abrirRestauracaoCompleta()" style="margin-top: 10px; border-color: #b8b8b8; color: #ddd; font-size: 0.65rem;">📤 Restaurar Completo</button>
+            <button class="primary-btn" onclick="abrirRestauracaoPorModulo()" style="margin-top: 10px; border-color: #b8b8b8; color: #ddd; font-size: 0.65rem;">📤 Restaurar por Módulo</button>
             <button class="primary-btn" onclick="abrirLimpezaDados()" style="margin-top: 10px; border-color: #ff4d4d; color: #ff6b6b; font-size: 0.65rem;">🗑️ Limpar Dados por Módulo</button>
             <button class="primary-btn" onclick="fecharConfig()" style="border-color: #444; color: #888; margin-top: 10px;">Voltar</button>
         </div>
@@ -355,6 +359,49 @@
             </div>
             <button class="primary-btn" onclick="confirmarLimpezaDados()" style="border-color: #ff4d4d; color: #ff6b6b;">Apagar dados dos módulos marcados</button>
             <button class="primary-btn" onclick="fecharLimpezaDados()" style="border-color: #444; color: #888; margin-top: 10px;">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- ═══════════════ NOVO: MODAL DE BACKUP POR MÓDULO ═══════════════ -->
+    <div id="backup-selecao-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.96); display: none; align-items: center; justify-content: center; z-index: 2100; backdrop-filter: blur(10px);">
+        <div class="glass-card" style="width: 620px; max-width: 94%; border: 1px solid #4dafff; text-align: left; padding: 30px;">
+            <h3 style="font-family: 'Cinzel'; margin-bottom: 15px; font-size: 1.05rem; color: #6bc4ff; text-align: center;">📥 BACKUP POR MÓDULO</h3>
+            <div style="font-size: 0.78rem; line-height: 1.55; color: #cbd5e1; margin-bottom: 20px; max-height: 440px; overflow-y: auto; padding-right: 7px;">
+                <p style="margin-bottom: 12px;">Selecione os módulos cujos dados deseja exportar. Módulos vazios aparecem desabilitados.</p>
+
+                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                    <button type="button" onclick="selecionarTodosBackup(true)" style="flex:1; padding: 6px; font-size: 0.62rem; background: transparent; border: 1px solid #4dafff; color: #6bc4ff; cursor: pointer; font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.08em;">Marcar Todos</button>
+                    <button type="button" onclick="selecionarTodosBackup(false)" style="flex:1; padding: 6px; font-size: 0.62rem; background: transparent; border: 1px solid #555; color: #999; cursor: pointer; font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.08em;">Desmarcar Todos</button>
+                </div>
+
+                <div id="lista-modulos-backup" style="border: 1px solid rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 2px; margin-bottom: 16px; background: rgba(0,0,0,0.3);"></div>
+
+                <p style="font-size: 0.72rem; color: #94a3b8; line-height: 1.5;">O arquivo gerado é um <strong>.json</strong> com os dados dos módulos selecionados. Pode ser restaurado depois pelo botão <strong>📤 Restaurar por Módulo</strong>.</p>
+            </div>
+            <button class="primary-btn" onclick="executarBackupSelecionado()" style="border-color: #4dafff; color: #6bc4ff;">Gerar backup dos módulos marcados</button>
+            <button class="primary-btn" onclick="fecharBackupSelecao()" style="border-color: #444; color: #888; margin-top: 10px;">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- ═══════════════ NOVO: MODAL DE RESTAURAÇÃO POR MÓDULO ═══════════════ -->
+    <div id="restauracao-selecao-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.96); display: none; align-items: center; justify-content: center; z-index: 2100; backdrop-filter: blur(10px);">
+        <div class="glass-card" style="width: 620px; max-width: 94%; border: 1px solid #b8b8b8; text-align: left; padding: 30px;">
+            <h3 style="font-family: 'Cinzel'; margin-bottom: 10px; font-size: 1.05rem; color: #ddd; text-align: center;">📤 RESTAURAR POR MÓDULO</h3>
+            <p id="restauracao-info-arquivo" style="font-size: 0.72rem; color: #94a3b8; text-align: center; margin-bottom: 15px;"></p>
+
+            <div style="font-size: 0.78rem; line-height: 1.55; color: #cbd5e1; margin-bottom: 20px; max-height: 420px; overflow-y: auto; padding-right: 7px;">
+                <p style="margin-bottom: 12px;"><strong style="color: #ffaa4d;">⚠️ Atenção:</strong> as chaves dos módulos marcados <strong>sobrescreverão</strong> dados existentes com o mesmo nome. Dados que não estão no backup serão <strong>mantidos</strong>.</p>
+
+                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                    <button type="button" onclick="selecionarTodosRestauracao(true)" style="flex:1; padding: 6px; font-size: 0.62rem; background: transparent; border: 1px solid #b8b8b8; color: #ddd; cursor: pointer; font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.08em;">Marcar Todos</button>
+                    <button type="button" onclick="selecionarTodosRestauracao(false)" style="flex:1; padding: 6px; font-size: 0.62rem; background: transparent; border: 1px solid #555; color: #999; cursor: pointer; font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.08em;">Desmarcar Todos</button>
+                </div>
+
+                <div id="lista-modulos-restauracao" style="border: 1px solid rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 2px; margin-bottom: 16px; background: rgba(0,0,0,0.3);"></div>
+            </div>
+
+            <button class="primary-btn" onclick="executarRestauracaoSelecionada()" style="border-color: #b8b8b8; color: #ddd;">Restaurar módulos marcados</button>
+            <button class="primary-btn" onclick="fecharRestauracaoSelecao()" style="border-color: #444; color: #888; margin-top: 10px;">Cancelar</button>
         </div>
     </div>
 
@@ -881,6 +928,346 @@
                 );
                 location.reload();
             }
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+         * BACKUP — COLETA E GERAÇÃO DE ARQUIVO
+         * ═══════════════════════════════════════════════════════════════ */
+
+        // Coleta apenas as chaves pertencentes aos módulos passados
+        function coletarDadosModulos(modulosSelecionados) {
+            const resultado = {};
+            modulosSelecionados.forEach(id => {
+                const cfg = ESCOPO_DADOS[id];
+                if (!cfg) return;
+                const dadosModulo = {};
+                Object.keys(localStorage).forEach(k => {
+                    const ehChave = cfg.chaves.includes(k);
+                    const ehPrefixo = cfg.prefixos.some(p => k.startsWith(p));
+                    if (ehChave || ehPrefixo) dadosModulo[k] = localStorage.getItem(k);
+                });
+                if (Object.keys(dadosModulo).length) resultado[id] = dadosModulo;
+            });
+            return resultado;
+        }
+
+        // Captura chaves que não pertencem a nenhum módulo mapeado (raro, mas seguro)
+        function coletarNaoMapeados() {
+            const naoMapeadas = {};
+            Object.keys(localStorage).forEach(k => {
+                let mapeada = false;
+                for (const cfg of Object.values(ESCOPO_DADOS)) {
+                    if (cfg.chaves.includes(k) || cfg.prefixos.some(p => k.startsWith(p))) {
+                        mapeada = true; break;
+                    }
+                }
+                if (!mapeada) naoMapeadas[k] = localStorage.getItem(k);
+            });
+            return naoMapeadas;
+        }
+
+        function gerarArquivoBackup(dadosPorModulo, tipo) {
+            const backup = {
+                app: 'Management Center',
+                versao: '1.0',
+                geradoEm: new Date().toISOString(),
+                tipo: tipo,
+                modulosIncluidos: Object.keys(dadosPorModulo).filter(k => k !== '_naoMapeados'),
+                dadosPorModulo: dadosPorModulo
+            };
+            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            a.download = 'management-center-backup-' + tipo + '-' + ts + '.json';
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        }
+
+        function backupCompleto() {
+            fecharConfig();
+            const dadosPorModulo = coletarDadosModulos(Object.keys(ESCOPO_DADOS));
+            const naoMapeados = coletarNaoMapeados();
+            if (Object.keys(naoMapeados).length) dadosPorModulo['_naoMapeados'] = naoMapeados;
+
+            const totalChaves = Object.values(dadosPorModulo).reduce((a, d) => a + Object.keys(d).length, 0);
+
+            if (totalChaves === 0) {
+                alert('Nenhum dado encontrado para backup.\n\nOs módulos ainda não salvaram nada no navegador.');
+                abrirConfig();
+                return;
+            }
+
+            gerarArquivoBackup(dadosPorModulo, 'completo');
+
+            const modulosComDados = Object.keys(dadosPorModulo).filter(k => k !== '_naoMapeados').length;
+            alert('✅ Backup completo gerado!\n\nMódulos com dados: ' + modulosComDados +
+                  '\nChaves exportadas: ' + totalChaves +
+                  '\n\nArquivo salvo na pasta de Downloads.');
+            abrirConfig();
+        }
+
+        function abrirBackupPorModulo() {
+            fecharConfig();
+            montarCheckboxesBackup();
+            document.getElementById('backup-selecao-modal').style.display = 'flex';
+        }
+
+        function montarCheckboxesBackup() {
+            const alvo = document.getElementById('lista-modulos-backup');
+            alvo.innerHTML = '';
+            Object.entries(ESCOPO_DADOS).forEach(([id, cfg]) => {
+                let qtd = 0;
+                Object.keys(localStorage).forEach(k => {
+                    if (cfg.chaves.includes(k) || cfg.prefixos.some(p => k.startsWith(p))) qtd++;
+                });
+                const linha = document.createElement('label');
+                linha.className = 'limpeza-linha';
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.value = id;
+                cb.checked = qtd > 0;
+                cb.disabled = qtd === 0;
+                const texto = document.createElement('span');
+                texto.textContent = cfg.rotulo + ' — ' + qtd + ' chave' + (qtd !== 1 ? 's' : '');
+                texto.style.opacity = qtd === 0 ? '0.4' : '1';
+                linha.appendChild(cb);
+                linha.appendChild(texto);
+                alvo.appendChild(linha);
+            });
+        }
+
+        function selecionarTodosBackup(marcar) {
+            document.querySelectorAll('#lista-modulos-backup input[type="checkbox"]:not(:disabled)')
+                .forEach(cb => cb.checked = marcar);
+        }
+
+        function fecharBackupSelecao() {
+            document.getElementById('backup-selecao-modal').style.display = 'none';
+            abrirConfig();
+        }
+
+        function executarBackupSelecionado() {
+            const marcados = [...document.querySelectorAll(
+                '#lista-modulos-backup input[type="checkbox"]:checked'
+            )].map(cb => cb.value);
+
+            if (!marcados.length) {
+                alert('Selecione ao menos um módulo com dados.');
+                return;
+            }
+
+            const dadosPorModulo = coletarDadosModulos(marcados);
+            const totalChaves = Object.values(dadosPorModulo).reduce((a, d) => a + Object.keys(d).length, 0);
+
+            if (!totalChaves) {
+                alert('Os módulos selecionados não possuem dados para exportar.');
+                return;
+            }
+
+            gerarArquivoBackup(dadosPorModulo, 'seletivo');
+            alert('✅ Backup gerado!\n\nMódulos: ' + marcados.length +
+                  '\nChaves: ' + totalChaves +
+                  '\n\nArquivo salvo na pasta de Downloads.');
+            fecharBackupSelecao();
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+         * RESTAURAÇÃO — COMPLETA E POR MÓDULO
+         * ═══════════════════════════════════════════════════════════════ */
+
+        let _backupPendente = null; // guarda o arquivo carregado durante a seleção
+
+        // Lê e valida o arquivo .json; retorna { backup, nomeArquivo } ou null
+        async function _lerArquivoBackup() {
+            return new Promise(resolve => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json,application/json';
+                input.onchange = async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) { resolve(null); return; }
+                    try {
+                        const backup = JSON.parse(await file.text());
+                        if (backup.app !== 'Management Center' || !backup.dadosPorModulo) {
+                            alert('❌ Arquivo inválido. Não é um backup do Management Center.');
+                            resolve(null); return;
+                        }
+                        resolve({ backup, nomeArquivo: file.name });
+                    } catch (err) {
+                        alert('❌ Erro ao ler o arquivo:\n' + err.message);
+                        resolve(null);
+                    }
+                };
+                input.click();
+            });
+        }
+
+        // Oferta de segurança: backup do estado atual antes de restaurar
+        // Retorna uma Promise que resolve quando o usuário decide (ambos caminhos continuam)
+        async function _oferecerBackupPrevio() {
+            const fazerBackup = confirm(
+                '💾 BACKUP DE SEGURANÇA\n\n' +
+                'Deseja baixar um backup do estado ATUAL antes de restaurar?\n\n' +
+                '✅ OK = baixar backup e depois restaurar\n' +
+                '❌ Cancelar = restaurar sem fazer backup\n\n' +
+                'Recomendado! Se algo der errado, o backup é sua única forma de voltar.'
+            );
+
+            if (!fazerBackup) return; // prossegue sem backup
+
+            const dadosPorModulo = coletarDadosModulos(Object.keys(ESCOPO_DADOS));
+            const naoMapeados = coletarNaoMapeados();
+            if (Object.keys(naoMapeados).length) dadosPorModulo['_naoMapeados'] = naoMapeados;
+
+            const totalChaves = Object.values(dadosPorModulo).reduce((a, d) => a + Object.keys(d).length, 0);
+
+            if (totalChaves === 0) {
+                alert('ℹ️ O sistema está vazio — não há nada para salvar.\n\nProsseguindo com a restauração.');
+                return;
+            }
+
+            gerarArquivoBackup(dadosPorModulo, 'pre-restauracao');
+
+            // pequena pausa para o download do arquivo iniciar antes de modificar os dados
+            await new Promise(r => setTimeout(r, 800));
+        }
+
+        // ── RESTAURAÇÃO COMPLETA ──────────────────────────────
+        async function abrirRestauracaoCompleta() {
+            fecharConfig();
+            const resultado = await _lerArquivoBackup();
+            if (!resultado) { abrirConfig(); return; }
+
+            const { backup, nomeArquivo } = resultado;
+            const totalChaves = Object.values(backup.dadosPorModulo)
+                .reduce((a, d) => a + Object.keys(d || {}).length, 0);
+
+            const msg =
+                'Restaurar COMPLETAMENTE este backup?\n\n' +
+                '📄 Arquivo: ' + nomeArquivo + '\n' +
+                '📅 Gerado em: ' + new Date(backup.geradoEm).toLocaleString('pt-BR') + '\n' +
+                '🗂️ Módulos: ' + (backup.modulosIncluidos || []).length + '\n' +
+                '🔑 Chaves totais: ' + totalChaves + '\n\n' +
+                '⚠️ TODOS os dados atuais dos módulos presentes no backup serão SOBRESCRITOS.\n\n' +
+                'Continuar?';
+
+            if (!confirm(msg)) { abrirConfig(); return; }
+
+            await _oferecerBackupPrevio();
+
+            let count = 0;
+            Object.values(backup.dadosPorModulo).forEach(dadosModulo => {
+                Object.entries(dadosModulo || {}).forEach(([k, v]) => {
+                    try { localStorage.setItem(k, v); count++; }
+                    catch (err) { console.warn('Falha ao restaurar', k, err); }
+                });
+            });
+
+            alert('✅ Restauração completa concluída!\n\n' + count + ' chaves gravadas.\n\nO sistema será recarregado.');
+            location.reload();
+        }
+
+        // ── RESTAURAÇÃO POR MÓDULO ────────────────────────────
+        async function abrirRestauracaoPorModulo() {
+            fecharConfig();
+            const resultado = await _lerArquivoBackup();
+            if (!resultado) { abrirConfig(); return; }
+
+            const { backup, nomeArquivo } = resultado;
+            _backupPendente = backup;
+
+            document.getElementById('restauracao-info-arquivo').textContent =
+                '📄 ' + nomeArquivo + ' — gerado em ' +
+                new Date(backup.geradoEm).toLocaleString('pt-BR');
+
+            montarCheckboxesRestauracao(backup);
+            document.getElementById('restauracao-selecao-modal').style.display = 'flex';
+        }
+
+        function montarCheckboxesRestauracao(backup) {
+            const alvo = document.getElementById('lista-modulos-restauracao');
+            alvo.innerHTML = '';
+
+            Object.entries(backup.dadosPorModulo).forEach(([id, dados]) => {
+                if (!dados || !Object.keys(dados).length) return;
+
+                const rotulo = id === '_naoMapeados'
+                    ? '📦 Outros dados (não classificados)'
+                    : ((ESCOPO_DADOS[id] && ESCOPO_DADOS[id].rotulo) || id);
+                const qtd = Object.keys(dados).length;
+
+                const linha = document.createElement('label');
+                linha.className = 'limpeza-linha';
+
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.value = id;
+                cb.checked = true;
+
+                const texto = document.createElement('span');
+                texto.textContent = rotulo + ' — ' + qtd + ' chave' + (qtd !== 1 ? 's' : '');
+
+                linha.appendChild(cb);
+                linha.appendChild(texto);
+                alvo.appendChild(linha);
+            });
+        }
+
+        function selecionarTodosRestauracao(marcar) {
+            document.querySelectorAll('#lista-modulos-restauracao input[type="checkbox"]')
+                .forEach(cb => cb.checked = marcar);
+        }
+
+        function fecharRestauracaoSelecao() {
+            document.getElementById('restauracao-selecao-modal').style.display = 'none';
+            _backupPendente = null;
+            abrirConfig();
+        }
+
+        async function executarRestauracaoSelecionada() {
+            if (!_backupPendente) {
+                alert('Nenhum arquivo carregado. Reabra a opção.');
+                return;
+            }
+
+            const marcados = [...document.querySelectorAll(
+                '#lista-modulos-restauracao input[type="checkbox"]:checked'
+            )].map(cb => cb.value);
+
+            if (!marcados.length) {
+                alert('Selecione ao menos um módulo para restaurar.');
+                return;
+            }
+
+            const rotulos = marcados.map(id =>
+                id === '_naoMapeados'
+                    ? 'Outros dados'
+                    : ((ESCOPO_DADOS[id] && ESCOPO_DADOS[id].rotulo) || id)
+            );
+
+            const confirmacao = confirm(
+                'Restaurar os seguintes módulos?\n\n- ' + rotulos.join('\n- ') +
+                '\n\n⚠️ As chaves desses módulos serão SOBRESCRITAS com os valores do backup.\n' +
+                'Os demais módulos não serão afetados.\n\nContinuar?'
+            );
+            if (!confirmacao) return;
+
+            await _oferecerBackupPrevio();
+
+            let count = 0;
+            marcados.forEach(id => {
+                const dados = _backupPendente.dadosPorModulo[id];
+                if (!dados) return;
+                Object.entries(dados).forEach(([k, v]) => {
+                    try { localStorage.setItem(k, v); count++; }
+                    catch (err) { console.warn('Falha ao restaurar', k, err); }
+                });
+            });
+
+            alert('✅ Restauração por módulo concluída!\n\n' + count +
+                  ' chaves gravadas em ' + marcados.length + ' módulo(s).\n\nO sistema será recarregado.');
+            location.reload();
         }
 
         document.getElementById('senhaSistema').addEventListener('keypress', event => {
