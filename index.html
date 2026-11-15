@@ -292,7 +292,9 @@
             <button class="primary-btn" onclick="abrirBackupPorModulo()" style="margin-top: 10px; border-color: #4dafff; color: #6bc4ff; font-size: 0.65rem;">📥 Backup por Módulo</button>
             <button class="primary-btn" onclick="abrirRestauracaoCompleta()" style="margin-top: 10px; border-color: #b8b8b8; color: #ddd; font-size: 0.65rem;">📤 Restaurar Completo</button>
             <button class="primary-btn" onclick="abrirRestauracaoPorModulo()" style="margin-top: 10px; border-color: #b8b8b8; color: #ddd; font-size: 0.65rem;">📤 Restaurar por Módulo</button>
+            <button class="primary-btn" onclick="diagnosticarModulos()" style="margin-top: 10px; border-color: #4dff9f; color: #6bffb8; font-size: 0.65rem;">🔍 Diagnóstico de Dados</button>
             <button class="primary-btn" onclick="abrirLimpezaDados()" style="margin-top: 10px; border-color: #ff4d4d; color: #ff6b6b; font-size: 0.65rem;">🗑️ Limpar Dados por Módulo</button>
+            <button class="primary-btn" onclick="resetTotal()" style="margin-top: 10px; border-color: #ff0000; color: #ff0000; font-size: 0.6rem; background: rgba(255,0,0,0.08);">🚨 RESET TOTAL (APAGAR TUDO)</button>
             <button class="primary-btn" onclick="fecharConfig()" style="border-color: #444; color: #888; margin-top: 10px;">Voltar</button>
         </div>
     </div>
@@ -362,7 +364,7 @@
         </div>
     </div>
 
-    <!-- ═══════════════ NOVO: MODAL DE BACKUP POR MÓDULO ═══════════════ -->
+    <!-- MODAL DE BACKUP POR MÓDULO -->
     <div id="backup-selecao-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.96); display: none; align-items: center; justify-content: center; z-index: 2100; backdrop-filter: blur(10px);">
         <div class="glass-card" style="width: 620px; max-width: 94%; border: 1px solid #4dafff; text-align: left; padding: 30px;">
             <h3 style="font-family: 'Cinzel'; margin-bottom: 15px; font-size: 1.05rem; color: #6bc4ff; text-align: center;">📥 BACKUP POR MÓDULO</h3>
@@ -383,7 +385,7 @@
         </div>
     </div>
 
-    <!-- ═══════════════ NOVO: MODAL DE RESTAURAÇÃO POR MÓDULO ═══════════════ -->
+    <!-- MODAL DE RESTAURAÇÃO POR MÓDULO -->
     <div id="restauracao-selecao-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.96); display: none; align-items: center; justify-content: center; z-index: 2100; backdrop-filter: blur(10px);">
         <div class="glass-card" style="width: 620px; max-width: 94%; border: 1px solid #b8b8b8; text-align: left; padding: 30px;">
             <h3 style="font-family: 'Cinzel'; margin-bottom: 10px; font-size: 1.05rem; color: #ddd; text-align: center;">📤 RESTAURAR POR MÓDULO</h3>
@@ -438,19 +440,14 @@
             : '';
 
         /* ═══════════════════════════════════════════════════════════════
-         * ESCOPO DE DADOS POR MÓDULO (whitelist seletiva)
+         * ESCOPO DE DADOS POR MÓDULO
          *
-         * Cada módulo tem seu próprio bloco. Ao limpar, o usuário escolhe
-         * quais blocos apagar. SOMENTE as chaves/prefixos/bancos do módulo
-         * selecionado são removidos.
-         *
-         * COMO COMPLETAR (uma vez por módulo):
-         *   1. Abra o módulo pelo index.html.
-         *   2. Use-o: cadastre, edite, exclua, exporte, reimporte.
-         *   3. F12 → Console → auditarEscopo()
-         *   4. Se aparecer chave/bando "não mapeado" que pertence a este
-         *      módulo, adicione no bloco correspondente abaixo.
-         *   5. Repita nos 17 módulos.
+         * Este mapeamento é uma TENTATIVA de associar prefixos de chave
+         * a cada módulo. Se os módulos usarem nomes diferentes dos listados,
+         * a limpeza por módulo não vai encontrá-los — mas a função
+         * confirmarLimpezaDados() agora DETECTA isso e oferece remover as
+         * chaves órfãs (não mapeadas). Use o botão 🔍 Diagnóstico para ver
+         * os nomes reais e completar o mapeamento aos poucos.
          * ═══════════════════════════════════════════════════════════════ */
         const ESCOPO_DADOS = {
             sistema: {
@@ -564,9 +561,170 @@
         };
 
         /* ═══════════════════════════════════════════════════════════════
-         * AUDITORIA DE ESCOPO
-         * Rode no console (F12) com cada módulo aberto para descobrir
-         * quais chaves ainda não estão mapeadas para nenhum módulo.
+         * DIAGNÓSTICO DE DADOS
+         * Mostra todas as chaves do localStorage com tamanho e amostra,
+         * para você identificar quais pertencem a quais módulos.
+         * ═══════════════════════════════════════════════════════════════ */
+        function diagnosticarModulos() {
+            const chaves = Object.keys(localStorage);
+
+            if (!chaves.length) {
+                alert('🔍 DIAGNÓSTICO\n\nO localStorage está VAZIO.\n\nNenhum módulo salvou dados ainda.');
+                return;
+            }
+
+            console.log('%c=== DIAGNÓSTICO DE DADOS ===', 'font-weight:bold; color:#6bffb8; font-size:14px;');
+            console.log('Total de chaves no localStorage:', chaves.length);
+            console.log('');
+
+            const tabela = chaves.map(k => {
+                const v = localStorage.getItem(k) || '';
+                let mapeada = '❌ NÃO MAPEADA';
+                let modulo = '—';
+                for (const [id, cfg] of Object.entries(ESCOPO_DADOS)) {
+                    if (cfg.chaves.includes(k)) {
+                        mapeada = '✅ mapeada'; modulo = id; break;
+                    }
+                    if (cfg.prefixos.some(p => k.startsWith(p))) {
+                        mapeada = '✅ por prefixo'; modulo = id; break;
+                    }
+                }
+                return {
+                    chave: k,
+                    modulo: modulo,
+                    status: mapeada,
+                    tamanho: v.length + ' chars',
+                    amostra: v.substring(0, 60).replace(/\n/g, ' ')
+                };
+            });
+            console.table(tabela);
+
+            const naoMapeadas = tabela.filter(t => t.status.includes('NÃO'));
+            if (naoMapeadas.length) {
+                console.warn('⚠️ ' + naoMapeadas.length + ' chave(s) NÃO mapeadas:');
+                console.warn(naoMapeadas.map(t => '• ' + t.chave).join('\n'));
+                console.warn('Essas chaves provavelmente são os dados reais dos módulos.');
+                console.warn('Para mapear: abra o módulo, use-o, e veja quais chaves aparecem.');
+            }
+
+            alert(
+                '🔍 DIAGNÓSTICO DE DADOS\n\n' +
+                '📦 Total de chaves no localStorage: ' + chaves.length + '\n' +
+                '✅ Mapeadas: ' + (chaves.length - naoMapeadas.length) + '\n' +
+                '❌ NÃO mapeadas: ' + naoMapeadas.length + '\n\n' +
+                (naoMapeadas.length
+                    ? 'As chaves NÃO mapeadas são provavelmente dados dos módulos.\n\n' +
+                      'Primeiras 5:\n' +
+                      naoMapeadas.slice(0, 5).map(t => '• ' + t.chave).join('\n') +
+                      '\n\nAbra o Console (F12) para ver a tabela completa.'
+                    : '✅ Todas as chaves estão mapeadas corretamente!')
+            );
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+         * RESET TOTAL — LIMPA TODO O LOCALSTORAGE
+         * Seguro em file:// (isolado dos outros sites do navegador)
+         * ═══════════════════════════════════════════════════════════════ */
+        async function resetTotal() {
+            fecharConfig();
+
+            const chaves = Object.keys(localStorage);
+            if (!chaves.length) {
+                alert('O localStorage já está vazio. Nada a apagar.');
+                abrirConfig();
+                return;
+            }
+
+            const conf1 = confirm(
+                '🚨 RESET TOTAL\n\n' +
+                'Isso vai APAGAR PERMANENTEMENTE todas as ' + chaves.length + ' chaves do localStorage.\n\n' +
+                'TODOS os dados de TODOS os módulos serão perdidos.\n\n' +
+                '⚠️ Faça backup primeiro!\n\n' +
+                'Continuar?'
+            );
+            if (!conf1) { abrirConfig(); return; }
+
+            const texto = prompt(
+                'Confirmação final: digite exatamente APAGAR TUDO para continuar.\n\n' +
+                '(Ou cancele para abortar)'
+            );
+            if (texto !== 'APAGAR TUDO') {
+                alert('❌ Confirmação inválida. Nada foi apagado.');
+                abrirConfig();
+                return;
+            }
+
+            // Fecha iframe antes de mexer em IndexedDB
+            try {
+                const frame = document.getElementById('content-frame');
+                if (frame && frame.style.display !== 'none' && frame.src && frame.src !== 'about:blank') {
+                    await new Promise(resolve => {
+                        frame.addEventListener('load', () => resolve(), { once: true });
+                        frame.src = 'about:blank';
+                        setTimeout(resolve, 1500);
+                    });
+                }
+                goHome();
+            } catch (e) { /* segue em frente */ }
+
+            // Apaga tudo
+            let removidas = 0;
+            const falhas = [];
+            chaves.forEach(k => {
+                try { localStorage.removeItem(k); removidas++; }
+                catch (e) { falhas.push(k + ': ' + e.message); }
+            });
+
+            // Limpa IndexedDB
+            if (window.indexedDB && typeof indexedDB.databases === 'function') {
+                try {
+                    const bancos = await indexedDB.databases();
+                    for (const b of bancos) {
+                        if (!b.name) continue;
+                        await new Promise(res => {
+                            const req = indexedDB.deleteDatabase(b.name);
+                            req.onsuccess = () => res();
+                            req.onerror = () => res();
+                            req.onblocked = () => res();
+                        });
+                    }
+                } catch (e) { falhas.push('IndexedDB: ' + e.message); }
+            }
+
+            // Cache + SW
+            if ('caches' in window) {
+                try {
+                    const cs = await caches.keys();
+                    await Promise.allSettled(cs.map(k => caches.delete(k)));
+                } catch (e) { /* silencioso */ }
+            }
+            if ('serviceWorker' in navigator) {
+                try {
+                    const regs = await navigator.serviceWorker.getRegistrations();
+                    await Promise.allSettled(regs.map(r => r.unregister()));
+                } catch (e) { /* silencioso */ }
+            }
+
+            SENHA_MESTRE = '';
+
+            if (falhas.length) {
+                alert(
+                    '⚠️ RESET PARCIAL\n\n' +
+                    removidas + ' chaves removidas.\n' +
+                    'Falhas:\n- ' + falhas.join('\n- ')
+                );
+            } else {
+                alert(
+                    '🚨 RESET CONCLUÍDO\n\n' +
+                    removidas + ' chaves removidas.\n\n' +
+                    'O sistema será recarregado vazio.'
+                );
+                location.reload();
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+         * AUDITORIA DE ESCOPO (mantida para compatibilidade)
          * ═══════════════════════════════════════════════════════════════ */
         function auditarEscopo() {
             const todas = Object.keys(localStorage);
@@ -590,33 +748,8 @@
             console.log('%c=== AUDITORIA DE ESCOPO ===', 'font-weight:bold; color:#d4af37;');
             console.log('Total no localStorage:', todas.length);
             if (mapeadas.length) console.table(mapeadas);
-            else console.log('✅ Nenhuma chave mapeada ainda (normal se o sistema está vazio).');
-            console.log('⚠️ Não mapeadas (NÃO serão apagadas por nenhum módulo):', naoMapeadas);
-            console.log('');
-            console.log('Para cada chave em ⚠️ que seja do Management Center, adicione-a');
-            console.log('no bloco do módulo correspondente (ESCOPO_DADOS.<modulo>.chaves)');
-            console.log('ou em prefixos (para chaves dinâmicas tipo "x_123").');
-
-            if (window.indexedDB && typeof indexedDB.databases === 'function') {
-                indexedDB.databases().then(bancos => {
-                    const nomes = bancos.map(b => b.name).filter(Boolean);
-                    const mapeadosDB = [];
-                    const naoMapeadosDB = [];
-                    nomes.forEach(n => {
-                        let achou = null;
-                        for (const [id, cfg] of Object.entries(ESCOPO_DADOS)) {
-                            if (cfg.indexedDB.includes(n)) { achou = id; break; }
-                        }
-                        if (achou) mapeadosDB.push({ banco: n, modulo: achou });
-                        else naoMapeadosDB.push(n);
-                    });
-                    console.log('%c=== IndexedDB ===', 'font-weight:bold; color:#d4af37;');
-                    if (mapeadosDB.length) console.table(mapeadosDB);
-                    else console.log('✅ Nenhum banco mapeado.');
-                    if (naoMapeadosDB.length) console.warn('⚠️ Bancos NÃO mapeados:', naoMapeadosDB);
-                });
-            }
-
+            else console.log('✅ Nenhuma chave mapeada ainda.');
+            console.log('⚠️ Não mapeadas:', naoMapeadas);
             return naoMapeadas;
         }
 
@@ -774,15 +907,13 @@
         }
 
         /* ═══════════════════════════════════════════════════════════════
-         * LIMPEZA SELETIVA POR MÓDULO
+         * LIMPEZA SELETIVA POR MÓDULO — VERSAO 2 (COM DETECÇÃO INTELIGENTE)
          *
-         * - Apaga SOMENTE as chaves dos módulos marcados no checklist.
-         * - Preserva dados de outros apps (mesmo em file://).
-         * - Sites externos (Gmail, bancos...) são inatingíveis por origem.
-         * - Exige senha se houver senha mestra cadastrada.
-         * - Aguarda o iframe descarregar antes de mexer no IndexedDB.
-         * - Relata falhas parciais item a item (allSettled).
-         * - A importação posterior continua funcionando normalmente.
+         * Novidades desta versão:
+         *  - Conta quantas chaves foram REALMENTE removidas
+         *  - Se 0 mapeadas forem removidas, detecta chaves não mapeadas
+         *    e OFERECE removê-las (assumindo que são dos módulos)
+         *  - Nunca mais mostra "sucesso" quando nada foi removido
          * ═══════════════════════════════════════════════════════════════ */
         async function confirmarLimpezaDados() {
             // 1) Coleta a seleção
@@ -795,7 +926,7 @@
                 return;
             }
 
-            // 2) Senha obrigatória se houver senha mestra cadastrada
+            // 2) Senha
             if (SENHA_MESTRE !== '') {
                 const senha = prompt('Senha mestra para autorizar a limpeza:');
                 if (senha === null) return;
@@ -819,7 +950,7 @@
 
             const falhas = [];
 
-            // 4) Fecha o iframe e espera o unload (libera IndexedDB)
+            // 4) Fecha o iframe
             try {
                 const frame = document.getElementById('content-frame');
                 if (frame && frame.style.display !== 'none' && frame.src && frame.src !== 'about:blank') {
@@ -834,7 +965,7 @@
                 falhas.push('fechamento do iframe: ' + e.message);
             }
 
-            // 5) Monta as listas a partir apenas dos módulos marcados
+            // 5) Monta as listas
             const chavesSel = new Set();
             const prefixosSel = new Set();
             const bancosSel = new Set();
@@ -851,25 +982,78 @@
             const prefixosArr = [...prefixosSel];
             const bancosArr = [...bancosSel];
 
-            // 6) Remove do localStorage / sessionStorage — SÓ chaves do escopo marcado
-            try {
-                Object.keys(localStorage).forEach(k => {
-                    if (chavesSel.has(k) || prefixosArr.some(p => k.startsWith(p))) {
-                        try { localStorage.removeItem(k); }
-                        catch (e) { falhas.push('localStorage "' + k + '": ' + e.message); }
-                    }
+            // 6) Remove do localStorage — SÓ CHAVES MAPEADAS — E CONTA
+            let removidasMapeadas = 0;
+            Object.keys(localStorage).forEach(k => {
+                if (chavesSel.has(k) || prefixosArr.some(p => k.startsWith(p))) {
+                    try { localStorage.removeItem(k); removidasMapeadas++; }
+                    catch (e) { falhas.push('localStorage "' + k + '": ' + e.message); }
+                }
+            });
+            Object.keys(sessionStorage).forEach(k => {
+                if (chavesSel.has(k) || prefixosArr.some(p => k.startsWith(p))) {
+                    try { sessionStorage.removeItem(k); }
+                    catch (e) { falhas.push('sessionStorage "' + k + '": ' + e.message); }
+                }
+            });
+
+            // 6b) FALLBACK: se nada mapeado foi removido, detecta órfãs
+            let removidasOrfas = 0;
+            const orfas = Object.keys(localStorage).filter(k => {
+                for (const cfg of Object.values(ESCOPO_DADOS)) {
+                    if (cfg.chaves.includes(k) || cfg.prefixos.some(p => k.startsWith(p))) return false;
+                }
+                return true;
+            });
+
+            if (removidasMapeadas === 0 && orfas.length > 0) {
+                const aceitou = confirm(
+                    '⚠️ MAPEAMENTO INCOMPLETO\n\n' +
+                    'O ESCOPO_DADOS não reconheceu nenhuma chave dos módulos selecionados.\n\n' +
+                    'Foram encontradas ' + orfas.length + ' chave(s) no navegador que NÃO estão mapeadas.\n' +
+                    'Essas chaves muito provavelmente SÃO os dados dos módulos.\n\n' +
+                    'Primeiras 8 chaves órfãs:\n' +
+                    orfas.slice(0, 8).map(k => '  • ' + k).join('\n') +
+                    (orfas.length > 8 ? '\n  • ... e mais ' + (orfas.length - 8) : '') +
+                    '\n\n' +
+                    '✅ OK = Remover essas ' + orfas.length + ' chave(s) também (LIMPEZA REAL)\n' +
+                    '❌ Cancelar = Cancelar limpeza (nada foi apagado ainda)'
+                );
+
+                if (!aceitou) {
+                    document.getElementById('limpeza-modal').style.display = 'none';
+                    abrirConfig();
+                    return;
+                }
+
+                orfas.forEach(k => {
+                    try { localStorage.removeItem(k); removidasOrfas++; }
+                    catch (e) { falhas.push('órfã "' + k + '": ' + e.message); }
                 });
-                Object.keys(sessionStorage).forEach(k => {
-                    if (chavesSel.has(k) || prefixosArr.some(p => k.startsWith(p))) {
-                        try { sessionStorage.removeItem(k); }
-                        catch (e) { falhas.push('sessionStorage "' + k + '": ' + e.message); }
-                    }
-                });
-            } catch (e) {
-                falhas.push('Web Storage: ' + e.message);
+            } else if (removidasMapeadas > 0 && orfas.length > 0) {
+                // Removeu mapeadas MAS sobraram órfãs → pergunta se quer remover também
+                const aceitou = confirm(
+                    'ℹ️ LIMPEZA PARCIAL DETECTADA\n\n' +
+                    'Foram removidas ' + removidasMapeadas + ' chave(s) mapeada(s).\n\n' +
+                    'Mas sobraram ' + orfas.length + ' chave(s) NÃO mapeadas no localStorage.\n' +
+                    'Essas chaves muito provavelmente pertencem aos módulos.\n\n' +
+                    'Primeiras 5:\n' +
+                    orfas.slice(0, 5).map(k => '  • ' + k).join('\n') +
+                    (orfas.length > 5 ? '\n  • ... e mais ' + (orfas.length - 5) : '') +
+                    '\n\n' +
+                    '✅ OK = Remover também essas ' + orfas.length + ' chave(s)\n' +
+                    '❌ Cancelar = Manter as órfãs (limpeza incompleta)'
+                );
+
+                if (aceitou) {
+                    orfas.forEach(k => {
+                        try { localStorage.removeItem(k); removidasOrfas++; }
+                        catch (e) { falhas.push('órfã "' + k + '": ' + e.message); }
+                    });
+                }
             }
 
-            // 7) IndexedDB — SÓ bancos dos módulos marcados
+            // 7) IndexedDB
             if (bancosArr.length && window.indexedDB) {
                 const resultados = await Promise.allSettled(
                     bancosArr.map(nome => new Promise((resolve, reject) => {
@@ -886,44 +1070,53 @@
                 });
             }
 
-            // 8) Cache Storage / Service Workers
+            // 8) Cache + SW
             if ('caches' in window) {
                 try {
-                    const chaves = await caches.keys();
-                    await Promise.allSettled(chaves.map(k => caches.delete(k)));
-                } catch (e) { falhas.push('Cache Storage: ' + e.message); }
+                    const cs = await caches.keys();
+                    await Promise.allSettled(cs.map(k => caches.delete(k)));
+                } catch (e) { falhas.push('Cache: ' + e.message); }
             }
             if ('serviceWorker' in navigator) {
                 try {
                     const regs = await navigator.serviceWorker.getRegistrations();
                     await Promise.allSettled(regs.map(r => r.unregister()));
-                } catch (e) { falhas.push('Service Workers: ' + e.message); }
+                } catch (e) { falhas.push('SW: ' + e.message); }
             }
 
-            // 9) Se o módulo 'sistema' foi apagado, zera a senha em memória
+            // 9) Zera senha em memória se o módulo sistema foi limpo
             if (marcados.includes('sistema')) SENHA_MESTRE = '';
 
             document.getElementById('limpeza-modal').style.display = 'none';
 
-            // 10) Auditoria pós-limpeza: sobrou algo do escopo marcado?
-            const residuais = Object.keys(localStorage).filter(k =>
-                chavesSel.has(k) || prefixosArr.some(p => k.startsWith(p))
-            );
-            if (residuais.length) {
-                falhas.push('resíduos no localStorage: ' + residuais.join(', '));
+            // 10) Relatório HONESTO
+            const totalRemovidas = removidasMapeadas + removidasOrfas;
+
+            if (totalRemovidas === 0 && !falhas.length) {
+                alert(
+                    '⚠️ NADA FOI REMOVIDO\n\n' +
+                    'Os módulos selecionados não possuem dados salvos no navegador.\n\n' +
+                    'Dica: use 🔍 Diagnóstico para ver o que existe no localStorage.'
+                );
+                abrirConfig();
+                return;
             }
 
-            // 11) Relatório
             if (falhas.length) {
                 alert(
-                    '⚠️ Limpeza PARCIAL nos módulos:\n- ' + rotulos.join('\n- ') +
-                    '\n\nItens que não puderam ser removidos:\n- ' + falhas.join('\n- ') +
-                    '\n\nFeche outras abas/janelas do sistema e tente novamente.\n' +
-                    'Para inspecionar o que restou, rode auditarEscopo() no console.'
+                    '⚠️ Limpeza PARCIAL\n\n' +
+                    '✅ Removidas: ' + totalRemovidas + ' chave(s)' +
+                    (removidasMapeadas ? '\n   • Mapeadas: ' + removidasMapeadas : '') +
+                    (removidasOrfas ? '\n   • Órfãs: ' + removidasOrfas : '') +
+                    '\n\n❌ Falhas:\n- ' + falhas.join('\n- ') +
+                    '\n\nFeche outras abas/janelas e tente novamente.'
                 );
             } else {
                 alert(
-                    '✅ Limpeza concluída nos módulos:\n- ' + rotulos.join('\n- ') +
+                    '✅ Limpeza concluída!\n\n' +
+                    '🗑️ ' + totalRemovidas + ' chave(s) removida(s)' +
+                    (removidasMapeadas ? '\n   • Mapeadas: ' + removidasMapeadas : '') +
+                    (removidasOrfas ? '\n   • Órfãs (não mapeadas): ' + removidasOrfas : '') +
                     '\n\nO sistema será recarregado.'
                 );
                 location.reload();
@@ -933,8 +1126,6 @@
         /* ═══════════════════════════════════════════════════════════════
          * BACKUP — COLETA E GERAÇÃO DE ARQUIVO
          * ═══════════════════════════════════════════════════════════════ */
-
-        // Coleta apenas as chaves pertencentes aos módulos passados
         function coletarDadosModulos(modulosSelecionados) {
             const resultado = {};
             modulosSelecionados.forEach(id => {
@@ -951,7 +1142,6 @@
             return resultado;
         }
 
-        // Captura chaves que não pertencem a nenhum módulo mapeado (raro, mas seguro)
         function coletarNaoMapeados() {
             const naoMapeadas = {};
             Object.keys(localStorage).forEach(k => {
@@ -1075,10 +1265,8 @@
         /* ═══════════════════════════════════════════════════════════════
          * RESTAURAÇÃO — COMPLETA E POR MÓDULO
          * ═══════════════════════════════════════════════════════════════ */
+        let _backupPendente = null;
 
-        let _backupPendente = null; // guarda o arquivo carregado durante a seleção
-
-        // Lê e valida o arquivo .json; retorna { backup, nomeArquivo } ou null
         async function _lerArquivoBackup() {
             return new Promise(resolve => {
                 const input = document.createElement('input');
@@ -1103,8 +1291,6 @@
             });
         }
 
-        // Oferta de segurança: backup do estado atual antes de restaurar
-        // Retorna uma Promise que resolve quando o usuário decide (ambos caminhos continuam)
         async function _oferecerBackupPrevio() {
             const fazerBackup = confirm(
                 '💾 BACKUP DE SEGURANÇA\n\n' +
@@ -1114,7 +1300,7 @@
                 'Recomendado! Se algo der errado, o backup é sua única forma de voltar.'
             );
 
-            if (!fazerBackup) return; // prossegue sem backup
+            if (!fazerBackup) return;
 
             const dadosPorModulo = coletarDadosModulos(Object.keys(ESCOPO_DADOS));
             const naoMapeados = coletarNaoMapeados();
@@ -1128,12 +1314,9 @@
             }
 
             gerarArquivoBackup(dadosPorModulo, 'pre-restauracao');
-
-            // pequena pausa para o download do arquivo iniciar antes de modificar os dados
             await new Promise(r => setTimeout(r, 800));
         }
 
-        // ── RESTAURAÇÃO COMPLETA ──────────────────────────────
         async function abrirRestauracaoCompleta() {
             fecharConfig();
             const resultado = await _lerArquivoBackup();
@@ -1168,7 +1351,6 @@
             location.reload();
         }
 
-        // ── RESTAURAÇÃO POR MÓDULO ────────────────────────────
         async function abrirRestauracaoPorModulo() {
             fecharConfig();
             const resultado = await _lerArquivoBackup();
