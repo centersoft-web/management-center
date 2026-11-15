@@ -81,7 +81,6 @@
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
         }
 
-        /* Barras laterais esquerda e direita */
         .sidebar {
             width: var(--sidebar-width);
             min-width: var(--sidebar-width);
@@ -239,28 +238,6 @@
             padding: 20px;
         }
 
-        /* Itens do checklist de limpeza */
-        .limpeza-linha {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 7px 8px;
-            cursor: pointer;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-            font-size: 0.82rem;
-            color: #cbd5e1;
-            transition: background 0.15s;
-        }
-        .limpeza-linha:hover { background: rgba(212, 175, 55, 0.08); }
-        .limpeza-linha input[type="checkbox"] {
-            width: 15px;
-            height: 15px;
-            min-width: 15px;
-            margin: 0;
-            cursor: pointer;
-            accent-color: #d4af37;
-        }
-
         @media (max-height: 700px) {
             .sidebar { padding: 8px 0; }
             .logo-btn { margin-bottom: 8px; }
@@ -287,15 +264,11 @@
             <input type="password" id="senhaAtual" placeholder="Senha Atual">
             <input type="password" id="senhaNova" placeholder="Nova Senha">
             <button class="primary-btn" onclick="salvarNovaSenha()">Gravar</button>
-            <button class="primary-btn" onclick="abrirAvisoBackupPelasConfiguracoes()" style="margin-top: 10px; border-color: rgba(212,175,55,0.55); font-size: 0.65rem;">⚠️ Política de Uso e Backup</button>
             <button class="primary-btn" onclick="backupCompleto()" style="margin-top: 10px; border-color: #4dafff; color: #6bc4ff; font-size: 0.65rem;">📥 Backup Completo</button>
-            <button class="primary-btn" onclick="abrirBackupPorModulo()" style="margin-top: 10px; border-color: #4dafff; color: #6bc4ff; font-size: 0.65rem;">📥 Backup por Módulo</button>
             <button class="primary-btn" onclick="abrirRestauracaoCompleta()" style="margin-top: 10px; border-color: #b8b8b8; color: #ddd; font-size: 0.65rem;">📤 Restaurar Completo</button>
-            <button class="primary-btn" onclick="abrirRestauracaoPorModulo()" style="margin-top: 10px; border-color: #b8b8b8; color: #ddd; font-size: 0.65rem;">📤 Restaurar por Módulo</button>
-            <button class="primary-btn" onclick="diagnosticarModulos()" style="margin-top: 10px; border-color: #4dff9f; color: #6bffb8; font-size: 0.65rem;">🔍 Diagnóstico de Dados</button>
-            <button class="primary-btn" onclick="abrirLimpezaDados()" style="margin-top: 10px; border-color: #ff4d4d; color: #ff6b6b; font-size: 0.65rem;">🗑️ Limpar Dados por Módulo</button>
             <button class="primary-btn" onclick="resetTotal()" style="margin-top: 10px; border-color: #ff0000; color: #ff0000; font-size: 0.6rem; background: rgba(255,0,0,0.08);">🚨 RESET TOTAL (APAGAR TUDO)</button>
             <button class="primary-btn" onclick="fecharConfig()" style="border-color: #444; color: #888; margin-top: 10px;">Voltar</button>
+            <button class="primary-btn" onclick="abrirAvisoBackupPelasConfiguracoes()" style="margin-top: 10px; border-color: rgba(212,175,55,0.55); font-size: 0.65rem;">⚠️ Política de Uso e Backup</button>
         </div>
     </div>
 
@@ -334,79 +307,6 @@
         </div>
     </div>
 
-    <div id="limpeza-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.96); display: none; align-items: center; justify-content: center; z-index: 2100; backdrop-filter: blur(10px);">
-        <div class="glass-card" style="width: 620px; max-width: 94%; border: 1px solid #ff4d4d; text-align: left; padding: 30px;">
-            <h3 style="font-family: 'Cinzel'; margin-bottom: 15px; font-size: 1.05rem; color: #ff6b6b; text-align: center;">⚠️ LIMPAR DADOS POR MÓDULO</h3>
-            <div style="font-size: 0.78rem; line-height: 1.55; color: #cbd5e1; margin-bottom: 20px; max-height: 440px; overflow-y: auto; padding-right: 7px;">
-                <p style="margin-bottom: 12px;"><strong style="color: #ff6b6b;">Esta ação é permanente e não pode ser desfeita.</strong> Faça backup antes de continuar.</p>
-
-                <p style="margin-bottom: 8px;"><strong>Marque os módulos cujos dados deseja apagar:</strong></p>
-
-                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                    <button type="button" onclick="selecionarTodosModulosLimpeza(true)" style="flex:1; padding: 6px; font-size: 0.62rem; background: transparent; border: 1px solid var(--accent); color: var(--accent); cursor: pointer; font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.08em;">Marcar Todos</button>
-                    <button type="button" onclick="selecionarTodosModulosLimpeza(false)" style="flex:1; padding: 6px; font-size: 0.62rem; background: transparent; border: 1px solid #555; color: #999; cursor: pointer; font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.08em;">Desmarcar Todos</button>
-                </div>
-
-                <div id="lista-modulos-limpeza" style="border: 1px solid rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 2px; margin-bottom: 16px; background: rgba(0,0,0,0.3);"></div>
-
-                <p style="margin-bottom: 8px;"><strong>O sistema de limpeza não inclui, não acessa e não afeta:</strong></p>
-                <ul style="margin: 0 0 14px 20px;">
-                    <li>senha do Gmail;</li>
-                    <li>senha da conta Microsoft;</li>
-                    <li>senhas salvas pelo Chrome, Edge ou outro navegador;</li>
-                    <li>senhas do gerenciador de senhas;</li>
-                    <li>senhas de bancos ou de outros sites.</li>
-                </ul>
-                <p>Ao continuar, ainda será necessário digitar exatamente <strong style="color: #ff6b6b;">APAGAR TUDO</strong> para concluir.</p>
-            </div>
-            <button class="primary-btn" onclick="confirmarLimpezaDados()" style="border-color: #ff4d4d; color: #ff6b6b;">Apagar dados dos módulos marcados</button>
-            <button class="primary-btn" onclick="fecharLimpezaDados()" style="border-color: #444; color: #888; margin-top: 10px;">Cancelar</button>
-        </div>
-    </div>
-
-    <!-- MODAL DE BACKUP POR MÓDULO -->
-    <div id="backup-selecao-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.96); display: none; align-items: center; justify-content: center; z-index: 2100; backdrop-filter: blur(10px);">
-        <div class="glass-card" style="width: 620px; max-width: 94%; border: 1px solid #4dafff; text-align: left; padding: 30px;">
-            <h3 style="font-family: 'Cinzel'; margin-bottom: 15px; font-size: 1.05rem; color: #6bc4ff; text-align: center;">📥 BACKUP POR MÓDULO</h3>
-            <div style="font-size: 0.78rem; line-height: 1.55; color: #cbd5e1; margin-bottom: 20px; max-height: 440px; overflow-y: auto; padding-right: 7px;">
-                <p style="margin-bottom: 12px;">Selecione os módulos cujos dados deseja exportar. Módulos vazios aparecem desabilitados.</p>
-
-                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                    <button type="button" onclick="selecionarTodosBackup(true)" style="flex:1; padding: 6px; font-size: 0.62rem; background: transparent; border: 1px solid #4dafff; color: #6bc4ff; cursor: pointer; font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.08em;">Marcar Todos</button>
-                    <button type="button" onclick="selecionarTodosBackup(false)" style="flex:1; padding: 6px; font-size: 0.62rem; background: transparent; border: 1px solid #555; color: #999; cursor: pointer; font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.08em;">Desmarcar Todos</button>
-                </div>
-
-                <div id="lista-modulos-backup" style="border: 1px solid rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 2px; margin-bottom: 16px; background: rgba(0,0,0,0.3);"></div>
-
-                <p style="font-size: 0.72rem; color: #94a3b8; line-height: 1.5;">O arquivo gerado é um <strong>.json</strong> com os dados dos módulos selecionados. Pode ser restaurado depois pelo botão <strong>📤 Restaurar por Módulo</strong>.</p>
-            </div>
-            <button class="primary-btn" onclick="executarBackupSelecionado()" style="border-color: #4dafff; color: #6bc4ff;">Gerar backup dos módulos marcados</button>
-            <button class="primary-btn" onclick="fecharBackupSelecao()" style="border-color: #444; color: #888; margin-top: 10px;">Cancelar</button>
-        </div>
-    </div>
-
-    <!-- MODAL DE RESTAURAÇÃO POR MÓDULO -->
-    <div id="restauracao-selecao-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.96); display: none; align-items: center; justify-content: center; z-index: 2100; backdrop-filter: blur(10px);">
-        <div class="glass-card" style="width: 620px; max-width: 94%; border: 1px solid #b8b8b8; text-align: left; padding: 30px;">
-            <h3 style="font-family: 'Cinzel'; margin-bottom: 10px; font-size: 1.05rem; color: #ddd; text-align: center;">📤 RESTAURAR POR MÓDULO</h3>
-            <p id="restauracao-info-arquivo" style="font-size: 0.72rem; color: #94a3b8; text-align: center; margin-bottom: 15px;"></p>
-
-            <div style="font-size: 0.78rem; line-height: 1.55; color: #cbd5e1; margin-bottom: 20px; max-height: 420px; overflow-y: auto; padding-right: 7px;">
-                <p style="margin-bottom: 12px;"><strong style="color: #ffaa4d;">⚠️ Atenção:</strong> as chaves dos módulos marcados <strong>sobrescreverão</strong> dados existentes com o mesmo nome. Dados que não estão no backup serão <strong>mantidos</strong>.</p>
-
-                <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-                    <button type="button" onclick="selecionarTodosRestauracao(true)" style="flex:1; padding: 6px; font-size: 0.62rem; background: transparent; border: 1px solid #b8b8b8; color: #ddd; cursor: pointer; font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.08em;">Marcar Todos</button>
-                    <button type="button" onclick="selecionarTodosRestauracao(false)" style="flex:1; padding: 6px; font-size: 0.62rem; background: transparent; border: 1px solid #555; color: #999; cursor: pointer; font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.08em;">Desmarcar Todos</button>
-                </div>
-
-                <div id="lista-modulos-restauracao" style="border: 1px solid rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 2px; margin-bottom: 16px; background: rgba(0,0,0,0.3);"></div>
-            </div>
-
-            <button class="primary-btn" onclick="executarRestauracaoSelecionada()" style="border-color: #b8b8b8; color: #ddd;">Restaurar módulos marcados</button>
-            <button class="primary-btn" onclick="fecharRestauracaoSelecao()" style="border-color: #444; color: #888; margin-top: 10px;">Cancelar</button>
-        </div>
-    </div>
-
     <script>
         /*
          * CADASTRO DOS MÓDULOS
@@ -438,320 +338,6 @@
         let SENHA_MESTRE = localStorage.getItem('senhaMaster') !== null
             ? localStorage.getItem('senhaMaster')
             : '';
-
-        /* ═══════════════════════════════════════════════════════════════
-         * ESCOPO DE DADOS POR MÓDULO
-         *
-         * Este mapeamento é uma TENTATIVA de associar prefixos de chave
-         * a cada módulo. Se os módulos usarem nomes diferentes dos listados,
-         * a limpeza por módulo não vai encontrá-los — mas a função
-         * confirmarLimpezaDados() agora DETECTA isso e oferece remover as
-         * chaves órfãs (não mapeadas). Use o botão 🔍 Diagnóstico para ver
-         * os nomes reais e completar o mapeamento aos poucos.
-         * ═══════════════════════════════════════════════════════════════ */
-        const ESCOPO_DADOS = {
-            sistema: {
-                rotulo: '🔐 Senha interna do sistema',
-                chaves: ['senhaMaster'],
-                prefixos: [],
-                indexedDB: []
-            },
-            alugueis: {
-                rotulo: '💰 Aluguéis',
-                chaves: ['alugueis', 'aluguel', 'inquilinos', 'recebimentos_aluguel'],
-                prefixos: ['aluguel_', 'inquilino_'],
-                indexedDB: []
-            },
-            imoveis: {
-                rotulo: '🏠 Imóveis & IPTU',
-                chaves: ['imoveis', 'iptu', 'imoveis_servicos'],
-                prefixos: ['imovel_', 'iptu_'],
-                indexedDB: []
-            },
-            contratos: {
-                rotulo: '🧾 Gestão de Contratos',
-                chaves: ['contratos'],
-                prefixos: ['contrato_'],
-                indexedDB: []
-            },
-            financeiro: {
-                rotulo: '📊 Financeiro Global',
-                chaves: ['financeiro', 'financeiro_lancamentos', 'transacoes'],
-                prefixos: ['financeiro_', 'lancamento_', 'transacao_'],
-                indexedDB: []
-            },
-            contas: {
-                rotulo: '🏦 Contas Bancárias',
-                chaves: ['contas', 'contas_bancarias', 'bancos', 'saldos_contas'],
-                prefixos: ['conta_bancaria_', 'conta_'],
-                indexedDB: []
-            },
-            cartoes_credito: {
-                rotulo: '💳 Cartões de Crédito',
-                chaves: ['cartoes'],
-                prefixos: ['cartao_credito_'],
-                indexedDB: []
-            },
-            cartoes_parcelas: {
-                rotulo: '💳 Cartões & Parcelas',
-                chaves: ['cartoes_parcelas', 'parcelas', 'parcelamentos'],
-                prefixos: ['parcela_', 'parcelamento_'],
-                indexedDB: []
-            },
-            quantum: {
-                rotulo: '📈 Quantum Trade',
-                chaves: ['quantum', 'quantum_trade', 'investimentos', 'trades'],
-                prefixos: ['quantum_', 'trade_', 'investimento_'],
-                indexedDB: []
-            },
-            frota: {
-                rotulo: '🚗 Frota',
-                chaves: ['frota', 'veiculos', 'manutencoes', 'abastecimentos'],
-                prefixos: ['veiculo_', 'manutencao_', 'abastecimento_'],
-                indexedDB: []
-            },
-            calc_financeira: {
-                rotulo: '📈 Calculadora Financeira',
-                chaves: ['calculadora_financeira', 'historico_calc_financeira'],
-                prefixos: ['calc_financeira_'],
-                indexedDB: []
-            },
-            custos_imob: {
-                rotulo: '🏘️ Custos Imobiliários',
-                chaves: ['custos_imobiliarios', 'simulador_imob'],
-                prefixos: [],
-                indexedDB: []
-            },
-            doacao: {
-                rotulo: '💷 Simulador de Doação',
-                chaves: ['doacao', 'simulador_doacao', 'custos_doacao'],
-                prefixos: ['doacao_'],
-                indexedDB: []
-            },
-            irpf: {
-                rotulo: '🧮 Simulador PF x PJ',
-                chaves: ['irpf', 'simulador_irpf', 'pf_pj', 'comparativo_pf_pj'],
-                prefixos: ['irpf_', 'pf_pj_'],
-                indexedDB: []
-            },
-            trabalhista: {
-                rotulo: '💼 Cálculo Trabalhista',
-                chaves: ['trabalhista', 'calculo_trabalhista', 'rescisao'],
-                prefixos: ['trabalhista_', 'rescisao_'],
-                indexedDB: []
-            },
-            reforma: {
-                rotulo: '🔨 Controle de Reforma',
-                chaves: ['reforma', 'reforma_itens', 'orcamento_reforma'],
-                prefixos: ['reforma_'],
-                indexedDB: []
-            },
-            comparativa: {
-                rotulo: '⚖️ Calculadora Comparativa',
-                chaves: ['comparativa', 'calc_comparativa'],
-                prefixos: ['comparativa_'],
-                indexedDB: []
-            },
-            agenda: {
-                rotulo: '🕘 Agenda de Tarefas',
-                chaves: ['agenda', 'tarefas', 'agenda_tarefas'],
-                prefixos: ['agenda_', 'tarefa_'],
-                indexedDB: []
-            }
-        };
-
-        /* ═══════════════════════════════════════════════════════════════
-         * DIAGNÓSTICO DE DADOS
-         * Mostra todas as chaves do localStorage com tamanho e amostra,
-         * para você identificar quais pertencem a quais módulos.
-         * ═══════════════════════════════════════════════════════════════ */
-        function diagnosticarModulos() {
-            const chaves = Object.keys(localStorage);
-
-            if (!chaves.length) {
-                alert('🔍 DIAGNÓSTICO\n\nO localStorage está VAZIO.\n\nNenhum módulo salvou dados ainda.');
-                return;
-            }
-
-            console.log('%c=== DIAGNÓSTICO DE DADOS ===', 'font-weight:bold; color:#6bffb8; font-size:14px;');
-            console.log('Total de chaves no localStorage:', chaves.length);
-            console.log('');
-
-            const tabela = chaves.map(k => {
-                const v = localStorage.getItem(k) || '';
-                let mapeada = '❌ NÃO MAPEADA';
-                let modulo = '—';
-                for (const [id, cfg] of Object.entries(ESCOPO_DADOS)) {
-                    if (cfg.chaves.includes(k)) {
-                        mapeada = '✅ mapeada'; modulo = id; break;
-                    }
-                    if (cfg.prefixos.some(p => k.startsWith(p))) {
-                        mapeada = '✅ por prefixo'; modulo = id; break;
-                    }
-                }
-                return {
-                    chave: k,
-                    modulo: modulo,
-                    status: mapeada,
-                    tamanho: v.length + ' chars',
-                    amostra: v.substring(0, 60).replace(/\n/g, ' ')
-                };
-            });
-            console.table(tabela);
-
-            const naoMapeadas = tabela.filter(t => t.status.includes('NÃO'));
-            if (naoMapeadas.length) {
-                console.warn('⚠️ ' + naoMapeadas.length + ' chave(s) NÃO mapeadas:');
-                console.warn(naoMapeadas.map(t => '• ' + t.chave).join('\n'));
-                console.warn('Essas chaves provavelmente são os dados reais dos módulos.');
-                console.warn('Para mapear: abra o módulo, use-o, e veja quais chaves aparecem.');
-            }
-
-            alert(
-                '🔍 DIAGNÓSTICO DE DADOS\n\n' +
-                '📦 Total de chaves no localStorage: ' + chaves.length + '\n' +
-                '✅ Mapeadas: ' + (chaves.length - naoMapeadas.length) + '\n' +
-                '❌ NÃO mapeadas: ' + naoMapeadas.length + '\n\n' +
-                (naoMapeadas.length
-                    ? 'As chaves NÃO mapeadas são provavelmente dados dos módulos.\n\n' +
-                      'Primeiras 5:\n' +
-                      naoMapeadas.slice(0, 5).map(t => '• ' + t.chave).join('\n') +
-                      '\n\nAbra o Console (F12) para ver a tabela completa.'
-                    : '✅ Todas as chaves estão mapeadas corretamente!')
-            );
-        }
-
-        /* ═══════════════════════════════════════════════════════════════
-         * RESET TOTAL — LIMPA TODO O LOCALSTORAGE
-         * Seguro em file:// (isolado dos outros sites do navegador)
-         * ═══════════════════════════════════════════════════════════════ */
-        async function resetTotal() {
-            fecharConfig();
-
-            const chaves = Object.keys(localStorage);
-            if (!chaves.length) {
-                alert('O localStorage já está vazio. Nada a apagar.');
-                abrirConfig();
-                return;
-            }
-
-            const conf1 = confirm(
-                '🚨 RESET TOTAL\n\n' +
-                'Isso vai APAGAR PERMANENTEMENTE todas as ' + chaves.length + ' chaves do localStorage.\n\n' +
-                'TODOS os dados de TODOS os módulos serão perdidos.\n\n' +
-                '⚠️ Faça backup primeiro!\n\n' +
-                'Continuar?'
-            );
-            if (!conf1) { abrirConfig(); return; }
-
-            const texto = prompt(
-                'Confirmação final: digite exatamente APAGAR TUDO para continuar.\n\n' +
-                '(Ou cancele para abortar)'
-            );
-            if (texto !== 'APAGAR TUDO') {
-                alert('❌ Confirmação inválida. Nada foi apagado.');
-                abrirConfig();
-                return;
-            }
-
-            // Fecha iframe antes de mexer em IndexedDB
-            try {
-                const frame = document.getElementById('content-frame');
-                if (frame && frame.style.display !== 'none' && frame.src && frame.src !== 'about:blank') {
-                    await new Promise(resolve => {
-                        frame.addEventListener('load', () => resolve(), { once: true });
-                        frame.src = 'about:blank';
-                        setTimeout(resolve, 1500);
-                    });
-                }
-                goHome();
-            } catch (e) { /* segue em frente */ }
-
-            // Apaga tudo
-            let removidas = 0;
-            const falhas = [];
-            chaves.forEach(k => {
-                try { localStorage.removeItem(k); removidas++; }
-                catch (e) { falhas.push(k + ': ' + e.message); }
-            });
-
-            // Limpa IndexedDB
-            if (window.indexedDB && typeof indexedDB.databases === 'function') {
-                try {
-                    const bancos = await indexedDB.databases();
-                    for (const b of bancos) {
-                        if (!b.name) continue;
-                        await new Promise(res => {
-                            const req = indexedDB.deleteDatabase(b.name);
-                            req.onsuccess = () => res();
-                            req.onerror = () => res();
-                            req.onblocked = () => res();
-                        });
-                    }
-                } catch (e) { falhas.push('IndexedDB: ' + e.message); }
-            }
-
-            // Cache + SW
-            if ('caches' in window) {
-                try {
-                    const cs = await caches.keys();
-                    await Promise.allSettled(cs.map(k => caches.delete(k)));
-                } catch (e) { /* silencioso */ }
-            }
-            if ('serviceWorker' in navigator) {
-                try {
-                    const regs = await navigator.serviceWorker.getRegistrations();
-                    await Promise.allSettled(regs.map(r => r.unregister()));
-                } catch (e) { /* silencioso */ }
-            }
-
-            SENHA_MESTRE = '';
-
-            if (falhas.length) {
-                alert(
-                    '⚠️ RESET PARCIAL\n\n' +
-                    removidas + ' chaves removidas.\n' +
-                    'Falhas:\n- ' + falhas.join('\n- ')
-                );
-            } else {
-                alert(
-                    '🚨 RESET CONCLUÍDO\n\n' +
-                    removidas + ' chaves removidas.\n\n' +
-                    'O sistema será recarregado vazio.'
-                );
-                location.reload();
-            }
-        }
-
-        /* ═══════════════════════════════════════════════════════════════
-         * AUDITORIA DE ESCOPO (mantida para compatibilidade)
-         * ═══════════════════════════════════════════════════════════════ */
-        function auditarEscopo() {
-            const todas = Object.keys(localStorage);
-            const mapeadas = [];
-            const naoMapeadas = [];
-
-            todas.forEach(k => {
-                let moduloId = null;
-                for (const [id, cfg] of Object.entries(ESCOPO_DADOS)) {
-                    if (cfg.chaves.includes(k)) { moduloId = id; break; }
-                }
-                if (!moduloId) {
-                    for (const [id, cfg] of Object.entries(ESCOPO_DADOS)) {
-                        if (cfg.prefixos.some(p => k.startsWith(p))) { moduloId = id; break; }
-                    }
-                }
-                if (moduloId) mapeadas.push({ chave: k, modulo: moduloId });
-                else naoMapeadas.push(k);
-            });
-
-            console.log('%c=== AUDITORIA DE ESCOPO ===', 'font-weight:bold; color:#d4af37;');
-            console.log('Total no localStorage:', todas.length);
-            if (mapeadas.length) console.table(mapeadas);
-            else console.log('✅ Nenhuma chave mapeada ainda.');
-            console.log('⚠️ Não mapeadas:', naoMapeadas);
-            return naoMapeadas;
-        }
 
         function criarBotaoModulo(modulo) {
             const botao = document.createElement('button');
@@ -866,407 +452,108 @@
         }
 
         /* ═══════════════════════════════════════════════════════════════
-         * CHECKLIST DE MÓDULOS NO MODAL DE LIMPEZA
+         * UTILITÁRIOS DE BACKUP / RESTAURAÇÃO
          * ═══════════════════════════════════════════════════════════════ */
-        function montarCheckboxesLimpeza() {
-            const alvo = document.getElementById('lista-modulos-limpeza');
-            alvo.innerHTML = '';
 
-            Object.entries(ESCOPO_DADOS).forEach(([id, cfg]) => {
-                const linha = document.createElement('label');
-                linha.className = 'limpeza-linha';
-
-                const cb = document.createElement('input');
-                cb.type = 'checkbox';
-                cb.value = id;
-                cb.checked = true;
-
-                const texto = document.createElement('span');
-                texto.textContent = cfg.rotulo;
-
-                linha.appendChild(cb);
-                linha.appendChild(texto);
-                alvo.appendChild(linha);
+        // Dump bruto de TODO o localStorage
+        function _coletarTudoLocalStorage() {
+            const tudo = {};
+            Object.keys(localStorage).forEach(k => {
+                tudo[k] = localStorage.getItem(k);
             });
+            return tudo;
         }
 
-        function selecionarTodosModulosLimpeza(marcar) {
-            document.querySelectorAll('#lista-modulos-limpeza input[type="checkbox"]')
-                .forEach(cb => cb.checked = marcar);
-        }
-
-        function abrirLimpezaDados() {
-            fecharConfig();
-            montarCheckboxesLimpeza();
-            document.getElementById('limpeza-modal').style.display = 'flex';
-        }
-
-        function fecharLimpezaDados() {
-            document.getElementById('limpeza-modal').style.display = 'none';
-            abrirConfig();
-        }
-
-        /* ═══════════════════════════════════════════════════════════════
-         * LIMPEZA SELETIVA POR MÓDULO — VERSAO 2 (COM DETECÇÃO INTELIGENTE)
-         *
-         * Novidades desta versão:
-         *  - Conta quantas chaves foram REALMENTE removidas
-         *  - Se 0 mapeadas forem removidas, detecta chaves não mapeadas
-         *    e OFERECE removê-las (assumindo que são dos módulos)
-         *  - Nunca mais mostra "sucesso" quando nada foi removido
-         * ═══════════════════════════════════════════════════════════════ */
-        async function confirmarLimpezaDados() {
-            // 1) Coleta a seleção
-            const marcados = [...document.querySelectorAll(
-                '#lista-modulos-limpeza input[type="checkbox"]:checked'
-            )].map(cb => cb.value);
-
-            if (marcados.length === 0) {
-                alert('Selecione ao menos um módulo para apagar.');
-                return;
-            }
-
-            // 2) Senha
-            if (SENHA_MESTRE !== '') {
-                const senha = prompt('Senha mestra para autorizar a limpeza:');
-                if (senha === null) return;
-                if (senha !== SENHA_MESTRE) {
-                    alert('Senha incorreta. Limpeza cancelada.');
+        // Detecta bancos IndexedDB existentes (não são incluídos no backup)
+        function _listarBancosIndexedDB() {
+            return new Promise(resolve => {
+                if (!window.indexedDB || typeof indexedDB.databases !== 'function') {
+                    resolve([]);
                     return;
                 }
-            }
-
-            // 3) Confirmação por texto
-            const rotulos = marcados.map(id => (ESCOPO_DADOS[id] && ESCOPO_DADOS[id].rotulo) || id);
-            const confirmacao = prompt(
-                'Confirmação final: digite exatamente APAGAR TUDO para excluir permanentemente os dados do(s) módulo(s):\n\n' +
-                rotulos.join('\n') +
-                '\n\nDigite APAGAR TUDO para continuar.'
-            );
-            if (confirmacao !== 'APAGAR TUDO') {
-                alert('Confirmação inválida. Nenhum dado foi apagado.');
-                return;
-            }
-
-            const falhas = [];
-
-            // 4) Fecha o iframe
-            try {
-                const frame = document.getElementById('content-frame');
-                if (frame && frame.style.display !== 'none' && frame.src && frame.src !== 'about:blank') {
-                    await new Promise(resolve => {
-                        frame.addEventListener('load', () => resolve(), { once: true });
-                        frame.src = 'about:blank';
-                        setTimeout(resolve, 1500);
-                    });
-                }
-                goHome();
-            } catch (e) {
-                falhas.push('fechamento do iframe: ' + e.message);
-            }
-
-            // 5) Monta as listas
-            const chavesSel = new Set();
-            const prefixosSel = new Set();
-            const bancosSel = new Set();
-
-            marcados.forEach(id => {
-                const cfg = ESCOPO_DADOS[id];
-                if (!cfg) return;
-                cfg.chaves.forEach(k => chavesSel.add(k));
-                cfg.prefixos.forEach(p => prefixosSel.add(p));
-                cfg.indexedDB.forEach(b => bancosSel.add(b));
+                indexedDB.databases().then(bancos => {
+                    resolve(bancos.map(b => b.name).filter(Boolean));
+                }).catch(() => resolve([]));
             });
-
-            const chavesArr = [...chavesSel];
-            const prefixosArr = [...prefixosSel];
-            const bancosArr = [...bancosSel];
-
-            // 6) Remove do localStorage — SÓ CHAVES MAPEADAS — E CONTA
-            let removidasMapeadas = 0;
-            Object.keys(localStorage).forEach(k => {
-                if (chavesSel.has(k) || prefixosArr.some(p => k.startsWith(p))) {
-                    try { localStorage.removeItem(k); removidasMapeadas++; }
-                    catch (e) { falhas.push('localStorage "' + k + '": ' + e.message); }
-                }
-            });
-            Object.keys(sessionStorage).forEach(k => {
-                if (chavesSel.has(k) || prefixosArr.some(p => k.startsWith(p))) {
-                    try { sessionStorage.removeItem(k); }
-                    catch (e) { falhas.push('sessionStorage "' + k + '": ' + e.message); }
-                }
-            });
-
-            // 6b) FALLBACK: se nada mapeado foi removido, detecta órfãs
-            let removidasOrfas = 0;
-            const orfas = Object.keys(localStorage).filter(k => {
-                for (const cfg of Object.values(ESCOPO_DADOS)) {
-                    if (cfg.chaves.includes(k) || cfg.prefixos.some(p => k.startsWith(p))) return false;
-                }
-                return true;
-            });
-
-            if (removidasMapeadas === 0 && orfas.length > 0) {
-                const aceitou = confirm(
-                    '⚠️ MAPEAMENTO INCOMPLETO\n\n' +
-                    'O ESCOPO_DADOS não reconheceu nenhuma chave dos módulos selecionados.\n\n' +
-                    'Foram encontradas ' + orfas.length + ' chave(s) no navegador que NÃO estão mapeadas.\n' +
-                    'Essas chaves muito provavelmente SÃO os dados dos módulos.\n\n' +
-                    'Primeiras 8 chaves órfãs:\n' +
-                    orfas.slice(0, 8).map(k => '  • ' + k).join('\n') +
-                    (orfas.length > 8 ? '\n  • ... e mais ' + (orfas.length - 8) : '') +
-                    '\n\n' +
-                    '✅ OK = Remover essas ' + orfas.length + ' chave(s) também (LIMPEZA REAL)\n' +
-                    '❌ Cancelar = Cancelar limpeza (nada foi apagado ainda)'
-                );
-
-                if (!aceitou) {
-                    document.getElementById('limpeza-modal').style.display = 'none';
-                    abrirConfig();
-                    return;
-                }
-
-                orfas.forEach(k => {
-                    try { localStorage.removeItem(k); removidasOrfas++; }
-                    catch (e) { falhas.push('órfã "' + k + '": ' + e.message); }
-                });
-            } else if (removidasMapeadas > 0 && orfas.length > 0) {
-                // Removeu mapeadas MAS sobraram órfãs → pergunta se quer remover também
-                const aceitou = confirm(
-                    'ℹ️ LIMPEZA PARCIAL DETECTADA\n\n' +
-                    'Foram removidas ' + removidasMapeadas + ' chave(s) mapeada(s).\n\n' +
-                    'Mas sobraram ' + orfas.length + ' chave(s) NÃO mapeadas no localStorage.\n' +
-                    'Essas chaves muito provavelmente pertencem aos módulos.\n\n' +
-                    'Primeiras 5:\n' +
-                    orfas.slice(0, 5).map(k => '  • ' + k).join('\n') +
-                    (orfas.length > 5 ? '\n  • ... e mais ' + (orfas.length - 5) : '') +
-                    '\n\n' +
-                    '✅ OK = Remover também essas ' + orfas.length + ' chave(s)\n' +
-                    '❌ Cancelar = Manter as órfãs (limpeza incompleta)'
-                );
-
-                if (aceitou) {
-                    orfas.forEach(k => {
-                        try { localStorage.removeItem(k); removidasOrfas++; }
-                        catch (e) { falhas.push('órfã "' + k + '": ' + e.message); }
-                    });
-                }
-            }
-
-            // 7) IndexedDB
-            if (bancosArr.length && window.indexedDB) {
-                const resultados = await Promise.allSettled(
-                    bancosArr.map(nome => new Promise((resolve, reject) => {
-                        const req = indexedDB.deleteDatabase(nome);
-                        req.onsuccess = () => resolve(nome);
-                        req.onerror = () => reject(req.error || new Error('erro desconhecido'));
-                        req.onblocked = () => reject(new Error('bloqueado por outra aba'));
-                    }))
-                );
-                resultados.forEach((r, i) => {
-                    if (r.status === 'rejected') {
-                        falhas.push('IndexedDB "' + bancosArr[i] + '": ' + r.reason.message);
-                    }
-                });
-            }
-
-            // 8) Cache + SW
-            if ('caches' in window) {
-                try {
-                    const cs = await caches.keys();
-                    await Promise.allSettled(cs.map(k => caches.delete(k)));
-                } catch (e) { falhas.push('Cache: ' + e.message); }
-            }
-            if ('serviceWorker' in navigator) {
-                try {
-                    const regs = await navigator.serviceWorker.getRegistrations();
-                    await Promise.allSettled(regs.map(r => r.unregister()));
-                } catch (e) { falhas.push('SW: ' + e.message); }
-            }
-
-            // 9) Zera senha em memória se o módulo sistema foi limpo
-            if (marcados.includes('sistema')) SENHA_MESTRE = '';
-
-            document.getElementById('limpeza-modal').style.display = 'none';
-
-            // 10) Relatório HONESTO
-            const totalRemovidas = removidasMapeadas + removidasOrfas;
-
-            if (totalRemovidas === 0 && !falhas.length) {
-                alert(
-                    '⚠️ NADA FOI REMOVIDO\n\n' +
-                    'Os módulos selecionados não possuem dados salvos no navegador.\n\n' +
-                    'Dica: use 🔍 Diagnóstico para ver o que existe no localStorage.'
-                );
-                abrirConfig();
-                return;
-            }
-
-            if (falhas.length) {
-                alert(
-                    '⚠️ Limpeza PARCIAL\n\n' +
-                    '✅ Removidas: ' + totalRemovidas + ' chave(s)' +
-                    (removidasMapeadas ? '\n   • Mapeadas: ' + removidasMapeadas : '') +
-                    (removidasOrfas ? '\n   • Órfãs: ' + removidasOrfas : '') +
-                    '\n\n❌ Falhas:\n- ' + falhas.join('\n- ') +
-                    '\n\nFeche outras abas/janelas e tente novamente.'
-                );
-            } else {
-                alert(
-                    '✅ Limpeza concluída!\n\n' +
-                    '🗑️ ' + totalRemovidas + ' chave(s) removida(s)' +
-                    (removidasMapeadas ? '\n   • Mapeadas: ' + removidasMapeadas : '') +
-                    (removidasOrfas ? '\n   • Órfãs (não mapeadas): ' + removidasOrfas : '') +
-                    '\n\nO sistema será recarregado.'
-                );
-                location.reload();
-            }
         }
 
-        /* ═══════════════════════════════════════════════════════════════
-         * BACKUP — COLETA E GERAÇÃO DE ARQUIVO
-         * ═══════════════════════════════════════════════════════════════ */
-        function coletarDadosModulos(modulosSelecionados) {
-            const resultado = {};
-            modulosSelecionados.forEach(id => {
-                const cfg = ESCOPO_DADOS[id];
-                if (!cfg) return;
-                const dadosModulo = {};
-                Object.keys(localStorage).forEach(k => {
-                    const ehChave = cfg.chaves.includes(k);
-                    const ehPrefixo = cfg.prefixos.some(p => k.startsWith(p));
-                    if (ehChave || ehPrefixo) dadosModulo[k] = localStorage.getItem(k);
-                });
-                if (Object.keys(dadosModulo).length) resultado[id] = dadosModulo;
-            });
-            return resultado;
-        }
-
-        function coletarNaoMapeados() {
-            const naoMapeadas = {};
-            Object.keys(localStorage).forEach(k => {
-                let mapeada = false;
-                for (const cfg of Object.values(ESCOPO_DADOS)) {
-                    if (cfg.chaves.includes(k) || cfg.prefixos.some(p => k.startsWith(p))) {
-                        mapeada = true; break;
-                    }
-                }
-                if (!mapeada) naoMapeadas[k] = localStorage.getItem(k);
-            });
-            return naoMapeadas;
-        }
-
-        function gerarArquivoBackup(dadosPorModulo, tipo) {
-            const backup = {
-                app: 'Management Center',
-                versao: '1.0',
-                geradoEm: new Date().toISOString(),
-                tipo: tipo,
-                modulosIncluidos: Object.keys(dadosPorModulo).filter(k => k !== '_naoMapeados'),
-                dadosPorModulo: dadosPorModulo
-            };
-            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+        // Baixa um objeto como JSON
+        function _baixarJSON(obj, nomeArquivo) {
+            const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-            a.download = 'management-center-backup-' + tipo + '-' + ts + '.json';
+            a.download = nomeArquivo;
             a.click();
             setTimeout(() => URL.revokeObjectURL(a.href), 1000);
         }
 
-        function backupCompleto() {
-            fecharConfig();
-            const dadosPorModulo = coletarDadosModulos(Object.keys(ESCOPO_DADOS));
-            const naoMapeados = coletarNaoMapeados();
-            if (Object.keys(naoMapeados).length) dadosPorModulo['_naoMapeados'] = naoMapeados;
+        // Timestamp para nomes de arquivo: 2026-11-15T14-30-45
+        function _timestampArquivo() {
+            return new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+        }
 
-            const totalChaves = Object.values(dadosPorModulo).reduce((a, d) => a + Object.keys(d).length, 0);
+        /* ═══════════════════════════════════════════════════════════════
+         * BACKUP COMPLETO — dump integral do localStorage
+         *
+         * Independe de mapeamento: captura TODAS as chaves do navegador.
+         * Avisa se houver IndexedDB (não incluído no arquivo).
+         * ═══════════════════════════════════════════════════════════════ */
+        async function backupCompleto() {
+            fecharConfig();
+
+            const tudo = _coletarTudoLocalStorage();
+            const totalChaves = Object.keys(tudo).length;
 
             if (totalChaves === 0) {
-                alert('Nenhum dado encontrado para backup.\n\nOs módulos ainda não salvaram nada no navegador.');
+                alert(
+                    '⚠️ Nenhum dado encontrado no navegador para backup.\n\n' +
+                    'Todos os módulos estão vazios ou ainda não salvaram nada.'
+                );
                 abrirConfig();
                 return;
             }
 
-            gerarArquivoBackup(dadosPorModulo, 'completo');
+            const bancosIDB = await _listarBancosIndexedDB();
 
-            const modulosComDados = Object.keys(dadosPorModulo).filter(k => k !== '_naoMapeados').length;
-            alert('✅ Backup completo gerado!\n\nMódulos com dados: ' + modulosComDados +
-                  '\nChaves exportadas: ' + totalChaves +
-                  '\n\nArquivo salvo na pasta de Downloads.');
-            abrirConfig();
-        }
+            const backup = {
+                app: 'Management Center',
+                versao: '2.0',
+                geradoEm: new Date().toISOString(),
+                tipo: 'completo',
+                totalChaves: totalChaves,
+                dados: tudo,
+                // Campos legados — mantidos por compatibilidade reversa
+                modulosIncluidos: [],
+                dadosPorModulo: { _todos: tudo }
+            };
 
-        function abrirBackupPorModulo() {
-            fecharConfig();
-            montarCheckboxesBackup();
-            document.getElementById('backup-selecao-modal').style.display = 'flex';
-        }
+            const nomeArquivo = 'management-center-backup-completo-' + _timestampArquivo() + '.json';
+            _baixarJSON(backup, nomeArquivo);
 
-        function montarCheckboxesBackup() {
-            const alvo = document.getElementById('lista-modulos-backup');
-            alvo.innerHTML = '';
-            Object.entries(ESCOPO_DADOS).forEach(([id, cfg]) => {
-                let qtd = 0;
-                Object.keys(localStorage).forEach(k => {
-                    if (cfg.chaves.includes(k) || cfg.prefixos.some(p => k.startsWith(p))) qtd++;
-                });
-                const linha = document.createElement('label');
-                linha.className = 'limpeza-linha';
-                const cb = document.createElement('input');
-                cb.type = 'checkbox';
-                cb.value = id;
-                cb.checked = qtd > 0;
-                cb.disabled = qtd === 0;
-                const texto = document.createElement('span');
-                texto.textContent = cfg.rotulo + ' — ' + qtd + ' chave' + (qtd !== 1 ? 's' : '');
-                texto.style.opacity = qtd === 0 ? '0.4' : '1';
-                linha.appendChild(cb);
-                linha.appendChild(texto);
-                alvo.appendChild(linha);
-            });
-        }
+            let msg =
+                '✅ Backup completo gerado!\n\n' +
+                '📦 Chaves exportadas: ' + totalChaves + '\n' +
+                '📄 Arquivo: ' + nomeArquivo + '\n' +
+                '📁 Salvo na pasta de Downloads.';
 
-        function selecionarTodosBackup(marcar) {
-            document.querySelectorAll('#lista-modulos-backup input[type="checkbox"]:not(:disabled)')
-                .forEach(cb => cb.checked = marcar);
-        }
-
-        function fecharBackupSelecao() {
-            document.getElementById('backup-selecao-modal').style.display = 'none';
-            abrirConfig();
-        }
-
-        function executarBackupSelecionado() {
-            const marcados = [...document.querySelectorAll(
-                '#lista-modulos-backup input[type="checkbox"]:checked'
-            )].map(cb => cb.value);
-
-            if (!marcados.length) {
-                alert('Selecione ao menos um módulo com dados.');
-                return;
+            if (bancosIDB.length > 0) {
+                msg +=
+                    '\n\n⚠️ ATENÇÃO — IndexedDB detectado:\n' +
+                    bancosIDB.map(b => '  • ' + b).join('\n') +
+                    '\n\nEsses bancos NÃO estão incluídos no backup ' +
+                    '(o backup cobre apenas localStorage).\n\n' +
+                    'Se algum módulo usa IndexedDB internamente, os dados dele ' +
+                    'precisam ser exportados pela função própria do módulo.';
             }
 
-            const dadosPorModulo = coletarDadosModulos(marcados);
-            const totalChaves = Object.values(dadosPorModulo).reduce((a, d) => a + Object.keys(d).length, 0);
-
-            if (!totalChaves) {
-                alert('Os módulos selecionados não possuem dados para exportar.');
-                return;
-            }
-
-            gerarArquivoBackup(dadosPorModulo, 'seletivo');
-            alert('✅ Backup gerado!\n\nMódulos: ' + marcados.length +
-                  '\nChaves: ' + totalChaves +
-                  '\n\nArquivo salvo na pasta de Downloads.');
-            fecharBackupSelecao();
+            alert(msg);
+            abrirConfig();
         }
 
         /* ═══════════════════════════════════════════════════════════════
-         * RESTAURAÇÃO — COMPLETA E POR MÓDULO
+         * LEITURA E VALIDAÇÃO DE ARQUIVO DE BACKUP
+         * Aceita formato novo (`dados`) e antigo (`dadosPorModulo`)
          * ═══════════════════════════════════════════════════════════════ */
-        let _backupPendente = null;
-
         async function _lerArquivoBackup() {
             return new Promise(resolve => {
                 const input = document.createElement('input');
@@ -1277,10 +564,20 @@
                     if (!file) { resolve(null); return; }
                     try {
                         const backup = JSON.parse(await file.text());
-                        if (backup.app !== 'Management Center' || !backup.dadosPorModulo) {
+
+                        if (backup.app !== 'Management Center') {
                             alert('❌ Arquivo inválido. Não é um backup do Management Center.');
                             resolve(null); return;
                         }
+
+                        const temDados = backup.dados && Object.keys(backup.dados).length > 0;
+                        const temModulos = backup.dadosPorModulo && Object.keys(backup.dadosPorModulo).length > 0;
+
+                        if (!temDados && !temModulos) {
+                            alert('❌ O arquivo não contém dados para restaurar.');
+                            resolve(null); return;
+                        }
+
                         resolve({ backup, nomeArquivo: file.name });
                     } catch (err) {
                         alert('❌ Erro ao ler o arquivo:\n' + err.message);
@@ -1291,165 +588,254 @@
             });
         }
 
+        // Converte o backup para um mapa plano { chave: valor }
+        // (aceita formato novo e antigo)
+        function _achatarBackup(backup) {
+            const plano = {};
+
+            if (backup.dados && Object.keys(backup.dados).length > 0) {
+                // Formato novo (2.0): dump direto
+                Object.entries(backup.dados).forEach(([k, v]) => {
+                    plano[k] = v;
+                });
+            } else if (backup.dadosPorModulo) {
+                // Formato antigo: itera por todos os módulos, inclusive _naoMapeados
+                Object.values(backup.dadosPorModulo).forEach(dadosModulo => {
+                    Object.entries(dadosModulo || {}).forEach(([k, v]) => {
+                        plano[k] = v;
+                    });
+                });
+            }
+
+            return plano;
+        }
+
+        // Oferta de backup do estado atual antes de restaurar
         async function _oferecerBackupPrevio() {
             const fazerBackup = confirm(
                 '💾 BACKUP DE SEGURANÇA\n\n' +
                 'Deseja baixar um backup do estado ATUAL antes de restaurar?\n\n' +
-                '✅ OK = baixar backup e depois restaurar\n' +
+                '✅ OK = baixar backup do estado atual e depois restaurar\n' +
                 '❌ Cancelar = restaurar sem fazer backup\n\n' +
                 'Recomendado! Se algo der errado, o backup é sua única forma de voltar.'
             );
 
             if (!fazerBackup) return;
 
-            const dadosPorModulo = coletarDadosModulos(Object.keys(ESCOPO_DADOS));
-            const naoMapeados = coletarNaoMapeados();
-            if (Object.keys(naoMapeados).length) dadosPorModulo['_naoMapeados'] = naoMapeados;
+            const tudo = _coletarTudoLocalStorage();
+            const total = Object.keys(tudo).length;
 
-            const totalChaves = Object.values(dadosPorModulo).reduce((a, d) => a + Object.keys(d).length, 0);
-
-            if (totalChaves === 0) {
+            if (total === 0) {
                 alert('ℹ️ O sistema está vazio — não há nada para salvar.\n\nProsseguindo com a restauração.');
                 return;
             }
 
-            gerarArquivoBackup(dadosPorModulo, 'pre-restauracao');
+            const backup = {
+                app: 'Management Center',
+                versao: '2.0',
+                geradoEm: new Date().toISOString(),
+                tipo: 'pre-restauracao',
+                totalChaves: total,
+                dados: tudo,
+                modulosIncluidos: [],
+                dadosPorModulo: { _todos: tudo }
+            };
+
+            const nomeArquivo = 'management-center-backup-pre-restauracao-' + _timestampArquivo() + '.json';
+            _baixarJSON(backup, nomeArquivo);
+
+            // pequena pausa pro download disparar antes de alterar dados
             await new Promise(r => setTimeout(r, 800));
         }
 
+        /* ═══════════════════════════════════════════════════════════════
+         * RESTAURAÇÃO COMPLETA — restaura TODAS as chaves do backup
+         *
+         * - Aceita backup novo (dump flat) e antigo (dadosPorModulo)
+         * - Fecha o iframe antes de restaurar (evita sobrescrita por
+         *   módulos abertos com estado em memória)
+         * - Relatório detalhado: chaves gravadas, falhas, alerta de IndexedDB
+         * ═══════════════════════════════════════════════════════════════ */
         async function abrirRestauracaoCompleta() {
             fecharConfig();
+
             const resultado = await _lerArquivoBackup();
             if (!resultado) { abrirConfig(); return; }
 
             const { backup, nomeArquivo } = resultado;
-            const totalChaves = Object.values(backup.dadosPorModulo)
-                .reduce((a, d) => a + Object.keys(d || {}).length, 0);
+            const plano = _achatarBackup(backup);
+            const totalChaves = Object.keys(plano).length;
+
+            if (totalChaves === 0) {
+                alert('❌ O backup não contém chaves para restaurar.');
+                abrirConfig();
+                return;
+            }
 
             const msg =
                 'Restaurar COMPLETAMENTE este backup?\n\n' +
                 '📄 Arquivo: ' + nomeArquivo + '\n' +
                 '📅 Gerado em: ' + new Date(backup.geradoEm).toLocaleString('pt-BR') + '\n' +
-                '🗂️ Módulos: ' + (backup.modulosIncluidos || []).length + '\n' +
-                '🔑 Chaves totais: ' + totalChaves + '\n\n' +
-                '⚠️ TODOS os dados atuais dos módulos presentes no backup serão SOBRESCRITOS.\n\n' +
+                '🔑 Chaves no backup: ' + totalChaves + '\n\n' +
+                '⚠️ As chaves do backup SOBRESCREVERÃO os dados atuais com o mesmo nome.\n' +
+                'Chaves existentes no navegador mas que NÃO estão no backup serão MANTIDAS.\n\n' +
                 'Continuar?';
 
             if (!confirm(msg)) { abrirConfig(); return; }
 
             await _oferecerBackupPrevio();
 
+            // Fecha o iframe para liberar localStorage de módulos abertos
+            try {
+                const frame = document.getElementById('content-frame');
+                if (frame && frame.style.display !== 'none' && frame.src && frame.src !== 'about:blank') {
+                    await new Promise(resolve => {
+                        frame.addEventListener('load', () => resolve(), { once: true });
+                        frame.src = 'about:blank';
+                        setTimeout(resolve, 1500);
+                    });
+                }
+                goHome();
+            } catch (e) { /* segue em frente */ }
+
+            // Aplica os dados
             let count = 0;
-            Object.values(backup.dadosPorModulo).forEach(dadosModulo => {
-                Object.entries(dadosModulo || {}).forEach(([k, v]) => {
-                    try { localStorage.setItem(k, v); count++; }
-                    catch (err) { console.warn('Falha ao restaurar', k, err); }
-                });
+            const falhas = [];
+            Object.entries(plano).forEach(([k, v]) => {
+                try {
+                    localStorage.setItem(k, v);
+                    count++;
+                } catch (err) {
+                    falhas.push(k + ': ' + err.message);
+                }
             });
 
-            alert('✅ Restauração completa concluída!\n\n' + count + ' chaves gravadas.\n\nO sistema será recarregado.');
+            // Verifica IndexedDB que pode NÃO ter sido restaurado
+            const bancosIDB = await _listarBancosIndexedDB();
+
+            let relatorio =
+                '✅ Restauração completa concluída!\n\n' +
+                '🔑 Chaves gravadas: ' + count + ' de ' + totalChaves;
+
+            if (falhas.length) {
+                relatorio +=
+                    '\n\n⚠️ ' + falhas.length + ' falha(s):\n- ' +
+                    falhas.slice(0, 5).join('\n- ') +
+                    (falhas.length > 5 ? '\n- ... e mais ' + (falhas.length - 5) : '');
+            }
+
+            if (bancosIDB.length > 0) {
+                relatorio +=
+                    '\n\n⚠️ IndexedDB detectado (não afetado):\n' +
+                    bancosIDB.map(b => '  • ' + b).join('\n') +
+                    '\n\nSe algum módulo usar IndexedDB, os dados dele ' +
+                    'NÃO foram restaurados por esta operação.';
+            }
+
+            relatorio += '\n\nO sistema será recarregado.';
+            alert(relatorio);
             location.reload();
         }
 
-        async function abrirRestauracaoPorModulo() {
+        /* ═══════════════════════════════════════════════════════════════
+         * RESET TOTAL — limpa TODO o localStorage + IndexedDB + Cache
+         * ═══════════════════════════════════════════════════════════════ */
+        async function resetTotal() {
             fecharConfig();
-            const resultado = await _lerArquivoBackup();
-            if (!resultado) { abrirConfig(); return; }
 
-            const { backup, nomeArquivo } = resultado;
-            _backupPendente = backup;
-
-            document.getElementById('restauracao-info-arquivo').textContent =
-                '📄 ' + nomeArquivo + ' — gerado em ' +
-                new Date(backup.geradoEm).toLocaleString('pt-BR');
-
-            montarCheckboxesRestauracao(backup);
-            document.getElementById('restauracao-selecao-modal').style.display = 'flex';
-        }
-
-        function montarCheckboxesRestauracao(backup) {
-            const alvo = document.getElementById('lista-modulos-restauracao');
-            alvo.innerHTML = '';
-
-            Object.entries(backup.dadosPorModulo).forEach(([id, dados]) => {
-                if (!dados || !Object.keys(dados).length) return;
-
-                const rotulo = id === '_naoMapeados'
-                    ? '📦 Outros dados (não classificados)'
-                    : ((ESCOPO_DADOS[id] && ESCOPO_DADOS[id].rotulo) || id);
-                const qtd = Object.keys(dados).length;
-
-                const linha = document.createElement('label');
-                linha.className = 'limpeza-linha';
-
-                const cb = document.createElement('input');
-                cb.type = 'checkbox';
-                cb.value = id;
-                cb.checked = true;
-
-                const texto = document.createElement('span');
-                texto.textContent = rotulo + ' — ' + qtd + ' chave' + (qtd !== 1 ? 's' : '');
-
-                linha.appendChild(cb);
-                linha.appendChild(texto);
-                alvo.appendChild(linha);
-            });
-        }
-
-        function selecionarTodosRestauracao(marcar) {
-            document.querySelectorAll('#lista-modulos-restauracao input[type="checkbox"]')
-                .forEach(cb => cb.checked = marcar);
-        }
-
-        function fecharRestauracaoSelecao() {
-            document.getElementById('restauracao-selecao-modal').style.display = 'none';
-            _backupPendente = null;
-            abrirConfig();
-        }
-
-        async function executarRestauracaoSelecionada() {
-            if (!_backupPendente) {
-                alert('Nenhum arquivo carregado. Reabra a opção.');
+            const chaves = Object.keys(localStorage);
+            if (!chaves.length) {
+                alert('O localStorage já está vazio. Nada a apagar.');
+                abrirConfig();
                 return;
             }
 
-            const marcados = [...document.querySelectorAll(
-                '#lista-modulos-restauracao input[type="checkbox"]:checked'
-            )].map(cb => cb.value);
+            const conf1 = confirm(
+                '🚨 RESET TOTAL\n\n' +
+                'Isso vai APAGAR PERMANENTEMENTE todas as ' + chaves.length + ' chaves do localStorage.\n\n' +
+                'TODOS os dados de TODOS os módulos serão perdidos.\n\n' +
+                '⚠️ Faça backup primeiro!\n\n' +
+                'Continuar?'
+            );
+            if (!conf1) { abrirConfig(); return; }
 
-            if (!marcados.length) {
-                alert('Selecione ao menos um módulo para restaurar.');
+            const texto = prompt(
+                'Confirmação final: digite exatamente APAGAR TUDO para continuar.\n\n' +
+                '(Ou cancele para abortar)'
+            );
+            if (texto !== 'APAGAR TUDO') {
+                alert('❌ Confirmação inválida. Nada foi apagado.');
+                abrirConfig();
                 return;
             }
 
-            const rotulos = marcados.map(id =>
-                id === '_naoMapeados'
-                    ? 'Outros dados'
-                    : ((ESCOPO_DADOS[id] && ESCOPO_DADOS[id].rotulo) || id)
-            );
+            // Fecha iframe antes de mexer em IndexedDB
+            try {
+                const frame = document.getElementById('content-frame');
+                if (frame && frame.style.display !== 'none' && frame.src && frame.src !== 'about:blank') {
+                    await new Promise(resolve => {
+                        frame.addEventListener('load', () => resolve(), { once: true });
+                        frame.src = 'about:blank';
+                        setTimeout(resolve, 1500);
+                    });
+                }
+                goHome();
+            } catch (e) { /* segue em frente */ }
 
-            const confirmacao = confirm(
-                'Restaurar os seguintes módulos?\n\n- ' + rotulos.join('\n- ') +
-                '\n\n⚠️ As chaves desses módulos serão SOBRESCRITAS com os valores do backup.\n' +
-                'Os demais módulos não serão afetados.\n\nContinuar?'
-            );
-            if (!confirmacao) return;
-
-            await _oferecerBackupPrevio();
-
-            let count = 0;
-            marcados.forEach(id => {
-                const dados = _backupPendente.dadosPorModulo[id];
-                if (!dados) return;
-                Object.entries(dados).forEach(([k, v]) => {
-                    try { localStorage.setItem(k, v); count++; }
-                    catch (err) { console.warn('Falha ao restaurar', k, err); }
-                });
+            // Apaga tudo do localStorage
+            let removidas = 0;
+            const falhas = [];
+            chaves.forEach(k => {
+                try { localStorage.removeItem(k); removidas++; }
+                catch (e) { falhas.push(k + ': ' + e.message); }
             });
 
-            alert('✅ Restauração por módulo concluída!\n\n' + count +
-                  ' chaves gravadas em ' + marcados.length + ' módulo(s).\n\nO sistema será recarregado.');
-            location.reload();
+            // Limpa IndexedDB
+            if (window.indexedDB && typeof indexedDB.databases === 'function') {
+                try {
+                    const bancos = await indexedDB.databases();
+                    for (const b of bancos) {
+                        if (!b.name) continue;
+                        await new Promise(res => {
+                            const req = indexedDB.deleteDatabase(b.name);
+                            req.onsuccess = () => res();
+                            req.onerror = () => res();
+                            req.onblocked = () => res();
+                        });
+                    }
+                } catch (e) { falhas.push('IndexedDB: ' + e.message); }
+            }
+
+            // Cache + Service Workers
+            if ('caches' in window) {
+                try {
+                    const cs = await caches.keys();
+                    await Promise.allSettled(cs.map(k => caches.delete(k)));
+                } catch (e) { /* silencioso */ }
+            }
+            if ('serviceWorker' in navigator) {
+                try {
+                    const regs = await navigator.serviceWorker.getRegistrations();
+                    await Promise.allSettled(regs.map(r => r.unregister()));
+                } catch (e) { /* silencioso */ }
+            }
+
+            SENHA_MESTRE = '';
+
+            if (falhas.length) {
+                alert(
+                    '⚠️ RESET PARCIAL\n\n' +
+                    removidas + ' chaves removidas.\n' +
+                    'Falhas:\n- ' + falhas.join('\n- ')
+                );
+            } else {
+                alert(
+                    '🚨 RESET CONCLUÍDO\n\n' +
+                    removidas + ' chaves removidas.\n\n' +
+                    'O sistema será recarregado vazio.'
+                );
+                location.reload();
+            }
         }
 
         document.getElementById('senhaSistema').addEventListener('keypress', event => {
