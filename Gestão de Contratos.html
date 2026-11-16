@@ -485,24 +485,23 @@
         }
 
         function exportBackup() {
-            const agora = new Date();
-            const ano = agora.getFullYear(); 
-            const dia = String(agora.getDate()).padStart(2, '0');
-            const mes = String(agora.getMonth() + 1).padStart(2, '0');
-            const dataCompleta = `${dia}-${mes}-${ano}`;
-            const horas = String(agora.getHours()).padStart(2, '0');
-            const minutos = String(agora.getMinutes()).padStart(2, '0');
-            const segundos = String(agora.getSeconds()).padStart(2, '0');
-            const horario = `${horas}-${minutos}-${segundos}`;
+    const agora = new Date();
+    const ano = agora.getFullYear();
+    const dia = String(agora.getDate()).padStart(2, '0');
+    const mes = String(agora.getMonth() + 1).padStart(2, '0');
+    const dataCompleta = `${dia}-${mes}-${ano}`;
+    const horas = String(agora.getHours()).padStart(2, '0');
+    const minutos = String(agora.getMinutes()).padStart(2, '0');
+    const horario = `${horas}h${minutos}`;          // <-- antes era `${horas}-${minutos}-${segundos}`
 
-            const nomeArquivo = `Gestão_de_Contratos_${ano}_${dataCompleta}_${horario}.json`;
-            
-            const blob = new Blob([JSON.stringify(imoveis)], { type: "application/json" });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob); 
-            a.download = nomeArquivo; 
-            a.click();
-        }
+    const nomeArquivo = `Gestão_de_Contratos_${ano}_${dataCompleta}_${horario}.json`;
+
+    const blob = new Blob([JSON.stringify(imoveis)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = nomeArquivo;
+    a.click();
+}
 
         async function importBackup(event) {
             const input = event.target;

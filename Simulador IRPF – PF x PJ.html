@@ -148,7 +148,7 @@ function exportarDados(){
   const a=document.createElement('a');
   const agora=new Date();
   const dataFormatada=String(agora.getDate()).padStart(2,'0')+'-'+String(agora.getMonth()+1).padStart(2,'0')+'-'+agora.getFullYear();
-  const horaFormatada=String(agora.getHours()).padStart(2,'0')+'-'+String(agora.getMinutes()).padStart(2,'0')+'-'+String(agora.getSeconds()).padStart(2,'0');
+  const horaFormatada=String(agora.getHours()).padStart(2,'0')+'h'+String(agora.getMinutes()).padStart(2,'0');
   a.href=URL.createObjectURL(blob);a.download=`Simulador_IRPF_PF_x_PJ_2026_${dataFormatada}_${horaFormatada}.json`;
   document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href);
 }
