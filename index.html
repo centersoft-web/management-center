@@ -267,8 +267,8 @@
             <button class="primary-btn" onclick="backupCompleto()" style="margin-top: 10px; border-color: #4dafff; color: #6bc4ff; font-size: 0.65rem;">📥 Backup Completo</button>
             <button class="primary-btn" onclick="abrirRestauracaoCompleta()" style="margin-top: 10px; border-color: #b8b8b8; color: #ddd; font-size: 0.65rem;">📤 Restaurar Completo</button>
             <button class="primary-btn" onclick="resetTotal()" style="margin-top: 10px; border-color: #ff0000; color: #ff0000; font-size: 0.6rem; background: rgba(255,0,0,0.08);">🚨 RESET TOTAL (APAGAR TUDO)</button>
-            <button class="primary-btn" onclick="fecharConfig()" style="border-color: #444; color: #888; margin-top: 10px;">Voltar</button>
             <button class="primary-btn" onclick="abrirAvisoBackupPelasConfiguracoes()" style="margin-top: 10px; border-color: rgba(212,175,55,0.55); font-size: 0.65rem;">⚠️ Política de Uso e Backup</button>
+            <button class="primary-btn" onclick="fecharConfig()" style="border-color: #444; color: #888; margin-top: 10px;">Voltar</button>
         </div>
     </div>
 
@@ -455,7 +455,6 @@
          * UTILITÁRIOS DE BACKUP / RESTAURAÇÃO
          * ═══════════════════════════════════════════════════════════════ */
 
-        // Dump bruto de TODO o localStorage
         function _coletarTudoLocalStorage() {
             const tudo = {};
             Object.keys(localStorage).forEach(k => {
@@ -464,7 +463,6 @@
             return tudo;
         }
 
-        // Detecta bancos IndexedDB existentes (não são incluídos no backup)
         function _listarBancosIndexedDB() {
             return new Promise(resolve => {
                 if (!window.indexedDB || typeof indexedDB.databases !== 'function') {
@@ -477,7 +475,6 @@
             });
         }
 
-        // Baixa um objeto como JSON
         function _baixarJSON(obj, nomeArquivo) {
             const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
             const a = document.createElement('a');
@@ -487,16 +484,12 @@
             setTimeout(() => URL.revokeObjectURL(a.href), 1000);
         }
 
-        // Timestamp para nomes de arquivo: 2026-11-15T14-30-45
         function _timestampArquivo() {
             return new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
         }
 
         /* ═══════════════════════════════════════════════════════════════
          * BACKUP COMPLETO — dump integral do localStorage
-         *
-         * Independe de mapeamento: captura TODAS as chaves do navegador.
-         * Avisa se houver IndexedDB (não incluído no arquivo).
          * ═══════════════════════════════════════════════════════════════ */
         async function backupCompleto() {
             fecharConfig();
@@ -522,7 +515,6 @@
                 tipo: 'completo',
                 totalChaves: totalChaves,
                 dados: tudo,
-                // Campos legados — mantidos por compatibilidade reversa
                 modulosIncluidos: [],
                 dadosPorModulo: { _todos: tudo }
             };
@@ -552,7 +544,6 @@
 
         /* ═══════════════════════════════════════════════════════════════
          * LEITURA E VALIDAÇÃO DE ARQUIVO DE BACKUP
-         * Aceita formato novo (`dados`) e antigo (`dadosPorModulo`)
          * ═══════════════════════════════════════════════════════════════ */
         async function _lerArquivoBackup() {
             return new Promise(resolve => {
@@ -588,18 +579,14 @@
             });
         }
 
-        // Converte o backup para um mapa plano { chave: valor }
-        // (aceita formato novo e antigo)
         function _achatarBackup(backup) {
             const plano = {};
 
             if (backup.dados && Object.keys(backup.dados).length > 0) {
-                // Formato novo (2.0): dump direto
                 Object.entries(backup.dados).forEach(([k, v]) => {
                     plano[k] = v;
                 });
             } else if (backup.dadosPorModulo) {
-                // Formato antigo: itera por todos os módulos, inclusive _naoMapeados
                 Object.values(backup.dadosPorModulo).forEach(dadosModulo => {
                     Object.entries(dadosModulo || {}).forEach(([k, v]) => {
                         plano[k] = v;
@@ -610,7 +597,6 @@
             return plano;
         }
 
-        // Oferta de backup do estado atual antes de restaurar
         async function _oferecerBackupPrevio() {
             const fazerBackup = confirm(
                 '💾 BACKUP DE SEGURANÇA\n\n' +
@@ -644,17 +630,11 @@
             const nomeArquivo = 'management-center-backup-pre-restauracao-' + _timestampArquivo() + '.json';
             _baixarJSON(backup, nomeArquivo);
 
-            // pequena pausa pro download disparar antes de alterar dados
             await new Promise(r => setTimeout(r, 800));
         }
 
         /* ═══════════════════════════════════════════════════════════════
-         * RESTAURAÇÃO COMPLETA — restaura TODAS as chaves do backup
-         *
-         * - Aceita backup novo (dump flat) e antigo (dadosPorModulo)
-         * - Fecha o iframe antes de restaurar (evita sobrescrita por
-         *   módulos abertos com estado em memória)
-         * - Relatório detalhado: chaves gravadas, falhas, alerta de IndexedDB
+         * RESTAURAÇÃO COMPLETA
          * ═══════════════════════════════════════════════════════════════ */
         async function abrirRestauracaoCompleta() {
             fecharConfig();
@@ -685,7 +665,6 @@
 
             await _oferecerBackupPrevio();
 
-            // Fecha o iframe para liberar localStorage de módulos abertos
             try {
                 const frame = document.getElementById('content-frame');
                 if (frame && frame.style.display !== 'none' && frame.src && frame.src !== 'about:blank') {
@@ -698,7 +677,6 @@
                 goHome();
             } catch (e) { /* segue em frente */ }
 
-            // Aplica os dados
             let count = 0;
             const falhas = [];
             Object.entries(plano).forEach(([k, v]) => {
@@ -710,7 +688,6 @@
                 }
             });
 
-            // Verifica IndexedDB que pode NÃO ter sido restaurado
             const bancosIDB = await _listarBancosIndexedDB();
 
             let relatorio =
@@ -738,7 +715,7 @@
         }
 
         /* ═══════════════════════════════════════════════════════════════
-         * RESET TOTAL — limpa TODO o localStorage + IndexedDB + Cache
+         * RESET TOTAL
          * ═══════════════════════════════════════════════════════════════ */
         async function resetTotal() {
             fecharConfig();
@@ -769,7 +746,6 @@
                 return;
             }
 
-            // Fecha iframe antes de mexer em IndexedDB
             try {
                 const frame = document.getElementById('content-frame');
                 if (frame && frame.style.display !== 'none' && frame.src && frame.src !== 'about:blank') {
@@ -782,7 +758,6 @@
                 goHome();
             } catch (e) { /* segue em frente */ }
 
-            // Apaga tudo do localStorage
             let removidas = 0;
             const falhas = [];
             chaves.forEach(k => {
@@ -790,7 +765,6 @@
                 catch (e) { falhas.push(k + ': ' + e.message); }
             });
 
-            // Limpa IndexedDB
             if (window.indexedDB && typeof indexedDB.databases === 'function') {
                 try {
                     const bancos = await indexedDB.databases();
@@ -806,7 +780,6 @@
                 } catch (e) { falhas.push('IndexedDB: ' + e.message); }
             }
 
-            // Cache + Service Workers
             if ('caches' in window) {
                 try {
                     const cs = await caches.keys();
