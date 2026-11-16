@@ -452,7 +452,25 @@
         }
 
         /* ═══════════════════════════════════════════════════════════════
-         * UTILITÁRIOS DE BACKUP / RESTAURAÇÃO
+         * FECHAR IFRAME ANTES DE MEXER EM DADOS
+         * (libera conexões IndexedDB abertas por módulos em execução)
+         * ═══════════════════════════════════════════════════════════════ */
+        async function _fecharIframe() {
+            try {
+                const frame = document.getElementById('content-frame');
+                if (frame && frame.style.display !== 'none' && frame.src && frame.src !== 'about:blank') {
+                    await new Promise(resolve => {
+                        frame.addEventListener('load', () => resolve(), { once: true });
+                        frame.src = 'about:blank';
+                        setTimeout(resolve, 1500);
+                    });
+                }
+                goHome();
+            } catch (e) { /* segue em frente */ }
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+         * UTILITÁRIOS GERAIS
          * ═══════════════════════════════════════════════════════════════ */
 
         function _coletarTudoLocalStorage() {
@@ -461,18 +479,6 @@
                 tudo[k] = localStorage.getItem(k);
             });
             return tudo;
-        }
-
-        function _listarBancosIndexedDB() {
-            return new Promise(resolve => {
-                if (!window.indexedDB || typeof indexedDB.databases !== 'function') {
-                    resolve([]);
-                    return;
-                }
-                indexedDB.databases().then(bancos => {
-                    resolve(bancos.map(b => b.name).filter(Boolean));
-                }).catch(() => resolve([]));
-            });
         }
 
         function _baixarJSON(obj, nomeArquivo) {
@@ -489,15 +495,277 @@
         }
 
         /* ═══════════════════════════════════════════════════════════════
-         * BACKUP COMPLETO — dump integral do localStorage
+         * INDEXEDDB — EXPORTAÇÃO
+         *
+         * Estrutura exportada:
+         * {
+         *   "nomeDoBanco": {
+         *     "version": 3,
+         *     "stores": {
+         *       "nomeStore": {
+         *         "keyPath": "id" | ["a","b"] | null,
+         *         "autoIncrement": true|false,
+         *         "indexes": {
+         *           "nomeIdx": { "keyPath": "...", "unique": false, "multiEntry": false }
+         *         },
+         *         "records": [ { "key": "...", "value": {...} }, ... ]
+         *       }
+         *     }
+         *   }
+         * }
+         * ═══════════════════════════════════════════════════════════════ */
+        async function _coletarTodoIndexedDB() {
+            if (!window.indexedDB) return { _aviso: 'IndexedDB não disponível' };
+            if (typeof indexedDB.databases !== 'function') {
+                return { _aviso: 'indexedDB.databases() não suportado neste navegador' };
+            }
+
+            let bancos = [];
+            try {
+                bancos = await indexedDB.databases();
+            } catch (e) {
+                return { _aviso: 'Falha ao enumerar bancos: ' + e.message };
+            }
+
+            const resultado = {};
+            for (const info of bancos) {
+                if (!info || !info.name) continue;
+                try {
+                    resultado[info.name] = await _exportarBancoIDB(info.name);
+                } catch (e) {
+                    resultado[info.name] = { _erro: e.message };
+                }
+            }
+            return resultado;
+        }
+
+        async function _exportarBancoIDB(nome) {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(nome);
+
+                req.onerror = () => reject(req.error || new Error('open falhou'));
+                req.onblocked = () => reject(new Error('bloqueado por outra aba'));
+                req.onsuccess = async () => {
+                    const db = req.result;
+                    const exportado = { version: db.version, stores: {} };
+
+                    try {
+                        const nomes = Array.from(db.objectStoreNames);
+                        for (const storeName of nomes) {
+                            exportado.stores[storeName] = await _exportarStoreIDB(db, storeName);
+                        }
+                        db.close();
+                        resolve(exportado);
+                    } catch (e) {
+                        try { db.close(); } catch (_) {}
+                        reject(e);
+                    }
+                };
+            });
+        }
+
+        async function _exportarStoreIDB(db, storeName) {
+            return new Promise((resolve, reject) => {
+                let tx;
+                try {
+                    tx = db.transaction(storeName, 'readonly');
+                } catch (e) {
+                    reject(e); return;
+                }
+
+                const store = tx.objectStore(storeName);
+
+                // índices
+                const indexes = {};
+                Array.from(store.indexNames).forEach(idxName => {
+                    const idx = store.index(idxName);
+                    indexes[idxName] = {
+                        keyPath: idx.keyPath,
+                        unique: !!idx.unique,
+                        multiEntry: !!idx.multiEntry
+                    };
+                });
+
+                const reqVal = store.getAll();
+                const reqKey = store.getAllKeys();
+
+                let values = null, keys = null;
+
+                function tentar() {
+                    if (values === null || keys === null) return;
+                    const records = [];
+                    for (let i = 0; i < values.length; i++) {
+                        records.push({ key: keys[i], value: values[i] });
+                    }
+                    resolve({
+                        keyPath: store.keyPath,
+                        autoIncrement: !!store.autoIncrement,
+                        indexes: indexes,
+                        records: records
+                    });
+                }
+
+                reqVal.onsuccess = () => { values = reqVal.result; tentar(); };
+                reqKey.onsuccess = () => { keys = reqKey.result; tentar(); };
+                reqVal.onerror = () => reject(reqVal.error || new Error('getAll falhou'));
+                reqKey.onerror = () => reject(reqKey.error || new Error('getAllKeys falhou'));
+            });
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+         * INDEXEDDB — RESTAURAÇÃO
+         *
+         * Estratégia por banco:
+         *  1. Apaga banco existente (deleteDatabase)
+         *  2. Cria banco novo com a mesma versão e o mesmo esquema
+         *  3. Reinsere todos os registros (put em transação readwrite)
+         * ═══════════════════════════════════════════════════════════════ */
+        async function _restaurarIndexedDB(backupIDB) {
+            const relatorio = {
+                bancosTotal: 0,
+                bancosOk: 0,
+                registrosTotal: 0,
+                falhas: []
+            };
+
+            if (!backupIDB || typeof backupIDB !== 'object') return relatorio;
+            if (backupIDB._aviso) {
+                relatorio.falhas.push('Aviso do backup: ' + backupIDB._aviso);
+                return relatorio;
+            }
+
+            const nomes = Object.keys(backupIDB).filter(n => !n.startsWith('_'));
+            relatorio.bancosTotal = nomes.length;
+
+            for (const nome of nomes) {
+                const dadosBanco = backupIDB[nome];
+                if (!dadosBanco || dadosBanco._erro) {
+                    relatorio.falhas.push(nome + ': ' + (dadosBanco && dadosBanco._erro || 'dados ausentes'));
+                    continue;
+                }
+                try {
+                    const count = await _recriarBancoIDB(nome, dadosBanco);
+                    relatorio.bancosOk++;
+                    relatorio.registrosTotal += count;
+                } catch (e) {
+                    relatorio.falhas.push(nome + ': ' + e.message);
+                }
+            }
+
+            return relatorio;
+        }
+
+        async function _recriarBancoIDB(nome, dadosBanco) {
+            // 1. Apaga se existir
+            await new Promise(resolve => {
+                const req = indexedDB.deleteDatabase(nome);
+                req.onsuccess = () => resolve();
+                req.onerror = () => resolve();
+                req.onblocked = () => resolve();
+            });
+
+            // 2. Cria com a mesma versão e esquema
+            const version = dadosBanco.version || 1;
+            const stores = dadosBanco.stores || {};
+
+            let registrosGravados = 0;
+
+            await new Promise((resolve, reject) => {
+                const req = indexedDB.open(nome, version);
+
+                req.onerror = () => reject(req.error || new Error('open falhou'));
+                req.onblocked = () => reject(new Error('bloqueado por outra aba'));
+
+                req.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    for (const [storeName, storeDef] of Object.entries(stores)) {
+                        const opts = {};
+                        if (storeDef.keyPath !== null && storeDef.keyPath !== undefined) {
+                            opts.keyPath = storeDef.keyPath;
+                        }
+                        if (storeDef.autoIncrement) {
+                            opts.autoIncrement = true;
+                        }
+                        const store = db.createObjectStore(storeName, opts);
+
+                        for (const [idxName, idxDef] of Object.entries(storeDef.indexes || {})) {
+                            store.createIndex(idxName, idxDef.keyPath, {
+                                unique: !!idxDef.unique,
+                                multiEntry: !!idxDef.multiEntry
+                            });
+                        }
+                    }
+                };
+
+                req.onsuccess = async () => {
+                    const db = req.result;
+
+                    try {
+                        for (const [storeName, storeDef] of Object.entries(stores)) {
+                            const records = storeDef.records || [];
+                            if (!records.length) continue;
+
+                            const temKeyPath = storeDef.keyPath !== null && storeDef.keyPath !== undefined;
+
+                            const tx = db.transaction(storeName, 'readwrite');
+                            const store = tx.objectStore(storeName);
+
+                            for (const rec of records) {
+                                try {
+                                    if (temKeyPath) {
+                                        store.put(rec.value);
+                                    } else {
+                                        store.put(rec.value, rec.key);
+                                    }
+                                    registrosGravados++;
+                                } catch (e) {
+                                    // segue, contabiliza no final pela tx
+                                }
+                            }
+
+                            await new Promise((res, rej) => {
+                                tx.oncomplete = () => res();
+                                tx.onerror = () => rej(tx.error);
+                                tx.onabort = () => rej(tx.error || new Error('transação abortada'));
+                            });
+                        }
+                        db.close();
+                        resolve();
+                    } catch (e) {
+                        try { db.close(); } catch (_) {}
+                        reject(e);
+                    }
+                };
+            });
+
+            return registrosGravados;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+         * BACKUP COMPLETO — localStorage + IndexedDB
          * ═══════════════════════════════════════════════════════════════ */
         async function backupCompleto() {
             fecharConfig();
 
-            const tudo = _coletarTudoLocalStorage();
-            const totalChaves = Object.keys(tudo).length;
+            // Fecha iframe antes de ler IDB (libera conexões dos módulos)
+            await _fecharIframe();
 
-            if (totalChaves === 0) {
+            const ls = _coletarTudoLocalStorage();
+            const idb = await _coletarTodoIndexedDB();
+
+            const totalLS = Object.keys(ls).length;
+            const nomesIDB = Object.keys(idb).filter(n => !n.startsWith('_'));
+            let totalRegistrosIDB = 0;
+            nomesIDB.forEach(n => {
+                const b = idb[n];
+                if (b && b.stores) {
+                    Object.values(b.stores).forEach(s => {
+                        totalRegistrosIDB += (s.records || []).length;
+                    });
+                }
+            });
+
+            if (totalLS === 0 && nomesIDB.length === 0) {
                 alert(
                     '⚠️ Nenhum dado encontrado no navegador para backup.\n\n' +
                     'Todos os módulos estão vazios ou ainda não salvaram nada.'
@@ -506,17 +774,15 @@
                 return;
             }
 
-            const bancosIDB = await _listarBancosIndexedDB();
-
             const backup = {
                 app: 'Management Center',
-                versao: '2.0',
+                versao: '3.0',
                 geradoEm: new Date().toISOString(),
                 tipo: 'completo',
-                totalChaves: totalChaves,
-                dados: tudo,
+                dados: ls,                 // localStorage
+                indexedDB: idb,            // novo
                 modulosIncluidos: [],
-                dadosPorModulo: { _todos: tudo }
+                dadosPorModulo: { _todos: ls }
             };
 
             const nomeArquivo = 'management-center-backup-completo-' + _timestampArquivo() + '.json';
@@ -524,18 +790,14 @@
 
             let msg =
                 '✅ Backup completo gerado!\n\n' +
-                '📦 Chaves exportadas: ' + totalChaves + '\n' +
+                '📦 localStorage: ' + totalLS + ' chave(s)\n' +
+                '🗄️ IndexedDB: ' + nomesIDB.length + ' banco(s), ' + totalRegistrosIDB + ' registro(s)\n' +
                 '📄 Arquivo: ' + nomeArquivo + '\n' +
                 '📁 Salvo na pasta de Downloads.';
 
-            if (bancosIDB.length > 0) {
-                msg +=
-                    '\n\n⚠️ ATENÇÃO — IndexedDB detectado:\n' +
-                    bancosIDB.map(b => '  • ' + b).join('\n') +
-                    '\n\nEsses bancos NÃO estão incluídos no backup ' +
-                    '(o backup cobre apenas localStorage).\n\n' +
-                    'Se algum módulo usa IndexedDB internamente, os dados dele ' +
-                    'precisam ser exportados pela função própria do módulo.';
+            if (idb._aviso) {
+                msg += '\n\n⚠️ IndexedDB: ' + idb._aviso +
+                       '\n\nOs dados em localStorage foram exportados normalmente.';
             }
 
             alert(msg);
@@ -561,10 +823,11 @@
                             resolve(null); return;
                         }
 
-                        const temDados = backup.dados && Object.keys(backup.dados).length > 0;
-                        const temModulos = backup.dadosPorModulo && Object.keys(backup.dadosPorModulo).length > 0;
+                        const temLS = (backup.dados && Object.keys(backup.dados).length > 0);
+                        const temModulos = (backup.dadosPorModulo && Object.keys(backup.dadosPorModulo).length > 0);
+                        const temIDB = (backup.indexedDB && Object.keys(backup.indexedDB).filter(k => !k.startsWith('_')).length > 0);
 
-                        if (!temDados && !temModulos) {
+                        if (!temLS && !temModulos && !temIDB) {
                             alert('❌ O arquivo não contém dados para restaurar.');
                             resolve(null); return;
                         }
@@ -608,23 +871,28 @@
 
             if (!fazerBackup) return;
 
-            const tudo = _coletarTudoLocalStorage();
-            const total = Object.keys(tudo).length;
+            await _fecharIframe();
 
-            if (total === 0) {
+            const ls = _coletarTudoLocalStorage();
+            const idb = await _coletarTodoIndexedDB();
+
+            const totalLS = Object.keys(ls).length;
+            const nomesIDB = Object.keys(idb).filter(n => !n.startsWith('_'));
+
+            if (totalLS === 0 && nomesIDB.length === 0) {
                 alert('ℹ️ O sistema está vazio — não há nada para salvar.\n\nProsseguindo com a restauração.');
                 return;
             }
 
             const backup = {
                 app: 'Management Center',
-                versao: '2.0',
+                versao: '3.0',
                 geradoEm: new Date().toISOString(),
                 tipo: 'pre-restauracao',
-                totalChaves: total,
-                dados: tudo,
+                dados: ls,
+                indexedDB: idb,
                 modulosIncluidos: [],
-                dadosPorModulo: { _todos: tudo }
+                dadosPorModulo: { _todos: ls }
             };
 
             const nomeArquivo = 'management-center-backup-pre-restauracao-' + _timestampArquivo() + '.json';
@@ -634,7 +902,7 @@
         }
 
         /* ═══════════════════════════════════════════════════════════════
-         * RESTAURAÇÃO COMPLETA
+         * RESTAURAÇÃO COMPLETA — localStorage + IndexedDB
          * ═══════════════════════════════════════════════════════════════ */
         async function abrirRestauracaoCompleta() {
             fecharConfig();
@@ -644,69 +912,72 @@
 
             const { backup, nomeArquivo } = resultado;
             const plano = _achatarBackup(backup);
-            const totalChaves = Object.keys(plano).length;
+            const totalLS = Object.keys(plano).length;
 
-            if (totalChaves === 0) {
-                alert('❌ O backup não contém chaves para restaurar.');
-                abrirConfig();
-                return;
-            }
+            const idb = backup.indexedDB || null;
+            const nomesIDB = idb ? Object.keys(idb).filter(n => !n.startsWith('_')) : [];
+            let totalRegistrosIDB = 0;
+            nomesIDB.forEach(n => {
+                const b = idb[n];
+                if (b && b.stores) {
+                    Object.values(b.stores).forEach(s => {
+                        totalRegistrosIDB += (s.records || []).length;
+                    });
+                }
+            });
 
             const msg =
                 'Restaurar COMPLETAMENTE este backup?\n\n' +
                 '📄 Arquivo: ' + nomeArquivo + '\n' +
                 '📅 Gerado em: ' + new Date(backup.geradoEm).toLocaleString('pt-BR') + '\n' +
-                '🔑 Chaves no backup: ' + totalChaves + '\n\n' +
-                '⚠️ As chaves do backup SOBRESCREVERÃO os dados atuais com o mesmo nome.\n' +
-                'Chaves existentes no navegador mas que NÃO estão no backup serão MANTIDAS.\n\n' +
+                '📦 localStorage: ' + totalLS + ' chave(s)\n' +
+                '🗄️ IndexedDB: ' + nomesIDB.length + ' banco(s), ' + totalRegistrosIDB + ' registro(s)\n\n' +
+                '⚠️ localStorage: chaves do backup SOBRESCREVEM as atuais (demais são mantidas).\n' +
+                '⚠️ IndexedDB: bancos do backup serão RECRIADOS do zero (conteúdo atual desses bancos é apagado).\n\n' +
                 'Continuar?';
 
             if (!confirm(msg)) { abrirConfig(); return; }
 
             await _oferecerBackupPrevio();
 
-            try {
-                const frame = document.getElementById('content-frame');
-                if (frame && frame.style.display !== 'none' && frame.src && frame.src !== 'about:blank') {
-                    await new Promise(resolve => {
-                        frame.addEventListener('load', () => resolve(), { once: true });
-                        frame.src = 'about:blank';
-                        setTimeout(resolve, 1500);
-                    });
-                }
-                goHome();
-            } catch (e) { /* segue em frente */ }
+            // Garante iframe fechado antes de mexer em IDB
+            await _fecharIframe();
 
-            let count = 0;
-            const falhas = [];
+            // 1) localStorage
+            let lsGravadas = 0;
+            const falhasLS = [];
             Object.entries(plano).forEach(([k, v]) => {
                 try {
                     localStorage.setItem(k, v);
-                    count++;
+                    lsGravadas++;
                 } catch (err) {
-                    falhas.push(k + ': ' + err.message);
+                    falhasLS.push(k + ': ' + err.message);
                 }
             });
 
-            const bancosIDB = await _listarBancosIndexedDB();
-
-            let relatorio =
-                '✅ Restauração completa concluída!\n\n' +
-                '🔑 Chaves gravadas: ' + count + ' de ' + totalChaves;
-
-            if (falhas.length) {
-                relatorio +=
-                    '\n\n⚠️ ' + falhas.length + ' falha(s):\n- ' +
-                    falhas.slice(0, 5).join('\n- ') +
-                    (falhas.length > 5 ? '\n- ... e mais ' + (falhas.length - 5) : '');
+            // 2) IndexedDB
+            let idbRelatorio = { bancosTotal: 0, bancosOk: 0, registrosTotal: 0, falhas: [] };
+            if (idb && nomesIDB.length > 0) {
+                idbRelatorio = await _restaurarIndexedDB(idb);
             }
 
-            if (bancosIDB.length > 0) {
+            // 3) Relatório
+            let relatorio =
+                '✅ Restauração completa concluída!\n\n' +
+                '📦 localStorage: ' + lsGravadas + ' de ' + totalLS + ' chave(s) gravada(s)\n' +
+                '🗄️ IndexedDB: ' + idbRelatorio.bancosOk + ' de ' + idbRelatorio.bancosTotal + ' banco(s) restaurado(s)\n' +
+                '   (' + idbRelatorio.registrosTotal + ' registro(s))';
+
+            const todasFalhas = [
+                ...falhasLS.map(f => 'localStorage — ' + f),
+                ...idbRelatorio.falhas.map(f => 'IndexedDB — ' + f)
+            ];
+
+            if (todasFalhas.length) {
                 relatorio +=
-                    '\n\n⚠️ IndexedDB detectado (não afetado):\n' +
-                    bancosIDB.map(b => '  • ' + b).join('\n') +
-                    '\n\nSe algum módulo usar IndexedDB, os dados dele ' +
-                    'NÃO foram restaurados por esta operação.';
+                    '\n\n⚠️ ' + todasFalhas.length + ' falha(s):\n- ' +
+                    todasFalhas.slice(0, 8).join('\n- ') +
+                    (todasFalhas.length > 8 ? '\n- ... e mais ' + (todasFalhas.length - 8) : '');
             }
 
             relatorio += '\n\nO sistema será recarregado.';
@@ -715,7 +986,7 @@
         }
 
         /* ═══════════════════════════════════════════════════════════════
-         * RESET TOTAL
+         * RESET TOTAL — limpa localStorage + IndexedDB + Cache
          * ═══════════════════════════════════════════════════════════════ */
         async function resetTotal() {
             fecharConfig();
@@ -746,17 +1017,7 @@
                 return;
             }
 
-            try {
-                const frame = document.getElementById('content-frame');
-                if (frame && frame.style.display !== 'none' && frame.src && frame.src !== 'about:blank') {
-                    await new Promise(resolve => {
-                        frame.addEventListener('load', () => resolve(), { once: true });
-                        frame.src = 'about:blank';
-                        setTimeout(resolve, 1500);
-                    });
-                }
-                goHome();
-            } catch (e) { /* segue em frente */ }
+            await _fecharIframe();
 
             let removidas = 0;
             const falhas = [];
