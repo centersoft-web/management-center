@@ -211,6 +211,16 @@
 
         button.primary-btn:hover { background: var(--accent); color: black; }
 
+        /* ── Override: RESET TOTAL fica amarelo no hover ────────────────
+           O style inline do botão (background rgba(255,0,0,0.08)) tem
+           especificidade maior que a regra :hover padrão. O !important
+           + seletor por atributo atingem APENAS este botão. */
+        button.primary-btn[onclick*="resetTotal"]:hover {
+            background: var(--accent) !important;
+            color: #000 !important;
+            border-color: var(--accent) !important;
+        }
+
         .main-content {
             flex: 1;
             min-width: 0;
@@ -258,9 +268,19 @@
         </div>
     </div>
 
-    <div id="config-modal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 2000;">
-        <div class="glass-card" style="width: 300px; border: 1px solid var(--accent); max-height: 92vh; overflow-y: auto;">
-            <h3 style="font-family: 'Cinzel'; margin-bottom: 20px; font-size: 0.9rem;">Segurança</h3>
+    <!-- POPUP de Configurações — flutuante, ancorado perto do botão ⚙️ -->
+    <div id="config-modal" style="position: fixed; inset: 0; display: none; z-index: 2000; pointer-events: none;">
+        <div class="glass-card" style="position: absolute; bottom: 90px; right: 70px; width: 320px; border: 1px solid var(--accent); max-height: calc(100vh - 140px); overflow-y: auto; pointer-events: auto; background: rgba(10, 20, 40, 0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); text-align: left;">
+
+            <!-- TÍTULO PRINCIPAL DO POPUP -->
+            <div style="text-align: center; margin-bottom: 18px;">
+                <h2 style="font-family: 'Cinzel', serif; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px;">Configurações</h2>
+                <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.55), transparent); margin: 0 auto; width: 85%;"></div>
+            </div>
+
+            <!-- Subtítulo da seção -->
+            <h3 style="font-family: 'Cinzel'; margin-bottom: 20px; font-size: 0.85rem; color: #cbd5e1; text-align: center; letter-spacing: 0.05em;">Segurança</h3>
+
             <input type="password" id="senhaAtual" placeholder="Senha Atual">
             <input type="password" id="senhaNova" placeholder="Nova Senha">
             <button class="primary-btn" onclick="salvarNovaSenha()">Gravar</button>
@@ -450,6 +470,21 @@
             document.getElementById('backup-modal').style.display = 'none';
             abrirConfig();
         }
+
+        /* ═══════════════════════════════════════════════════════════════
+         * POPUP DE CONFIGURAÇÕES — FECHAR AO CLICAR FORA
+         * Como o popup não tem overlay de fundo, é preciso detectar
+         * cliques fora dele. Ignoramos cliques no botão ⚙️ para não
+         * fechar/reabrir no mesmo clique.
+         * ═══════════════════════════════════════════════════════════════ */
+        document.addEventListener('click', function (e) {
+            const modal = document.getElementById('config-modal');
+            if (modal.style.display === 'flex' &&
+                !e.target.closest('#config-modal') &&
+                !e.target.closest('[onclick*="abrirConfig"]')) {
+                fecharConfig();
+            }
+        });
 
         /* ═══════════════════════════════════════════════════════════════
          * FECHAR IFRAME ANTES DE MEXER EM DADOS
