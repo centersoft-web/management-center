@@ -298,9 +298,9 @@
                             <span class="w-2 h-6 bg-brand-500 rounded-full shrink-0"></span>
                             <span class="font-bold text-slate-800">Master DI (100% CDI)</span>
                         </div>
-                        <div class="md:col-span-3"><input type="number" id="v-master" placeholder="R$" oninput="salvarTudo()" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-3"><input type="text" inputmode="decimal" id="v-master" placeholder="R$" oninput="this.value=this.value.replace(/[^0-9,.\s-]/g,''); salvarTudo()" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
                         <div class="md:col-span-2"><input type="date" id="d-master" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
-                        <div class="md:col-span-2"><input type="number" id="a-master" placeholder="Aporte R$" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="text" inputmode="decimal" id="a-master" placeholder="Aporte R$" oninput="this.value=this.value.replace(/[^0-9,.\s-]/g,''); salvarTudo()" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
                         <div id="res-total-master" class="md:col-span-2 text-right font-black mono text-brand-700 text-sm">R$ 0,00</div>
                     </div>
 
@@ -310,9 +310,9 @@
                             <span class="w-2 h-6 bg-rose-500 rounded-full shrink-0"></span>
                             <span class="font-bold text-slate-800">Fundo Mapfre</span>
                         </div>
-                        <div class="md:col-span-3"><input type="number" id="v-mapfre" placeholder="R$" oninput="salvarTudo()" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-3"><input type="text" inputmode="decimal" id="v-mapfre" placeholder="R$" oninput="this.value=this.value.replace(/[^0-9,.\s-]/g,''); salvarTudo()" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
                         <div class="md:col-span-2"><input type="date" id="d-mapfre" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
-                        <div class="md:col-span-2"><input type="number" id="a-mapfre" placeholder="Aporte R$" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="text" inputmode="decimal" id="a-mapfre" placeholder="Aporte R$" oninput="this.value=this.value.replace(/[^0-9,.\s-]/g,''); salvarTudo()" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
                         <div id="res-total-mapfre" class="md:col-span-2 text-right font-black mono text-brand-700 text-sm">R$ 0,00</div>
                     </div>
 
@@ -322,9 +322,9 @@
                             <span class="w-2 h-6 bg-indigo-500 rounded-full shrink-0"></span>
                             <span class="font-bold text-slate-800">Previdência</span>
                         </div>
-                        <div class="md:col-span-3"><input type="number" id="v-prev" placeholder="R$" oninput="salvarTudo()" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-3"><input type="text" inputmode="decimal" id="v-prev" placeholder="R$" oninput="this.value=this.value.replace(/[^0-9,.\s-]/g,''); salvarTudo()" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
                         <div class="md:col-span-2"><input type="date" id="d-prev" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
-                        <div class="md:col-span-2"><input type="number" id="a-prev" placeholder="Aporte R$" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="text" inputmode="decimal" id="a-prev" placeholder="Aporte R$" oninput="this.value=this.value.replace(/[^0-9,.\s-]/g,''); salvarTudo()" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
                         <div id="res-total-prev" class="md:col-span-2 text-right font-black mono text-brand-700 text-sm">R$ 0,00</div>
                     </div>
 
@@ -334,9 +334,9 @@
                             <span class="w-2 h-6 bg-emerald-500 rounded-full shrink-0"></span>
                             <span class="font-bold text-slate-800">Tesouro Selic</span>
                         </div>
-                        <div class="md:col-span-3"><input type="number" id="v-selic" placeholder="R$" oninput="salvarTudo()" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-3"><input type="text" inputmode="decimal" id="v-selic" placeholder="R$" oninput="this.value=this.value.replace(/[^0-9,.\s-]/g,''); salvarTudo()" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
                         <div class="md:col-span-2"><input type="date" id="d-selic" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
-                        <div class="md:col-span-2"><input type="number" id="a-selic" placeholder="Aporte R$" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="text" inputmode="decimal" id="a-selic" placeholder="Aporte R$" oninput="this.value=this.value.replace(/[^0-9,.\s-]/g,''); salvarTudo()" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
                         <div id="res-total-selic" class="md:col-span-2 text-right font-black mono text-brand-700 text-sm">R$ 0,00</div>
                     </div>
 
@@ -346,9 +346,9 @@
                             <span class="w-2 h-6 bg-sky-500 rounded-full shrink-0"></span>
                             <span class="font-bold text-slate-800">LCI / LCA</span>
                         </div>
-                        <div class="md:col-span-3"><input type="number" id="v-lci" placeholder="R$" oninput="salvarTudo()" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-3"><input type="text" inputmode="decimal" id="v-lci" placeholder="R$" oninput="this.value=this.value.replace(/[^0-9,.\s-]/g,''); salvarTudo()" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
                         <div class="md:col-span-2"><input type="date" id="d-lci" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
-                        <div class="md:col-span-2"><input type="number" id="a-lci" placeholder="Aporte R$" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="text" inputmode="decimal" id="a-lci" placeholder="Aporte R$" oninput="this.value=this.value.replace(/[^0-9,.\s-]/g,''); salvarTudo()" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
                         <div id="res-total-lci" class="md:col-span-2 text-right font-black mono text-brand-700 text-sm">R$ 0,00</div>
                     </div>
 
@@ -358,9 +358,9 @@
                             <span class="w-2 h-6 bg-amber-500 rounded-full shrink-0"></span>
                             <span class="font-bold text-slate-800">Poupança</span>
                         </div>
-                        <div class="md:col-span-3"><input type="number" id="v-poup" placeholder="R$" oninput="salvarTudo()" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-3"><input type="text" inputmode="decimal" id="v-poup" placeholder="R$" oninput="this.value=this.value.replace(/[^0-9,.\s-]/g,''); salvarTudo()" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
                         <div class="md:col-span-2"><input type="date" id="d-poup" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
-                        <div class="md:col-span-2"><input type="number" id="a-poup" placeholder="Aporte R$" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="text" inputmode="decimal" id="a-poup" placeholder="Aporte R$" oninput="this.value=this.value.replace(/[^0-9,.\s-]/g,''); salvarTudo()" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
                         <div id="res-total-poup" class="md:col-span-2 text-right font-black mono text-brand-700 text-sm">R$ 0,00</div>
                     </div>
 
@@ -373,9 +373,9 @@
                                 <span id="cot-usd" class="text-[10px] text-slate-400 mono block font-normal">R$ 0,00</span>
                             </div>
                         </div>
-                        <div class="md:col-span-3"><input type="number" id="v-usd" placeholder="US$" oninput="salvarTudo()" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-3"><input type="text" inputmode="decimal" id="v-usd" placeholder="US$" oninput="this.value=this.value.replace(/[^0-9,.\s-]/g,''); salvarTudo()" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
                         <div class="md:col-span-2"><input type="date" id="d-usd" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
-                        <div class="md:col-span-2"><input type="number" id="a-usd" placeholder="Aporte US$" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="text" inputmode="decimal" id="a-usd" placeholder="Aporte US$" oninput="this.value=this.value.replace(/[^0-9,.\s-]/g,''); salvarTudo()" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
                         <div id="res-total-usd" class="md:col-span-2 text-right font-black mono text-brand-700 text-sm">R$ 0,00</div>
                     </div>
 
@@ -388,9 +388,9 @@
                                 <span id="cot-eur" class="text-[10px] text-slate-400 mono block font-normal">R$ 0,00</span>
                             </div>
                         </div>
-                        <div class="md:col-span-3"><input type="number" id="v-eur" placeholder="€" oninput="salvarTudo()" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-3"><input type="text" inputmode="decimal" id="v-eur" placeholder="€" oninput="this.value=this.value.replace(/[^0-9,.\s-]/g,''); salvarTudo()" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
                         <div class="md:col-span-2"><input type="date" id="d-eur" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
-                        <div class="md:col-span-2"><input type="number" id="a-eur" placeholder="Aporte €" oninput="salvarTudo()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
+                        <div class="md:col-span-2"><input type="text" inputmode="decimal" id="a-eur" placeholder="Aporte €" oninput="this.value=this.value.replace(/[^0-9,.\s-]/g,''); salvarTudo()" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition"></div>
                         <div id="res-total-eur" class="md:col-span-2 text-right font-black mono text-brand-700 text-sm">R$ 0,00</div>
                     </div>
 
@@ -411,6 +411,35 @@
 
     <!-- SCRIPT GERAL UNIFICADO -->
     <script>
+        // ==================== UTILITÁRIOS DE FORMATAÇÃO MONETÁRIA (PADRÃO BR) ====================
+        const parseBR = value => {
+            if (value === null || value === undefined || value === '') return 0;
+            if (typeof value === 'number') return value;
+            let s = String(value).trim().replace(/[R$\s]/g, '');
+            if (!s) return 0;
+            if (s.includes(',')) {
+                s = s.replace(/\./g, '').replace(',', '.');
+            } else if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) {
+                s = s.replace(/\./g, '');
+            }
+            const n = parseFloat(s);
+            return isNaN(n) ? 0 : n;
+        };
+
+        const formatBRL = val => parseBR(val).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        const onMoneyFocus = el => {
+            const raw = el.value.trim();
+            if (!raw) return;
+            el.value = String(parseBR(raw));
+        };
+
+        const onMoneyBlur = el => {
+            const raw = el.value.trim();
+            if (raw === '') return;
+            el.value = formatBRL(raw);
+        };
+
         // ==================== TROCA DE ABAS PRINCIPAIS ====================
         function switchMainTab(tabId) {
             document.getElementById('aba-fluxo').classList.add('hidden');
@@ -463,7 +492,7 @@
                 let valB = b[campo] || (campo === 'desc' ? '' : 0);
 
                 if (campo === 'd' || campo === 'e' || campo === 's') {
-                    return (parseFloat(valA) - parseFloat(valB)) * ordem;
+                    return (parseBR(valA) - parseBR(valB)) * ordem;
                 } else {
                     return valA.toString().localeCompare(valB.toString()) * ordem;
                 }
@@ -495,29 +524,38 @@
             for (let i = 0; i < mesIdx; i++) {
                 const m = months[i];
                 (fullDB[ano][m] || []).forEach(l => {
-                    saldo += parseFloat(l.e || 0);
-                    saldo -= parseFloat(l.s || 0);
+                    saldo += parseBR(l.e);
+                    saldo -= parseBR(l.s);
                 });
             }
             return saldo;
+        }
+
+        function atualizarIconeAviso(i) {
+            const rows = document.querySelectorAll('#tableBody tr');
+            if (!rows[i]) return;
+            const warn = rows[i].querySelector('.aviso-warn');
+            if (!warn) return;
+            const val = parseBR(fullDB[currentYear][currentMonth][i].s);
+            warn.innerHTML = val >= 1000 ? '<span class="text-amber-500 font-bold ml-1 text-xs" title="Saída elevada">⚠️</span>' : '';
         }
 
         function renderTable() {
             const body = document.getElementById('tableBody');
             body.innerHTML = '';
             fullDB[currentYear][currentMonth].forEach((row, i) => {
-                const aviso = parseFloat(row.s) >= 1000 ? '<span class="text-amber-500 font-bold ml-1 text-xs" title="Saída elevada">⚠️</span>' : '';
+                const aviso = parseBR(row.s) >= 1000 ? '<span class="text-amber-500 font-bold ml-1 text-xs" title="Saída elevada">⚠️</span>' : '';
                 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
                 tr.innerHTML = `
                     <td class="p-1"><input type="text" value="${row.d || ''}" oninput="update(${i}, 'd', this.value)" class="w-full px-2 py-1 bg-transparent border border-transparent hover:border-slate-300 focus:border-brand-500 focus:bg-white rounded outline-none font-medium text-center"></td>
                     <td class="p-1"><input type="text" uppercase value="${row.desc || ''}" oninput="update(${i}, 'desc', this.value)" class="w-full px-2 py-1 bg-transparent border border-transparent hover:border-slate-300 focus:border-brand-500 focus:bg-white rounded outline-none font-semibold uppercase"></td>
-                    <td class="p-1"><input type="number" step="0.01" value="${row.e || ''}" oninput="update(${i}, 'e', this.value)" class="w-full px-2 py-1 bg-transparent border border-transparent hover:border-slate-300 focus:border-brand-500 focus:bg-white rounded outline-none text-right font-mono font-bold text-emerald-600"></td>
+                    <td class="p-1"><input type="text" inputmode="decimal" value="${row.e ? formatBRL(row.e) : ''}" oninput="this.value=this.value.replace(/[^0-9,.\\s-]/g,''); update(${i}, 'e', this.value)" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2 py-1 bg-transparent border border-transparent hover:border-slate-300 focus:border-brand-500 focus:bg-white rounded outline-none text-right font-mono font-bold text-emerald-600"></td>
                     <td class="p-1">
                         <div class="flex items-center">
-                            <input type="number" step="0.01" value="${row.s || ''}" oninput="update(${i}, 's', this.value)" class="w-full px-2 py-1 bg-transparent border border-transparent hover:border-slate-300 focus:border-brand-500 focus:bg-white rounded outline-none text-right font-mono font-bold text-rose-600">
-                            ${aviso}
+                            <input type="text" inputmode="decimal" value="${row.s ? formatBRL(row.s) : ''}" oninput="this.value=this.value.replace(/[^0-9,.\\s-]/g,''); update(${i}, 's', this.value)" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2 py-1 bg-transparent border border-transparent hover:border-slate-300 focus:border-brand-500 focus:bg-white rounded outline-none text-right font-mono font-bold text-rose-600">
+                            <span class="aviso-warn">${aviso}</span>
                         </div>
                     </td>
                     <td class="p-2 text-right font-mono font-bold status-cell"></td>
@@ -539,8 +577,8 @@
             let totalSaidas = 0;
             const rows = document.querySelectorAll('#tableBody tr');
             fullDB[currentYear][currentMonth].forEach((data, i) => {
-                const e = parseFloat(data.e || 0);
-                const s = parseFloat(data.s || 0);
+                const e = parseBR(data.e);
+                const s = parseBR(data.s);
                 totalEntradas += e;
                 totalSaidas += s;
                 acumulado += (e - s);
@@ -559,8 +597,12 @@
             if (field === 'desc') val = val.toUpperCase();
             fullDB[currentYear][currentMonth][i][field] = val;
             saveDataSilent();
-            if(field === 's') renderTable();
-            else recalculate();
+            if (field === 's') {
+                atualizarIconeAviso(i);
+                recalculate();
+            } else {
+                recalculate();
+            }
         }
 
         function addLinha(index) {
@@ -736,9 +778,9 @@
         }
 
         function calcRF(id, cdi, bench) {
-            const v = parseFloat(document.getElementById(`v-${id}`).value) || 0;
+            const v = parseBR(document.getElementById(`v-${id}`).value);
             const d = document.getElementById(`d-${id}`).value;
-            const a = parseFloat(document.getElementById(`a-${id}`).value) || 0;
+            const a = parseBR(document.getElementById(`a-${id}`).value);
             if (v <= 0 || !d) { atualizarDisplay(id, 0); return; }
             const dias = Math.max(1, Math.ceil((new Date() - new Date(d)) / 86400000));
             const meses = dias / 30.44;
@@ -753,9 +795,9 @@
         }
 
         function calcIsento(id, cdi, bench) {
-            const v = parseFloat(document.getElementById(`v-${id}`).value) || 0;
+            const v = parseBR(document.getElementById(`v-${id}`).value);
             const d = document.getElementById(`d-${id}`).value;
-            const a = parseFloat(document.getElementById(`a-${id}`).value) || 0;
+            const a = parseBR(document.getElementById(`a-${id}`).value);
             if (v <= 0 || !d) { atualizarDisplay(id, 0); return; }
             const dias = Math.max(1, Math.ceil((new Date() - new Date(d)) / 86400000));
             const meses = dias / 30.44;
@@ -767,9 +809,9 @@
         }
 
         function calcPoup() {
-            const v = parseFloat(document.getElementById('v-poup').value) || 0;
+            const v = parseBR(document.getElementById('v-poup').value);
             const d = document.getElementById('d-poup').value;
-            const a = parseFloat(document.getElementById('a-poup').value) || 0;
+            const a = parseBR(document.getElementById('a-poup').value);
             if (v <= 0 || !d) { atualizarDisplay('poup', 0); return; }
             const meses = (new Date() - new Date(d)) / 2628000000;
             let taxaPoup = globalCDI > 8.5 ? 0.005 : (globalCDI * 0.70 / 12 / 100);
@@ -779,9 +821,9 @@
         }
 
         function calcMoedaCompleta(id, taxa) {
-            const v = parseFloat(document.getElementById(`v-${id}`).value) || 0;
+            const v = parseBR(document.getElementById(`v-${id}`).value);
             const d = document.getElementById(`d-${id}`).value;
-            const a = parseFloat(document.getElementById(`a-${id}`).value) || 0;
+            const a = parseBR(document.getElementById(`a-${id}`).value);
             if (v <= 0) { atualizarDisplay(id, 0); return; }
             let totalMoeda = v;
             if (d) {
@@ -817,15 +859,16 @@
         function carregarDados(s) {
             if(!s) return;
             document.getElementById('nome-investidor').value = s.n || "";
-            const L = (id, val) => { if(document.getElementById(id)) document.getElementById(id).value = val || ""; };
-            L('v-master', s.vm); L('d-master', s.dm); L('a-master', s.am);
-            L('v-mapfre', s.vmap); L('d-mapfre', s.dmap); L('a-mapfre', s.amap);
-            L('v-prev', s.vp); L('d-prev', s.dp); L('a-prev', s.ap);
-            L('v-selic', s.vs); L('d-selic', s.ds); L('a-selic', s.as);
-            L('v-lci', s.vl); L('d-lci', s.dl); L('a-lci', s.al);
-            L('v-poup', s.vpo); L('d-poup', s.dpo); L('a-poup', s.apo);
-            L('v-usd', s.v_usd); L('d-usd', s.d_usd); L('a-usd', s.a_usd);
-            L('v-eur', s.v_eur); L('d-eur', s.d_eur); L('a-eur', s.a_eur);
+            const LMon = (id, val) => { if(document.getElementById(id)) document.getElementById(id).value = val ? formatBRL(val) : ""; };
+            const LStr = (id, val) => { if(document.getElementById(id)) document.getElementById(id).value = val || ""; };
+            LMon('v-master', s.vm); LStr('d-master', s.dm); LMon('a-master', s.am);
+            LMon('v-mapfre', s.vmap); LStr('d-mapfre', s.dmap); LMon('a-mapfre', s.amap);
+            LMon('v-prev', s.vp); LStr('d-prev', s.dp); LMon('a-prev', s.ap);
+            LMon('v-selic', s.vs); LStr('d-selic', s.ds); LMon('a-selic', s.as);
+            LMon('v-lci', s.vl); LStr('d-lci', s.dl); LMon('a-lci', s.al);
+            LMon('v-poup', s.vpo); LStr('d-poup', s.dpo); LMon('a-poup', s.apo);
+            LMon('v-usd', s.v_usd); LStr('d-usd', s.d_usd); LMon('a-usd', s.a_usd);
+            LMon('v-eur', s.v_eur); LStr('d-eur', s.d_eur); LMon('a-eur', s.a_eur);
             processarTudo();
         }
 

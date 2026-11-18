@@ -355,6 +355,37 @@
     let currentMonthIdx = parseInt(localStorage.getItem('selected_month') || '0', 10);
     if (!Number.isInteger(currentMonthIdx) || currentMonthIdx < 0 || currentMonthIdx > 11) currentMonthIdx = 0;
 
+    /* ===== Utilitários de formatação monetária (padrão brasileiro) ===== */
+    function parseBR(value) {
+        if (value === null || value === undefined || value === '') return 0;
+        if (typeof value === 'number') return value;
+        let s = String(value).trim().replace(/[R$\s]/g, '');
+        if (!s) return 0;
+        if (s.includes(',')) {
+            s = s.replace(/\./g, '').replace(',', '.');
+        } else if (/^\d{1,3}(\.\d{3})+$/.test(s)) {
+            s = s.replace(/\./g, '');
+        }
+        const n = parseFloat(s);
+        return isNaN(n) ? 0 : n;
+    }
+
+    function formatBR(value) {
+        return parseBR(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function onMoneyFocus(input) {
+        const v = input.value.trim();
+        if (!v) return;
+        input.value = String(parseBR(v));
+    }
+
+    function onMoneyBlur(input) {
+        const raw = input.value.trim();
+        input.value = raw === '' ? '' : formatBR(raw);
+        autoCalc(input);
+    }
+
     function init() {
         const yearSelect = document.getElementById('current-year-select');
         for(let y = 2024; y <= 2050; y++){
@@ -393,11 +424,11 @@
                 </div>
             </td>
             <td class="p-2"><input type="text" class="in-destino w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" placeholder="Pix" oninput="saveData(false)"></td>
-            <td class="p-2"><input type="number" step="0.01" class="in-val w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-medium text-slate-800 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" oninput="autoCalc(this)"></td>
-            <td class="p-2"><input type="number" step="0.01" class="in-extra w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-medium text-slate-800 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" oninput="autoCalc(this)"></td>
+            <td class="p-2"><input type="text" inputmode="decimal" class="in-val w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-medium text-slate-800 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" oninput="autoCalc(this)" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)"></td>
+            <td class="p-2"><input type="text" inputmode="decimal" class="in-extra w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-medium text-slate-800 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" oninput="autoCalc(this)" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)"></td>
             <td class="p-2"><input type="text" class="in-extra-desc w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" placeholder="Ex: Condomínio" oninput="saveData(false)"></td>
-            <td class="p-2"><input type="number" step="0.01" class="in-ir w-full px-2 py-1.5 bg-amber-50 border border-amber-300 rounded-md text-xs font-semibold text-amber-800 focus:ring-2 focus:ring-amber-500 focus:bg-white outline-none transition" oninput="autoCalc(this)"></td>
-            <td class="p-2"><input type="number" step="0.01" class="in-recebido w-full px-2 py-1.5 bg-emerald-50 border border-emerald-300 rounded-md text-xs font-semibold text-emerald-800 focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition" oninput="autoCalc(this)"></td>
+            <td class="p-2"><input type="text" inputmode="decimal" class="in-ir w-full px-2 py-1.5 bg-amber-50 border border-amber-300 rounded-md text-xs font-semibold text-amber-800 focus:ring-2 focus:ring-amber-500 focus:bg-white outline-none transition" oninput="autoCalc(this)" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)"></td>
+            <td class="p-2"><input type="text" inputmode="decimal" class="in-recebido w-full px-2 py-1.5 bg-emerald-50 border border-emerald-300 rounded-md text-xs font-semibold text-emerald-800 focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition" oninput="autoCalc(this)" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)"></td>
             <td class="row-total p-2 font-extrabold text-brand-700 text-xs">R$ 0,00</td>
             <td class="p-2">
                 <div class="flex flex-col gap-1">
@@ -467,12 +498,12 @@
     function autoCalc(inputEl) {
         const row = inputEl.closest('tr');
         if (!inputEl.classList.contains('in-recebido')) {
-            const aluguel = parseFloat(row.querySelector('.in-val').value) || 0;
-            const extras = parseFloat(row.querySelector('.in-extra').value) || 0;
-            const ir = parseFloat(row.querySelector('.in-ir').value) || 0;
-            row.querySelector('.in-recebido').value = (aluguel + extras - ir).toFixed(2);
+            const aluguel = parseBR(row.querySelector('.in-val').value) || 0;
+            const extras = parseBR(row.querySelector('.in-extra').value) || 0;
+            const ir = parseBR(row.querySelector('.in-ir').value) || 0;
+            row.querySelector('.in-recebido').value = formatBR(aluguel + extras - ir);
         }
-        const recebido = parseFloat(row.querySelector('.in-recebido').value) || 0;
+        const recebido = parseBR(row.querySelector('.in-recebido').value) || 0;
         row.querySelector('.row-total').innerText = recebido.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
         saveData(false);
     }
@@ -505,14 +536,14 @@
                 row.querySelector('.in-email').value = d.email || '';
                 row.querySelector('.in-date').value = d.d || ''; 
                 row.querySelector('.in-reajuste').value = d.r || ''; 
-                row.querySelector('.in-val').value = d.v || ''; 
-                row.querySelector('.in-extra').value = d.e || ''; 
+                row.querySelector('.in-val').value = d.v ? formatBR(d.v) : ''; 
+                row.querySelector('.in-extra').value = d.e ? formatBR(d.e) : ''; 
                 row.querySelector('.in-extra-desc').value = d.ed || '';
-                row.querySelector('.in-ir').value = d.ir || '';
+                row.querySelector('.in-ir').value = d.ir ? formatBR(d.ir) : '';
                 row.querySelector('.in-destino').value = d.dest || '';
                 row.querySelector('.in-cdc').value = d.cdc || '';
-                const recebido = d.recebido !== undefined ? (parseFloat(d.recebido)||0) : ((parseFloat(d.v)||0)+(parseFloat(d.e)||0)-(parseFloat(d.ir)||0));
-                row.querySelector('.in-recebido').value = recebido.toFixed(2);
+                const recebido = d.recebido !== undefined ? parseBR(d.recebido) : (parseBR(d.v) + parseBR(d.e) - parseBR(d.ir));
+                row.querySelector('.in-recebido').value = formatBR(recebido);
                 row.querySelector('.row-total').innerText = recebido.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
                 tbody.appendChild(row);
             });
@@ -535,7 +566,7 @@
 
     function changeYear() { saveData(false); currentYear = document.getElementById('current-year-select').value; localStorage.setItem('selected_year', currentYear); loadMonthData(currentMonthIdx); updateAnnualTotal(); }
     function saveLocador() { localStorage.setItem('locador_nome', document.getElementById('locador-nome').value); }
-    function updateAnnualTotal() { let t = 0; for(let i=0; i<12; i++){ JSON.parse(localStorage.getItem(`data_${currentYear}_mes_${i}`)||'[]').forEach(x => t += x.recebido !== undefined ? (parseFloat(x.recebido)||0) : ((parseFloat(x.v)||0)+(parseFloat(x.e)||0)-(parseFloat(x.ir)||0))); } document.getElementById('grand-annual-total').innerText = t.toLocaleString('pt-BR', {style:'currency', currency:'BRL'}); document.getElementById('label-year-badge').innerText = currentYear; }
+    function updateAnnualTotal() { let t = 0; for(let i=0; i<12; i++){ JSON.parse(localStorage.getItem(`data_${currentYear}_mes_${i}`)||'[]').forEach(x => t += x.recebido !== undefined ? parseBR(x.recebido) : (parseBR(x.v) + parseBR(x.e) - parseBR(x.ir))); } document.getElementById('grand-annual-total').innerText = t.toLocaleString('pt-BR', {style:'currency', currency:'BRL'}); document.getElementById('label-year-badge').innerText = currentYear; }
     
     function copyFromPreviousMonth() { 
         if(currentMonthIdx === 0) return alert("Não há mês anterior."); 
@@ -554,13 +585,13 @@
                 row.querySelector('.in-email').value = d.email || '';
                 row.querySelector('.in-reajuste').value = d.r || ''; 
                 row.querySelector('.in-cdc').value = d.cdc || ''; 
-                row.querySelector('.in-val').value = d.v || ''; 
-                row.querySelector('.in-extra').value = d.e || ''; 
+                row.querySelector('.in-val').value = d.v ? formatBR(d.v) : ''; 
+                row.querySelector('.in-extra').value = d.e ? formatBR(d.e) : ''; 
                 row.querySelector('.in-extra-desc').value = d.ed || '';
-                row.querySelector('.in-ir').value = d.ir || '';
+                row.querySelector('.in-ir').value = d.ir ? formatBR(d.ir) : '';
                 row.querySelector('.in-destino').value = d.dest || ''; 
-                const recebido = d.recebido !== undefined ? (parseFloat(d.recebido)||0) : ((parseFloat(d.v)||0)+(parseFloat(d.e)||0)-(parseFloat(d.ir)||0));
-                row.querySelector('.in-recebido').value = recebido.toFixed(2);
+                const recebido = d.recebido !== undefined ? parseBR(d.recebido) : (parseBR(d.v) + parseBR(d.e) - parseBR(d.ir));
+                row.querySelector('.in-recebido').value = formatBR(recebido);
                 if(d.d) { 
                     const dia = d.d.split('-')[2]; 
                     const mesCorrente = (currentMonthIdx + 1).toString().padStart(2, '0'); 
@@ -621,7 +652,7 @@
     function abrirWhatsAppPopup(rowIdx) {
         saveData(false); const rows=document.querySelectorAll('#rent-rows tr'); if(!rows[rowIdx]) return;
         const row=rows[rowIdx], nome=row.querySelector('.in-name').value.trim(), dataPagamento=row.querySelector('.in-date').value;
-        const subtotal=(parseFloat(row.querySelector('.in-val').value)||0)+(parseFloat(row.querySelector('.in-extra').value)||0)-(parseFloat(row.querySelector('.in-ir').value)||0);
+        const subtotal=parseBR(row.querySelector('.in-val').value)+parseBR(row.querySelector('.in-extra').value)-parseBR(row.querySelector('.in-ir').value);
         if(!nome) return alert('Preencha o nome do inquilino.'); if(!dataPagamento) return alert('Preencha a Data de Pagamento.');
         const dataFormatada=dataPagamento.split('-').reverse().join('/'), valorFormatado=subtotal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}), competencia=`${meses[currentMonthIdx]} / ${currentYear}`;
         const agora=new Date(), minutosAtuais=agora.getHours()*60+agora.getMinutes();
@@ -642,9 +673,9 @@
         const emailTexto = row.querySelector('.in-email').value.trim();
         const emails = emailTexto.split(';').map(item => item.trim()).filter(Boolean);
         const dataPagamento = row.querySelector('.in-date').value;
-        const aluguel = parseFloat(row.querySelector('.in-val').value) || 0;
-        const extras = parseFloat(row.querySelector('.in-extra').value) || 0;
-        const ir = parseFloat(row.querySelector('.in-ir').value) || 0;
+        const aluguel = parseBR(row.querySelector('.in-val').value) || 0;
+        const extras = parseBR(row.querySelector('.in-extra').value) || 0;
+        const ir = parseBR(row.querySelector('.in-ir').value) || 0;
         const subtotal = aluguel + extras - ir;
         const locador = document.getElementById('locador-nome').value.trim() || 'Locador';
         if (!nome) return alert('Preencha o nome do inquilino.');
@@ -679,7 +710,7 @@
         const emailTexto = row.querySelector('.in-email').value.trim();
         const emails = emailTexto.split(';').map(item => item.trim()).filter(Boolean);
         const dataPagamento = row.querySelector('.in-date').value;
-        const subtotal = (parseFloat(row.querySelector('.in-val').value) || 0) + (parseFloat(row.querySelector('.in-extra').value) || 0) - (parseFloat(row.querySelector('.in-ir').value) || 0);
+        const subtotal = parseBR(row.querySelector('.in-val').value) + parseBR(row.querySelector('.in-extra').value) - parseBR(row.querySelector('.in-ir').value);
         const locador = document.getElementById('locador-nome').value.trim() || 'Locador';
         if (!nome) { alert('Preencha o nome do inquilino.'); return null; }
         if (exigirEmail && emails.length === 0) { alert('Preencha pelo menos um e-mail do inquilino.'); return null; }
@@ -876,9 +907,9 @@
         const reajuste = row.querySelector('.in-reajuste').value;
         const cdc = row.querySelector('.in-cdc').value || 'Não informado';
         const destino = row.querySelector('.in-destino').value || 'Não informado';
-        const val = parseFloat(row.querySelector('.in-val').value) || 0;
-        const extra = parseFloat(row.querySelector('.in-extra').value) || 0;
-        const ir = parseFloat(row.querySelector('.in-ir').value) || 0;
+        const val = parseBR(row.querySelector('.in-val').value) || 0;
+        const extra = parseBR(row.querySelector('.in-extra').value) || 0;
+        const ir = parseBR(row.querySelector('.in-ir').value) || 0;
         const extraDesc = row.querySelector('.in-extra-desc').value.trim() || 'Não informado';
         const total = val + extra - ir;
         const dataF = row.querySelector('.in-date').value ? row.querySelector('.in-date').value.split('-').reverse().join('/') : 'A Combinar';
@@ -987,13 +1018,13 @@
             const reg = dados.find(r => r.unidade && r.unidade.trim().toUpperCase() === unidadeSelecionada.trim().toUpperCase());
             if(reg) {
                 encontrou = true;
-                const v = reg.recebido !== undefined ? (parseFloat(reg.recebido)||0) : ((parseFloat(reg.v)||0)+(parseFloat(reg.e)||0));
+                const v = reg.recebido !== undefined ? parseBR(reg.recebido) : (parseBR(reg.v) + parseBR(reg.e));
                 totalAnual += v;
                 htmlExtrato += `<tr>
                     <td style="padding:10px; border:1px solid #000;">${meses[i].toUpperCase()}</td>
                     <td style="padding:10px; border:1px solid #000; text-align:center;">${reg.d ? reg.d.split('-').reverse().join('/') : '--'}</td>
                     <td style="padding:10px; border:1px solid #000; text-align:right;">${v.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                    <td style="padding:10px; border:1px solid #000; text-align:right;">${(parseFloat(reg.ir)||0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td style="padding:10px; border:1px solid #000; text-align:right;">${parseBR(reg.ir).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
                 </tr>`;
             }
         }
@@ -1002,7 +1033,7 @@
                 <tr style="font-weight:bold; background:#eee;">
                     <td colspan="2" style="padding:12px; text-align:right; border:1.5px solid #000;">TOTAL ACUMULADO NO ANO:</td>
                     <td style="padding:12px; text-align:right; border:1.5px solid #000;">${totalAnual.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</td>
-                    <td style="padding:12px; text-align:right; border:1.5px solid #000;">${(() => { let totalIR = 0; for(let m=0; m<12; m++){ const regs = JSON.parse(localStorage.getItem(`data_${currentYear}_mes_${m}`) || '[]'); const item = regs.find(r => r.unidade && r.unidade.trim().toUpperCase() === unidadeSelecionada.trim().toUpperCase()); if(item) totalIR += parseFloat(item.ir)||0; } return totalIR.toLocaleString('pt-BR', {style:'currency', currency:'BRL'}); })()}</td>
+                    <td style="padding:12px; text-align:right; border:1.5px solid #000;">${(() => { let totalIR = 0; for(let m=0; m<12; m++){ const regs = JSON.parse(localStorage.getItem(`data_${currentYear}_mes_${m}`) || '[]'); const item = regs.find(r => r.unidade && r.unidade.trim().toUpperCase() === unidadeSelecionada.trim().toUpperCase()); if(item) totalIR += parseBR(item.ir); } return totalIR.toLocaleString('pt-BR', {style:'currency', currency:'BRL'}); })()}</td>
                 </tr></tbody></table>
                 <div class="signature-block">
                     <p class="signature-name">${locador}</p>
@@ -1024,9 +1055,9 @@
         const unidade = row.querySelector('.in-unidade').value.trim();
         const emailTexto = row.querySelector('.in-email').value.trim();
         const emails = emailTexto.split(';').map(item => item.trim()).filter(Boolean);
-        const aluguel = parseFloat(row.querySelector('.in-val').value) || 0;
-        const extras = parseFloat(row.querySelector('.in-extra').value) || 0;
-        const ir = parseFloat(row.querySelector('.in-ir').value) || 0;
+        const aluguel = parseBR(row.querySelector('.in-val').value) || 0;
+        const extras = parseBR(row.querySelector('.in-extra').value) || 0;
+        const ir = parseBR(row.querySelector('.in-ir').value) || 0;
         const total = aluguel + extras - ir;
         if (!nome) { alert('Preencha o nome do inquilino/contato.'); return null; }
         if (!unidade) { alert('Preencha a unidade.'); return null; }
@@ -1079,9 +1110,9 @@
         const row = rows[rowIdx];
         
         const unidade = row.querySelector('.in-unidade').value || "(Unidade)";
-        const val = parseFloat(row.querySelector('.in-val').value) || 0;
-        const extra = parseFloat(row.querySelector('.in-extra').value) || 0;
-        const ir = parseFloat(row.querySelector('.in-ir').value) || 0;
+        const val = parseBR(row.querySelector('.in-val').value) || 0;
+        const extra = parseBR(row.querySelector('.in-extra').value) || 0;
+        const ir = parseBR(row.querySelector('.in-ir').value) || 0;
         const total = val + extra - ir;
         const locador = document.getElementById('locador-nome').value || '(Locador)';
         const dataF = new Date().toLocaleDateString('pt-BR');
@@ -1152,10 +1183,10 @@
             const data = JSON.parse(localStorage.getItem(`data_${currentYear}_mes_${idx}`) || '[]');
             let rHtml = ''; let sub = 0; let has = false;
             data.forEach(r => {
-                const total = r.recebido !== undefined ? (parseFloat(r.recebido)||0) : ((parseFloat(r.v)||0) + (parseFloat(r.e)||0) - (parseFloat(r.ir)||0));
+                const total = r.recebido !== undefined ? parseBR(r.recebido) : (parseBR(r.v) + parseBR(r.e) - parseBR(r.ir));
                 if(r.unidade || total > 0) {
-                    has = true; sub += total; totalGeral += total; totalIRGeral += parseFloat(r.ir) || 0;
-                    rHtml += `<tr><td><strong>${(r.unidade || '').toUpperCase()}</strong></td><td style="text-align:center">${r.d?r.d.split('-').reverse().join('/'):'--'}</td><td style="text-align:right">${(parseFloat(r.v)||0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right">${(parseFloat(r.e)||0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right; font-weight:bold">${total.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right; font-weight:bold">${total.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right">${(parseFloat(r.ir)||0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td></tr>`;
+                    has = true; sub += total; totalGeral += total; totalIRGeral += parseBR(r.ir);
+                    rHtml += `<tr><td><strong>${(r.unidade || '').toUpperCase()}</strong></td><td style="text-align:center">${r.d?r.d.split('-').reverse().join('/'):'--'}</td><td style="text-align:right">${parseBR(r.v).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right">${parseBR(r.e).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right; font-weight:bold">${total.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right; font-weight:bold">${total.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td style="text-align:right">${parseBR(r.ir).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td></tr>`;
                 }
             });
             return has ? `<tr class="rep-month-title"><td colspan="7">${meses[idx].toUpperCase()}</td></tr>` + rHtml + `<tr><td colspan="5" style="text-align:right; font-weight:bold">Subtotal:</td><td style="text-align:right; font-weight:bold">${sub.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</td><td></td></tr>` : '';

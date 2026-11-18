@@ -191,11 +191,11 @@
                     </div>
                     <div class="flex flex-col gap-1">
                         <label class="text-[10px] font-bold text-slate-500 uppercase">Peças (R$)</label>
-                        <input type="number" id="servPecas" step="0.01" value="0.00" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition">
+                        <input type="text" inputmode="decimal" id="servPecas" value="0,00" oninput="this.value=this.value.replace(/[^0-9,.\s]/g,'')" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition">
                     </div>
                     <div class="flex flex-col gap-1">
                         <label class="text-[10px] font-bold text-slate-500 uppercase">Mão de Obra (R$)</label>
-                        <input type="number" id="servMaoObra" step="0.01" value="0.00" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition">
+                        <input type="text" inputmode="decimal" id="servMaoObra" value="0,00" oninput="this.value=this.value.replace(/[^0-9,.\s]/g,'')" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition">
                     </div>
                     <div class="flex flex-col gap-1 sm:col-span-2">
                         <label class="text-[10px] font-bold text-slate-500 uppercase">Descrição</label>
@@ -225,6 +225,35 @@
     </footer>
 
     <script>
+        /* ===== Utilitários de formatação monetária (padrão brasileiro) ===== */
+        const parseBR = value => {
+            if (value === null || value === undefined || value === '') return 0;
+            if (typeof value === 'number') return value;
+            let s = String(value).trim().replace(/[R$\s]/g, '');
+            if (!s) return 0;
+            if (s.includes(',')) {
+                s = s.replace(/\./g, '').replace(',', '.');
+            } else if (/^\d{1,3}(\.\d{3})+$/.test(s)) {
+                s = s.replace(/\./g, '');
+            }
+            const n = parseFloat(s);
+            return isNaN(n) ? 0 : n;
+        };
+
+        const formatBRL = val => parseBR(val).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        const onMoneyFocus = el => {
+            const raw = el.value.trim();
+            if (!raw) return;
+            el.value = String(parseBR(raw));
+        };
+
+        const onMoneyBlur = el => {
+            const raw = el.value.trim();
+            if (raw === '') { el.value = '0,00'; return; }
+            el.value = formatBRL(raw);
+        };
+
         const STORAGE_KEY = 'frota_db_v32_final';
         let dados = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { veiculos: [] };
         let editandoId = { veiculo: null, servico: null };
@@ -301,8 +330,8 @@
                 reg.data = document.getElementById(`editSData-${sId}`).value.split('-').reverse().join('/');
                 reg.responsavel = document.getElementById(`editSResp-${sId}`).value.toUpperCase();
                 reg.km = document.getElementById(`editSKM-${sId}`).value;
-                reg.pecas = parseFloat(document.getElementById(`editSPec-${sId}`).value) || 0;
-                reg.maoObra = parseFloat(document.getElementById(`editSMao-${sId}`).value) || 0;
+                reg.pecas = parseBR(document.getElementById(`editSPec-${sId}`).value);
+                reg.maoObra = parseBR(document.getElementById(`editSMao-${sId}`).value);
                 reg.total = reg.pecas + reg.maoObra;
                 reg.desc = document.getElementById(`editSDesc-${sId}`).value;
                 editandoId.servico = null;
@@ -326,8 +355,8 @@
                                 <div class="flex flex-col gap-0.5"><label class="text-[9px] font-bold text-slate-500 uppercase">Data</label><input type="date" id="editSData-${r.id}" value="${r.data.split('/').reverse().join('-')}" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs font-semibold"></div>
                                 <div class="flex flex-col gap-0.5 sm:col-span-2"><label class="text-[9px] font-bold text-slate-500 uppercase">Prestador</label><input type="text" id="editSResp-${r.id}" value="${r.responsavel}" class="uppercase px-2 py-1 bg-white border border-slate-300 rounded text-xs font-semibold"></div>
                                 <div class="flex flex-col gap-0.5"><label class="text-[9px] font-bold text-slate-500 uppercase">KM</label><input type="number" id="editSKM-${r.id}" value="${r.km}" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs font-semibold"></div>
-                                <div class="flex flex-col gap-0.5"><label class="text-[9px] font-bold text-slate-500 uppercase">Peças</label><input type="number" id="editSPec-${r.id}" value="${r.pecas}" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs font-semibold"></div>
-                                <div class="flex flex-col gap-0.5"><label class="text-[9px] font-bold text-slate-500 uppercase">M. Obra</label><input type="number" id="editSMao-${r.id}" value="${r.maoObra}" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs font-semibold"></div>
+                                <div class="flex flex-col gap-0.5"><label class="text-[9px] font-bold text-slate-500 uppercase">Peças</label><input type="text" inputmode="decimal" id="editSPec-${r.id}" value="${formatBRL(r.pecas)}" oninput="this.value=this.value.replace(/[^0-9,.\s]/g,'')" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs font-semibold"></div>
+                                <div class="flex flex-col gap-0.5"><label class="text-[9px] font-bold text-slate-500 uppercase">M. Obra</label><input type="text" inputmode="decimal" id="editSMao-${r.id}" value="${formatBRL(r.maoObra)}" oninput="this.value=this.value.replace(/[^0-9,.\s]/g,'')" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="px-2 py-1 bg-white border border-slate-300 rounded text-xs font-semibold"></div>
                             </div>
                             <textarea id="editSDesc-${r.id}" class="w-full mt-2 px-2 py-1 bg-white border border-slate-300 rounded text-xs font-medium" placeholder="Descrição">${r.desc}</textarea>
                             <div class="flex justify-end gap-1 mt-2">
@@ -446,12 +475,14 @@
             const vId = document.getElementById('selectVeiculo').value;
             if(!vId) return alert("Selecione um veículo!");
             const vIdx = dados.veiculos.findIndex(v => v.id == vId);
-            const p = parseFloat(document.getElementById('servPecas').value) || 0;
-            const m = parseFloat(document.getElementById('servMaoObra').value) || 0;
+            const p = parseBR(document.getElementById('servPecas').value);
+            const m = parseBR(document.getElementById('servMaoObra').value);
             dados.veiculos[vIdx].registros.unshift({ id: Date.now(), data: document.getElementById('servData').value.split('-').reverse().join('/'), categoria: document.getElementById('servCat').value, responsavel: document.getElementById('servResponsavel').value.toUpperCase(), km: document.getElementById('servKM').value, pecas: p, maoObra: m, total: p + m, desc: document.getElementById('servDesc').value });
             blocosAbertos.add(Number(vId));
             salvarEAtualizar();
             ['servDesc', 'servKM', 'servResponsavel'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('servPecas').value = '0,00';
+            document.getElementById('servMaoObra').value = '0,00';
         }
 
         function exportarDados() { 

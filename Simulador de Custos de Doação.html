@@ -19,20 +19,20 @@
 <div class="fields">
 <div><label>Ano da doação</label><select id="ano"><option value="2050">2050</option><option value="2049">2049</option><option value="2048">2048</option><option value="2047">2047</option><option value="2046">2046</option><option value="2045">2045</option><option value="2044">2044</option><option value="2043">2043</option><option value="2042">2042</option><option value="2041">2041</option><option value="2040">2040</option><option value="2039">2039</option><option value="2038">2038</option><option value="2037">2037</option><option value="2036">2036</option><option value="2035">2035</option><option value="2034">2034</option><option value="2033">2033</option><option value="2032">2032</option><option value="2031">2031</option><option value="2030">2030</option><option value="2029">2029</option><option value="2028">2028</option><option value="2027">2027</option><option value="2026" selected>2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option></select></div>
 <div><label>Data da doação atual</label><input id="data" type="date"></div>
-<div class="full"><label>Valor desta doação (R$)</label><input id="valorAtual" type="number" min="0" step="0.01" placeholder="0,00"></div>
-<div><label>Doações anteriores no ano (R$)</label><input id="anteriores" type="number" min="0" step="0.01" value="0"><div class="hint">Mesmo doador para o mesmo donatário.</div></div>
-<div><label>ITCMD já recolhido no ano (R$)</label><input id="pago" type="number" min="0" step="0.01" value="0"></div>
+<div class="full"><label>Valor desta doação (R$)</label><input id="valorAtual" type="text" inputmode="decimal" class="moeda" placeholder="0,00"></div>
+<div><label>Doações anteriores no ano (R$)</label><input id="anteriores" type="text" inputmode="decimal" class="moeda" value="0,00"><div class="hint">Mesmo doador para o mesmo donatário.</div></div>
+<div><label>ITCMD já recolhido no ano (R$)</label><input id="pago" type="text" inputmode="decimal" class="moeda" value="0,00"></div>
 <div><label>Estado de domicílio do doador</label><select id="ufDoador" onchange="configurarUF();calcular()"><option value="SP">São Paulo</option><option value="AC">Acre</option><option value="AL">Alagoas</option><option value="AP">Amapá</option><option value="AM">Amazonas</option><option value="BA">Bahia</option><option value="CE">Ceará</option><option value="DF">Distrito Federal</option><option value="ES">Espírito Santo</option><option value="GO">Goiás</option><option value="MA">Maranhão</option><option value="MT">Mato Grosso</option><option value="MS">Mato Grosso do Sul</option><option value="MG">Minas Gerais</option><option value="PA">Pará</option><option value="PB">Paraíba</option><option value="PR">Paraná</option><option value="PE">Pernambuco</option><option value="PI">Piauí</option><option value="RJ">Rio de Janeiro</option><option value="RN">Rio Grande do Norte</option><option value="RS">Rio Grande do Sul</option><option value="RO">Rondônia</option><option value="RR">Roraima</option><option value="SC">Santa Catarina</option><option value="SE">Sergipe</option><option value="TO">Tocantins</option><option value="EX">Exterior</option></select><div class="hint">Para dinheiro, selecione o domicílio do doador.</div></div>
 <div><label>Estado de domicílio do donatário</label><select id="ufDonatario"><option value="SP">São Paulo</option><option value="AC">Acre</option><option value="AL">Alagoas</option><option value="AP">Amapá</option><option value="AM">Amazonas</option><option value="BA">Bahia</option><option value="CE">Ceará</option><option value="DF">Distrito Federal</option><option value="ES">Espírito Santo</option><option value="GO">Goiás</option><option value="MA">Maranhão</option><option value="MT">Mato Grosso</option><option value="MS">Mato Grosso do Sul</option><option value="MG">Minas Gerais</option><option value="PA">Pará</option><option value="PB">Paraíba</option><option value="PR">Paraná</option><option value="PE">Pernambuco</option><option value="PI">Piauí</option><option value="RJ">Rio de Janeiro</option><option value="RN">Rio Grande do Norte</option><option value="RS">Rio Grande do Sul</option><option value="RO">Rondônia</option><option value="RR">Roraima</option><option value="SC">Santa Catarina</option><option value="SE">Sergipe</option><option value="TO">Tocantins</option><option value="EX">Exterior</option></select></div>
-<div><label>Limite de isenção do Estado (R$)</label><input id="limiteManual" type="number" min="0" step="0.01" value="96050"><div class="hint" id="hintLimite">SP 2026: 2.500 UFESPs.</div></div>
+<div><label>Limite de isenção do Estado (R$)</label><input id="limiteManual" type="text" inputmode="decimal" class="moeda" value="96.050,00"><div class="hint" id="hintLimite">SP 2026: 2.500 UFESPs.</div></div>
 <div><label>Alíquota da doação no Estado</label><input id="faixaEstadual" type="text" value="4% (fixa)" readonly><div class="hint">Faixa estadual de referência para doações em 2026.</div></div><div><label>Alíquota aplicável ao cálculo (%)</label><input id="aliquotaManual" type="number" min="0" max="8" step="0.01" value="4"><div class="hint" id="hintAliquota">Em alíquota progressiva, confirme a faixa correspondente ao valor da doação.</div></div>
 </div>
 <h2 class="section-title" style="margin-top:24px">Acréscimos e despesas</h2><p class="section-sub">Campos manuais, sem presumir cobranças que variam por caso.</p>
 <div class="fields">
-<div><label>Multa oficial por atraso (R$)</label><input id="multa" type="number" min="0" step="0.01" value="0"></div>
-<div><label>Juros / atualização oficial (R$)</label><input id="juros" type="number" min="0" step="0.01" value="0"></div>
-<div><label>Tarifa bancária (R$)</label><input id="banco" type="number" min="0" step="0.01" value="0"></div>
-<div><label>Outras despesas documentadas (R$)</label><input id="outras" type="number" min="0" step="0.01" value="0"></div>
+<div><label>Multa oficial por atraso (R$)</label><input id="multa" type="text" inputmode="decimal" class="moeda" value="0,00"></div>
+<div><label>Juros / atualização oficial (R$)</label><input id="juros" type="text" inputmode="decimal" class="moeda" value="0,00"></div>
+<div><label>Tarifa bancária (R$)</label><input id="banco" type="text" inputmode="decimal" class="moeda" value="0,00"></div>
+<div><label>Outras despesas documentadas (R$)</label><input id="outras" type="text" inputmode="decimal" class="moeda" value="0,00"></div>
 </div>
 <div class="actions"><button type="button" class="btn btn-primary" onclick="calcular()">Calcular doação</button><button type="button" class="btn btn-secondary" onclick="limpar()">Limpar</button></div>
 </section>
@@ -73,18 +73,79 @@ const UFESP={2026:38.42,2025:37.02,2024:35.36,2023:34.26,2022:31.97,2021:29.09,2
 const ALIQUOTAS_DOACAO={
  AC:{texto:'2% a 8% (progressiva)',fixa:null,min:2,max:8},AL:{texto:'1% a 2% (progressiva)',fixa:null,min:1,max:2},AP:{texto:'2% a 4% (progressiva)',fixa:null,min:2,max:4},AM:{texto:'2% a 4% (progressiva)',fixa:null,min:2,max:4},BA:{texto:'3% a 4% (progressiva)',fixa:null,min:3,max:4},CE:{texto:'2% a 8% (progressiva)',fixa:null,min:2,max:8},DF:{texto:'4% a 6% (progressiva)',fixa:null,min:4,max:6},ES:{texto:'4% (fixa)',fixa:4},GO:{texto:'2% a 8% (progressiva)',fixa:null,min:2,max:8},MA:{texto:'1% a 2% (progressiva)',fixa:null,min:1,max:2},MT:{texto:'2% a 8% (progressiva)',fixa:null,min:2,max:8},MS:{texto:'3% (fixa)',fixa:3},MG:{texto:'5% (fixa)',fixa:5},PA:{texto:'2% a 4% (progressiva)',fixa:null,min:2,max:4},PB:{texto:'2% a 8% (progressiva)',fixa:null,min:2,max:8},PR:{texto:'4% (fixa)',fixa:4},PE:{texto:'2% a 8% (progressiva)',fixa:null,min:2,max:8},PI:{texto:'2% a 4% (progressiva)',fixa:null,min:2,max:4},RJ:{texto:'4% a 8% (progressiva)',fixa:null,min:4,max:8},RN:{texto:'3% a 6% (progressiva)',fixa:null,min:3,max:6},RS:{texto:'3% a 4% (progressiva)',fixa:null,min:3,max:4},RO:{texto:'2% a 4% (progressiva)',fixa:null,min:2,max:4},RR:{texto:'4% (fixa)',fixa:4},SC:{texto:'1% a 7% (progressiva)',fixa:null,min:1,max:7},SP:{texto:'4% (fixa)',fixa:4},SE:{texto:'2% a 8% (progressiva)',fixa:null,min:2,max:8},TO:{texto:'2% a 8% (progressiva)',fixa:null,min:2,max:8},EX:{texto:'Consultar regra aplicável',fixa:null}
 };
+
+/* ========== FORMATAÇÃO MONETÁRIA (padrão brasileiro) ========== */
+function parseMoeda(v){
+  if(typeof v==='number') return isFinite(v)?v:0;
+  let s=String(v==null?'':v).trim().replace(/R\$\s*/gi,'').replace(/\s/g,'');
+  if(!s) return 0;
+  if(s.indexOf(',')>-1) s=s.replace(/\./g,'').replace(',','.');
+  else if(/^\d{1,3}(\.\d{3})+$/.test(s)) s=s.replace(/\./g,'');
+  const n=parseFloat(s);
+  return isFinite(n)?n:0;
+}
+function formatarMoedaString(valor,finalizar){
+  let s;
+  if(typeof valor==='number' && isFinite(valor)){
+    s=valor.toFixed(2).replace('.',',');
+  }else{
+    s=String(valor==null?'':valor).replace(/R\$\s*/gi,'').replace(/\s/g,'').replace(/[^\d.,]/g,'');
+    if(s.indexOf(',')>-1) s=s.replace(/\./g,'');
+    else if(/\.\d{1,2}$/.test(s)||/\.$/.test(s)) s=s.replace(/\.(\d*)$/,',$1');
+  }
+  if(s==='') return finalizar?'0,00':'';
+  const temVirgula=s.indexOf(',')>-1;
+  const partes=s.split(',');
+  const inteiro=(partes[0]||'').replace(/\D/g,'').replace(/^0+(?=\d)/,'');
+  const decimal=partes.length>1?partes.slice(1).join('').replace(/\D/g,'').slice(0,2):'';
+  const intFmt=inteiro.replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  if(temVirgula) return (intFmt||'0')+','+(finalizar?decimal.padEnd(2,'0'):decimal);
+  return (intFmt||'0')+(finalizar?',00':'');
+}
+function setMoeda(id,valor){document.getElementById(id).value=formatarMoedaString(valor,true)}
+function normalizarMoedas(){
+  document.querySelectorAll('input.moeda').forEach(el=>{
+    if(el.value.trim()!=='') el.value=formatarMoedaString(el.value,true);
+  });
+}
+function aoDigitarMoeda(e){
+  const el=e.target;
+  const pos=el.selectionStart;
+  const noFim=(pos===el.value.length);
+  const digitosAntes=(el.value.slice(0,pos).match(/\d/g)||[]).length;
+  const formatado=formatarMoedaString(el.value,false);
+  el.value=formatado;
+  let novaPos=formatado.length;
+  if(!noFim){
+    if(digitosAntes===0){novaPos=0;}
+    else{
+      let cont=0;
+      for(let i=0;i<formatado.length;i++){
+        if(/\d/.test(formatado[i])){cont++;if(cont===digitosAntes){novaPos=i+1;break;}}
+      }
+    }
+  }
+  el.setSelectionRange(novaPos,novaPos);
+}
+document.querySelectorAll('input.moeda').forEach(el=>{
+  el.addEventListener('input',aoDigitarMoeda);
+  el.addEventListener('blur',()=>{if(el.value.trim()!=='') el.value=formatarMoedaString(el.value,true);});
+  el.addEventListener('focus',()=>el.select());
+});
+/* =============================================================== */
+
 const money=v=>(Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-const val=id=>Math.max(0,Number(document.getElementById(id).value)||0);
+const val=id=>Math.max(0,parseMoeda(document.getElementById(id).value));
 const round=v=>Math.round((v+Number.EPSILON)*100)/100;
 function configurarUF(){
  const uf=document.getElementById('ufDoador').value, ano=Number(document.getElementById('ano').value), regra=ALIQUOTAS_DOACAO[uf];
  document.getElementById('faixaEstadual').value=regra.texto;
  if(uf==='SP'){
    const u=UFESP[ano]||UFESP[2026];
-   document.getElementById('limiteManual').value=round(2500*u);
+   setMoeda('limiteManual',round(2500*u));
    document.getElementById('hintLimite').textContent=UFESP[ano]?`SP ${ano}: 2.500 UFESPs.`:`SP ${ano}: valor futuro da UFESP ainda não cadastrado; usando provisoriamente a UFESP de 2026. Atualize o limite quando o valor oficial for publicado.`;
  }else{
-   document.getElementById('limiteManual').value=0;
+   setMoeda('limiteManual',0);
    document.getElementById('hintLimite').textContent='Informe o limite previsto na legislação do Estado selecionado.';
  }
  if(regra.fixa!==null){
@@ -97,6 +158,7 @@ function configurarUF(){
  }
 }
 function calcular(){
+ normalizarMoedas();
  const ano=Number(document.getElementById('ano').value),ufesp=UFESP[ano]||0,uf=document.getElementById('ufDoador').value;
  const limite=val('limiteManual'),aliq=val('aliquotaManual'),atual=val('valorAtual'),ant=val('anteriores'),pago=val('pago');
  const acumulado=round(atual+ant); let base=0,bruto=0,imposto=0,txtStatus='',classe='status';
@@ -110,7 +172,14 @@ function calcular(){
  const don=document.getElementById('ufDonatario').value;
  document.getElementById('obriga').innerHTML=configurado?`<strong>Providência:</strong> validar a apuração, a isenção e o contribuinte no sistema oficial da Secretaria da Fazenda de ${uf}. Domicílio informado do donatário: <strong>${don}</strong>.`:'<strong>Providência:</strong> informe a alíquota e o limite de isenção vigentes, ou consulte a Secretaria da Fazenda do Estado competente.';
 }
-function limpar(){document.querySelectorAll('input[type=number]').forEach(e=>e.value=e.id==='valorAtual'?'':'0');document.getElementById('data').value='';document.getElementById('ano').value='2026';document.getElementById('ufDoador').value='SP';document.getElementById('ufDonatario').value='SP';configurarUF();calcular()}
+function limpar(){
+ document.querySelectorAll('input.moeda').forEach(e=>{e.value=(e.id==='valorAtual')?'':'0,00'});
+ document.getElementById('data').value='';
+ document.getElementById('ano').value='2026';
+ document.getElementById('ufDoador').value='SP';
+ document.getElementById('ufDonatario').value='SP';
+ configurarUF();calcular();
+}
 function imprimir(){document.getElementById('printDate').textContent='Gerado em '+new Date().toLocaleString('pt-BR');window.print()}
 document.getElementById('ano').addEventListener('change',()=>{configurarUF();calcular()});document.getElementById('data').value=new Date().toISOString().slice(0,10);configurarUF();calcular();
 </script>

@@ -195,12 +195,12 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Valor Declarado (R$)</label>
-                                <input type="number" id="valorImovel" step="0.01" min="0" placeholder="0,00" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                                <input type="text" inputmode="decimal" id="valorImovel" placeholder="0,00" class="moeda w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">V. Venal Referência (R$)</label>
-                                <input type="number" id="valorVenalRef" step="0.01" min="0" placeholder="0,00" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                                <input type="text" inputmode="decimal" id="valorVenalRef" placeholder="0,00" class="moeda w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
                             </div>
                         </div>
 
@@ -339,7 +339,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1" for="custoAquisicao">Custo Total de Aquisição (R$)</label>
-                                <input type="number" id="custoAquisicao" step="0.01" min="0" placeholder="0,00" required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                                <input type="text" inputmode="decimal" id="custoAquisicao" placeholder="0,00" required class="moeda w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
                             </div>
 
                             <div>
@@ -351,12 +351,12 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div id="groupValorVenda">
                                 <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1" for="valorVenda">Valor de Alienação / Venda (R$)</label>
-                                <input type="number" id="valorVenda" step="0.01" min="0" placeholder="0,00" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                                <input type="text" inputmode="decimal" id="valorVenda" placeholder="0,00" class="moeda w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
                             </div>
 
                             <div id="groupValorTorna" style="display: none;">
                                 <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1" for="valorTorna">Valor da Torna Recebida (R$)</label>
-                                <input type="number" id="valorTorna" step="0.01" min="0" placeholder="0,00" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                                <input type="text" inputmode="decimal" id="valorTorna" placeholder="0,00" class="moeda w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
                             </div>
 
                             <div id="groupValorImovelPermutado" style="display: none;">
@@ -374,12 +374,12 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1" for="corretagem">Quais foram as despesas de corretagem (R$) para esta negociação</label>
-                                <input type="number" id="corretagem" step="0.01" min="0" placeholder="0,00" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                                <input type="text" inputmode="decimal" id="corretagem" placeholder="0,00" class="moeda w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1" for="reinvestimento">Valor reinvestido em imóvel residencial no Brasil, em até 180 dias (R$)</label>
-                                <input type="number" id="reinvestimento" step="0.01" min="0" placeholder="0,00" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
+                                <input type="text" inputmode="decimal" id="reinvestimento" placeholder="0,00" class="moeda w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
                             </div>
                         </div>
                     </div>
@@ -438,6 +438,66 @@
                 </div></div></div></section>
 </main><footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500"><p>Simulador integrado de custos imobiliários e ganho de capital.</p><p class="mt-1 text-slate-400">© Calc Center Soft.</p></footer>
 <script>
+        /* ========== FORMATAÇÃO MONETÁRIA (padrão brasileiro) ========== */
+        function parseMoeda(v){
+            if(typeof v==='number') return isFinite(v)?v:0;
+            let s=String(v==null?'':v).trim().replace(/R\$\s*/gi,'').replace(/\s/g,'');
+            if(!s) return 0;
+            if(s.indexOf(',')>-1) s=s.replace(/\./g,'').replace(',','.');
+            else if(/^\d{1,3}(\.\d{3})+$/.test(s)) s=s.replace(/\./g,'');
+            const n=parseFloat(s);
+            return isFinite(n)?n:0;
+        }
+        function formatarMoedaString(valor,finalizar){
+            let s;
+            if(typeof valor==='number' && isFinite(valor)){
+                s=valor.toFixed(2).replace('.',',');
+            }else{
+                s=String(valor==null?'':valor).replace(/R\$\s*/gi,'').replace(/\s/g,'').replace(/[^\d.,]/g,'');
+                if(s.indexOf(',')>-1) s=s.replace(/\./g,'');
+                else if(/\.\d{1,2}$/.test(s)||/\.$/.test(s)) s=s.replace(/\.(\d*)$/,',$1');
+            }
+            if(s==='') return finalizar?'0,00':'';
+            const temVirgula=s.indexOf(',')>-1;
+            const partes=s.split(',');
+            const inteiro=(partes[0]||'').replace(/\D/g,'').replace(/^0+(?=\d)/,'');
+            const decimal=partes.length>1?partes.slice(1).join('').replace(/\D/g,'').slice(0,2):'';
+            const intFmt=inteiro.replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+            if(temVirgula) return (intFmt||'0')+','+(finalizar?decimal.padEnd(2,'0'):decimal);
+            return (intFmt||'0')+(finalizar?',00':'');
+        }
+        function setMoeda(id,valor){document.getElementById(id).value=formatarMoedaString(valor,true)}
+        function normalizarMoedas(){
+            document.querySelectorAll('input.moeda').forEach(el=>{
+                if(el.value.trim()!=='') el.value=formatarMoedaString(el.value,true);
+            });
+        }
+        function aoDigitarMoeda(e){
+            const el=e.target;
+            const pos=el.selectionStart;
+            const noFim=(pos===el.value.length);
+            const digitosAntes=(el.value.slice(0,pos).match(/\d/g)||[]).length;
+            const formatado=formatarMoedaString(el.value,false);
+            el.value=formatado;
+            let novaPos=formatado.length;
+            if(!noFim){
+                if(digitosAntes===0){novaPos=0;}
+                else{
+                    let cont=0;
+                    for(let i=0;i<formatado.length;i++){
+                        if(/\d/.test(formatado[i])){cont++;if(cont===digitosAntes){novaPos=i+1;break;}}
+                    }
+                }
+            }
+            el.setSelectionRange(novaPos,novaPos);
+        }
+        document.querySelectorAll('input.moeda').forEach(el=>{
+            el.addEventListener('input',aoDigitarMoeda);
+            el.addEventListener('blur',()=>{if(el.value.trim()!=='') el.value=formatarMoedaString(el.value,true);});
+            el.addEventListener('focus',()=>el.select());
+        });
+        /* =============================================================== */
+
         const configurarDataPadrao = () => {
             const dataSistema = new Date();
             const ano = dataSistema.getFullYear();
@@ -490,6 +550,7 @@
 
         document.getElementById('btnLimpar').onclick = () => {
             document.getElementById('calcForm').reset();
+            document.querySelectorAll('#calcForm input.moeda').forEach(el=>el.value='');
             configurarDataPadrao();
             document.getElementById('boxUsufruto').classList.add('hidden');
             document.getElementById('resultados').classList.add('hidden');
@@ -517,8 +578,9 @@
         };
 
         document.getElementById('btnCalcular').onclick = function() {
-            const vDecl = parseFloat(document.getElementById('valorImovel').value) || 0;
-            const vVenRef = parseFloat(document.getElementById('valorVenalRef').value) || 0;
+            normalizarMoedas();
+            const vDecl = parseMoeda(document.getElementById('valorImovel').value);
+            const vVenRef = parseMoeda(document.getElementById('valorVenalRef').value);
             const baseTransm = Math.max(vDecl, vVenRef);
             let imposto = 0, esc = 0, reg = 0, txComp = 0;
 
@@ -569,6 +631,7 @@
 
         document.getElementById('btnLimparGcap').onclick = () => {
             document.getElementById('simuladorForm').reset();
+            document.querySelectorAll('#simuladorForm input.moeda').forEach(el=>el.value='');
             document.getElementById('groupValorVenda').style.display = 'block';
             document.getElementById('groupValorTorna').style.display = 'none';
             document.getElementById('groupValorImovelPermutado').style.display = 'none';
@@ -647,8 +710,8 @@
             return arredondarCentavos(custoAquisicao * (valorTorna / valorTotalPermuta));
         }
         function atualizarValorImovelPermutado() {
-            const custoAquisicao = parseFloat(document.getElementById('custoAquisicao').value) || 0;
-            const valorTorna = parseFloat(document.getElementById('valorTorna').value) || 0;
+            const custoAquisicao = parseMoeda(document.getElementById('custoAquisicao').value);
+            const valorTorna = parseMoeda(document.getElementById('valorTorna').value);
             const valorImovelPermutado = custoAquisicao + valorTorna;
             const custoTorna = calcularCustoAquisicaoTorna(custoAquisicao, valorTorna);
             document.getElementById('valorImovelPermutado').value = formatarMoeda(valorImovelPermutado);
@@ -657,12 +720,13 @@
         document.getElementById('custoAquisicao').addEventListener('input', atualizarValorImovelPermutado);
         document.getElementById('valorTorna').addEventListener('input', atualizarValorImovelPermutado);
         function calcularGanhoDeCapital() {
+            normalizarMoedas();
             const tipoOperacao = document.getElementById('tipoOperacaoGcap').value;
-            const custoAquisicao = parseFloat(document.getElementById('custoAquisicao').value) || 0;
+            const custoAquisicao = parseMoeda(document.getElementById('custoAquisicao').value);
             const dataAquisicaoStr = document.getElementById('dataAquisicao').value;
             const dataAlienacaoStr = document.getElementById('dataAlienacao').value;
-            const corretagem = parseFloat(document.getElementById('corretagem').value) || 0;
-            const reinvestimento = parseFloat(document.getElementById('reinvestimento').value) || 0;
+            const corretagem = parseMoeda(document.getElementById('corretagem').value);
+            const reinvestimento = parseMoeda(document.getElementById('reinvestimento').value);
 
             if (!dataAquisicaoStr || !dataAlienacaoStr) {
                 alert('Por favor, informe as datas de aquisição e alienação.');
@@ -685,14 +749,14 @@
             let resultado1 = 0;
 
             if (tipoOperacao === 'venda') {
-                valorBaseOperacao = parseFloat(document.getElementById('valorVenda').value) || 0;
+                valorBaseOperacao = parseMoeda(document.getElementById('valorVenda').value);
                 if (valorBaseOperacao <= 0) {
                     alert('Informe um valor de alienação maior que zero.');
                     return;
                 }
                 resultado1 = valorBaseOperacao - custoAquisicao - corretagem;
             } else {
-                const valorTorna = parseFloat(document.getElementById('valorTorna').value) || 0;
+                const valorTorna = parseMoeda(document.getElementById('valorTorna').value);
                 if (valorTorna <= 0) {
                     alert('Informe um valor de torna maior que zero.');
                     return;

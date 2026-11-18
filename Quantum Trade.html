@@ -215,19 +215,19 @@
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Preço Médio</label>
-                        <input type="text" id="in-preco" placeholder="R$ 0,00" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition">
+                        <input type="text" inputmode="decimal" id="in-preco" placeholder="R$ 0,00" oninput="this.value=this.value.replace(/[^0-9,.\s-]/g,'')" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">LPA / VPA</label>
-                        <input type="text" id="in-lpa" placeholder="LPA / VPA" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition">
+                        <input type="text" inputmode="decimal" id="in-lpa" placeholder="LPA / VPA" oninput="this.value=this.value.replace(/[^0-9,.\s-]/g,'')" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">VPA / P.VP REF</label>
-                        <input type="text" id="in-vpa" placeholder="VPA / P.VP" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition">
+                        <input type="text" inputmode="decimal" id="in-vpa" placeholder="VPA / P.VP" oninput="this.value=this.value.replace(/[^0-9,.\s-]/g,'')" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Dividendos</label>
-                        <input type="text" id="in-div" placeholder="R$ 0,00" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition">
+                        <input type="text" inputmode="decimal" id="in-div" placeholder="R$ 0,00" oninput="this.value=this.value.replace(/[^0-9,.\s-]/g,'')" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Categoria</label>
@@ -305,6 +305,35 @@
     </footer>
 
     <script>
+        /* ===== Utilitários de formatação monetária (padrão brasileiro) ===== */
+        const parseBR = (value) => {
+            if (value === null || value === undefined || value === '') return 0;
+            if (typeof value === 'number') return value;
+            let s = String(value).trim().replace(/[R$\s]/g, '');
+            if (!s) return 0;
+            if (s.includes(',')) {
+                s = s.replace(/\./g, '').replace(',', '.');
+            } else if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) {
+                s = s.replace(/\./g, '');
+            }
+            const n = parseFloat(s);
+            return isNaN(n) ? 0 : n;
+        };
+
+        const formatBRL = (val) => parseBR(val).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        const onMoneyFocus = (el) => {
+            const raw = el.value.trim();
+            if (!raw) return;
+            el.value = String(parseBR(raw));
+        };
+
+        const onMoneyBlur = (el) => {
+            const raw = el.value.trim();
+            if (raw === '') return;
+            el.value = formatBRL(raw);
+        };
+
         let abaAtiva = 'ACOES'; 
         let precos = JSON.parse(localStorage.getItem('qt_precos_cache') || '{}'); 
         let carteira = JSON.parse(localStorage.getItem('qt_full_cart') || '[]');
@@ -337,9 +366,9 @@
             const info = DB[cat][t];
             const fields = ['in-lpa', 'in-vpa', 'in-div'];
             if (info) {
-                document.getElementById('in-lpa').value = info.l ? info.l.toFixed(2) : "0.00";
-                document.getElementById('in-vpa').value = info.v ? info.v.toFixed(2) : "0.00";
-                document.getElementById('in-div').value = info.d ? info.d.toFixed(2) : "0.00";
+                document.getElementById('in-lpa').value = formatBRL(info.l || 0);
+                document.getElementById('in-vpa').value = formatBRL(info.v || 0);
+                document.getElementById('in-div').value = formatBRL(info.d || 0);
                 fields.forEach(id => document.getElementById(id).style.borderColor = "#10b981");
             } else {
                 fields.forEach(id => { document.getElementById(id).value = ""; document.getElementById(id).style.borderColor = "#cbd5e1"; });
@@ -708,10 +737,10 @@
             editandoIndice = i;
             document.getElementById('in-ticker').value = item.t;
             document.getElementById('in-qtd').value = item.q;
-            document.getElementById('in-preco').value = item.p;
-            document.getElementById('in-lpa').value = item.l;
-            document.getElementById('in-vpa').value = item.v;
-            document.getElementById('in-div').value = item.d;
+            document.getElementById('in-preco').value = item.p ? formatBRL(item.p) : '';
+            document.getElementById('in-lpa').value = item.l ? formatBRL(item.l) : '';
+            document.getElementById('in-vpa').value = item.v ? formatBRL(item.v) : '';
+            document.getElementById('in-div').value = item.d ? formatBRL(item.d) : '';
             document.getElementById('in-cat').value = item.cat || 'ACOES';
             document.getElementById('btn-add').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar Alterações';
             document.getElementById('in-ticker').focus();

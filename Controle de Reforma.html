@@ -191,6 +191,35 @@
 
     <!-- Lógica JavaScript Preservada na Íntegra -->
     <script>
+        /* ===== Utilitários de formatação monetária (padrão brasileiro) ===== */
+        const parseBR = value => {
+            if (value === null || value === undefined || value === '') return 0;
+            if (typeof value === 'number') return value;
+            let s = String(value).trim().replace(/[R$\s]/g, '');
+            if (!s) return 0;
+            if (s.includes(',')) {
+                s = s.replace(/\./g, '').replace(',', '.');
+            } else if (/^\d{1,3}(\.\d{3})+$/.test(s)) {
+                s = s.replace(/\./g, '');
+            }
+            const n = parseFloat(s);
+            return isNaN(n) ? 0 : n;
+        };
+
+        const formatBRL = val => parseBR(val).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        const onMoneyFocus = el => {
+            const raw = el.value.trim();
+            if (!raw) return;
+            el.value = String(parseBR(raw));
+        };
+
+        const onMoneyBlur = el => {
+            const raw = el.value.trim();
+            if (raw === '') return;
+            el.value = formatBRL(raw);
+        };
+
         function formatarMoeda(valor) {
             return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
@@ -215,7 +244,7 @@
                     <input type="number" value="${dados.qtd}" min="0" step="any" oninput="salvarDados()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-slate-800 font-medium text-center focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-xs">
                 </td>
                 <td class="py-2 px-2 text-right">
-                    <input type="number" value="${dados.valorUnit}" min="0" step="0.01" oninput="salvarDados()" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-slate-800 font-medium text-right focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-xs">
+                    <input type="text" inputmode="decimal" value="${formatBRL(dados.valorUnit)}" oninput="this.value=this.value.replace(/[^0-9,.]/g,''); salvarDados()" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-slate-800 font-medium text-right focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-xs">
                 </td>
                 <td class="py-2 px-3 text-right font-bold text-slate-700 subtotal">R$ 0,00</td>
                 <td class="py-2 px-2 text-center no-print">
@@ -248,7 +277,7 @@
                 const subtotalTd = linha.querySelector('.subtotal');
 
                 const qtd = parseFloat(qtdInput.value) || 0;
-                const valorUnit = parseFloat(valorInput.value) || 0;
+                const valorUnit = parseBR(valorInput.value) || 0;
                 const subtotal = qtd * valorUnit;
 
                 subtotalTd.textContent = formatarMoeda(subtotal);
@@ -294,7 +323,7 @@
                                 tipo: item.tipo,
                                 descricao: item.descricao,
                                 qtd: parseFloat(item.qtd) || 0,
-                                valorUnit: parseFloat(item.valorUnit) || 0
+                                valorUnit: parseBR(item.valorUnit) || 0
                             });
                         });
                         alert('Backup importado com sucesso!');
@@ -319,7 +348,7 @@
                             tipo: item.tipo,
                             descricao: item.descricao,
                             qtd: parseFloat(item.qtd) || 0,
-                            valorUnit: parseFloat(item.valorUnit) || 0
+                            valorUnit: parseBR(item.valorUnit) || 0
                         });
                     });
                     return;
