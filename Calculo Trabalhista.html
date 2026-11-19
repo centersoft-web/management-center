@@ -237,11 +237,11 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Saldo FGTS informado (R$)</label>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Saldo FGTS informado, até o mês anterior à rescisão (R$)</label>
                         <input type="text" inputmode="decimal" id="fgtsAnterior" value="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Base rescisória FGTS informada (R$)</label>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Base rescisória FGTS informada, sem os depósitos da rescisão (R$)</label>
                         <input type="text" inputmode="decimal" id="baseMultaFgts" value="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:ring-2 focus:ring-brand-500 focus:bg-white transition text-sm">
                     </div>
                     <div class="grid grid-cols-3 gap-2">
@@ -290,6 +290,14 @@
                             <option value="fixa">Valor fixo total</option>
                             <option value="percentual">Percentual das verbas selecionadas</option>
                         </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Base do percentual da pensão</label>
+                        <select id="baseCalcPensao" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold text-sm disabled:opacity-50">
+                            <option value="bruta">Valor bruto das verbas</option>
+                            <option value="liquida">Líquido (após INSS e IRRF)</option>
+                        </select>
+                        <p class="text-[11px] text-slate-400 mt-1">Só vale para pensão percentual. Siga o que determina a decisão judicial.</p>
                     </div>
                     <div class="md:col-span-1">
                         <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Incidência da pensão</label>
@@ -362,7 +370,7 @@
             </div>
             
             <p class="text-[11px] text-slate-400 italic">
-                * Simulação estimativa com tabelas de INSS e IRRF vigentes desde janeiro de 2026. INSS e IRRF do 13º são apurados separadamente. Férias indenizadas e FGTS ficam discriminados. O modo projetado do FGTS não substitui o extrato nem a base rescisória oficial.
+                * Simulação estimativa com tabelas de INSS e IRRF vigentes desde janeiro de 2026. INSS e IRRF do 13º são apurados separadamente. Férias indenizadas e FGTS ficam discriminados. O modo projetado do FGTS não substitui o extrato nem a base rescisória oficial. Quando o aviso-prévio indenizado projeta o contrato para o ano seguinte, o 13º do ano do desligamento é considerado integral e o do ano seguinte, proporcional aos meses projetados. A pensão percentual pode ser calculada sobre o bruto ou o líquido, conforme a decisão judicial.
             </p>
         </div>
 
@@ -436,7 +444,10 @@
         function diasTrabalhadosNoMes(inicio,fim,mesRef) {
             const ini=new Date(Math.max(inicio.getTime(),primeiroDiaMes(mesRef).getTime()));
             const ter=new Date(Math.min(fim.getTime(),ultimoDiaMes(mesRef).getTime()));
-            return ter<ini?0:Math.min(30,ter.getDate()-ini.getDate()+1);
+            if(ter<ini)return 0;
+            // Mês comercial de 30 dias: se vai até o último dia do mês, fevereiro conta como 30.
+            const fimDia=ter.getTime()===ultimoDiaMes(mesRef).getTime()?Math.max(ter.getDate(),30):ter.getDate();
+            return Math.min(30,fimDia-ini.getDate()+1);
         }
         function mesesComQuinzeDias(inicio,fim) {
             let total=0,cursor=primeiroDiaMes(inicio),limite=primeiroDiaMes(fim);
@@ -446,9 +457,25 @@
         function avos13(inicio,fim) { const inicioAno=new Date(fim.getFullYear(),0,1), ini=new Date(Math.max(inicio.getTime(),inicioAno.getTime())); return Math.min(12,mesesComQuinzeDias(ini,fim)); }
         function inicioPeriodoAquisitivo(admissao,fim) { let i=new Date(fim.getFullYear(),admissao.getMonth(),admissao.getDate()); if(i>fim)i.setFullYear(i.getFullYear()-1); return i<admissao?admissao:i; }
         function avosFeriasProporcionais(admissao,fim) { return Math.min(12,mesesComQuinzeDias(inicioPeriodoAquisitivo(admissao,fim),fim)); }
+        // 13º na rescisão: se o aviso indenizado projeta o contrato para o ano seguinte, o 13º do ano do
+        // desligamento fica completo (até 31/12) e o ano seguinte conta só os meses projetados.
+        function avos13Rescisao(admissao,desligamento,fimProjetado) {
+            if(fimProjetado.getFullYear()>desligamento.getFullYear()){
+                const fimAno=new Date(desligamento.getFullYear(),11,31);
+                return {avosAno:avos13(admissao,fimAno),avosProx:Math.min(12,mesesComQuinzeDias(new Date(fimProjetado.getFullYear(),0,1),fimProjetado))};
+            }
+            return {avosAno:avos13(admissao,fimProjetado),avosProx:0};
+        }
+        // Férias proporcionais na rescisão: se a projeção do aviso completa o período aquisitivo em curso,
+        // ele vale 12/12 e o novo período conta só os meses projetados.
+        function avosFeriasRescisao(admissao,desligamento,fimProjetado) {
+            const iniDesl=inicioPeriodoAquisitivo(admissao,desligamento), iniProj=inicioPeriodoAquisitivo(admissao,fimProjetado);
+            if(iniProj.getTime()>iniDesl.getTime())return {completo:12,novo:Math.min(12,mesesComQuinzeDias(iniProj,fimProjetado))};
+            return {completo:0,novo:avosFeriasProporcionais(admissao,fimProjetado)};
+        }
         function limparForm() {
             document.querySelectorAll('input').forEach(input=>{ if(input.type==='checkbox'){input.checked=input.id==='pensaoSalario';return;} const zeros=['dependentes','fgtsAnterior','baseMultaFgts','vt','vr','saude','pensao','descVt','descVr','descSaude','feriasIntegrais','feriasDobro']; input.value=zeros.includes(input.id)?'0':input.id==='aliqPatronal'?'20':input.id==='aliqRat'?'2':input.id==='aliqTerceiros'?'5.8':''; });
-            document.getElementById('tipoSaida').selectedIndex=0; document.getElementById('modoAviso').value='indenizado'; document.getElementById('modoFgts').value='informado'; document.getElementById('tipoPensao').value='fixa'; document.getElementById('results').style.display='none'; window.scrollTo({top:0,behavior:'smooth'});
+            document.getElementById('tipoSaida').selectedIndex=0; document.getElementById('modoFgts').value='informado'; document.getElementById('tipoPensao').value='fixa'; document.getElementById('baseCalcPensao').value='bruta'; atualizarOpcoesAviso(); atualizarBasePensao(); document.getElementById('results').style.display='none'; window.scrollTo({top:0,behavior:'smooth'});
         }
         // Tabelas vigentes a partir de janeiro de 2026.
         const PARAMETROS_2026 = Object.freeze({
@@ -494,11 +521,26 @@
             else if(bruto<=PARAMETROS_2026.irrf.reducaoParcialAte)reducao=Math.max(0,978.62-(0.133145*bruto));
             return arredondar(Math.max(0,imposto-Math.min(imposto,reducao)));
         }
-        function calcularPensao(componentes) {
-            const entrada=numero('pensao'), tipo=document.getElementById('tipoPensao').value;
+        function calcularPensao(componentes,dependentes=0) {
+            const entrada=numero('pensao'), tipo=document.getElementById('tipoPensao').value, baseLiquida=tipo==='percentual'&&document.getElementById('baseCalcPensao').value==='liquida';
             const bases={salario:marcado('pensaoSalario')?componentes.salario:0,decimo:marcado('pensao13')?componentes.decimo:0,ferias:marcado('pensaoFerias')?componentes.ferias:0,aviso:marcado('pensaoAviso')?componentes.aviso:0};
             const soma=Object.values(bases).reduce((a,b)=>a+b,0); if(entrada<=0||soma<=0)return {total:0,salario:0,decimo:0,ferias:0,aviso:0};
-            if(tipo==='percentual'){const f=entrada/100; return {total:arredondar(soma*f),salario:arredondar(bases.salario*f),decimo:arredondar(bases.decimo*f),ferias:arredondar(bases.ferias*f),aviso:arredondar(bases.aviso*f)};}
+            if(tipo==='percentual'){
+                const f=entrada/100;
+                if(baseLiquida){
+                    // Líquido = valor - INSS - IRRF (só salário/saldo e 13º sofrem desconto; férias e aviso indenizados entram cheios).
+                    // Como a pensão é dedutível do IRRF, o valor é refinado até estabilizar.
+                    let pSal=0,pDec=0;
+                    for(let i=0;i<30;i++){
+                        const nSal=bases.salario>0?arredondar(f*Math.max(0,bases.salario-calcularINSS(bases.salario)-calcularIRRF(bases.salario,dependentes,pSal))):0;
+                        const nDec=bases.decimo>0?arredondar(f*Math.max(0,bases.decimo-calcularINSS(bases.decimo)-calcularIRRF(bases.decimo,dependentes,pDec))):0;
+                        const estavel=nSal===pSal&&nDec===pDec; pSal=nSal; pDec=nDec; if(estavel)break;
+                    }
+                    const pFer=arredondar(bases.ferias*f), pAvi=arredondar(bases.aviso*f);
+                    return {total:arredondar(pSal+pDec+pFer+pAvi),salario:pSal,decimo:pDec,ferias:pFer,aviso:pAvi};
+                }
+                return {total:arredondar(soma*f),salario:arredondar(bases.salario*f),decimo:arredondar(bases.decimo*f),ferias:arredondar(bases.ferias*f),aviso:arredondar(bases.aviso*f)};
+            }
             const total=Math.min(entrada,soma); return {total:arredondar(total),salario:arredondar(total*bases.salario/soma),decimo:arredondar(total*bases.decimo/soma),ferias:arredondar(total*bases.ferias/soma),aviso:arredondar(total*bases.aviso/soma)};
         }
         function projetarFgts(admissao,fim,salario,decimoRescisao) {
@@ -515,19 +557,19 @@
             const custoBrutoBeneficios=arredondar(vt+vr+saude),participacaoBeneficiosEmpresa=Math.min(descBeneficios,custoBrutoBeneficios),custoLiquidoBeneficios=arredondar(custoBrutoBeneficios-participacaoBeneficiosEmpresa),custoTotal=arredondar(salario+patronal+rat+terceiros+fgtsMensal+provisao13+provisaoFerias+fgtsProv+encProv+custoLiquidoBeneficios);
             let html='',totalDireto=0,totalDescontos=0;
             if(tipo==='mensal'){
-                const pensao=calcularPensao({salario,decimo:0,ferias:0,aviso:0}),inss=calcularINSS(salario),irrf=calcularIRRF(salario,dependentes,pensao.salario); totalDireto=salario; totalDescontos=inss+irrf+pensao.total+descBeneficios;
+                const pensao=calcularPensao({salario,decimo:0,ferias:0,aviso:0},dependentes),inss=calcularINSS(salario),irrf=calcularIRRF(salario,dependentes,pensao.salario); totalDireto=salario; totalDescontos=inss+irrf+pensao.total+descBeneficios;
                 html+=linha('Salário mensal bruto',salario)+linha('INSS',null,inss)+linha('IRRF',null,irrf)+linha('Pensão alimentícia',null,pensao.total)+linha('Coparticipações VT/VR/Saúde',null,descBeneficios);
             } else {
                 const modoAviso=document.getElementById('modoAviso').value,anos=anosCompletos(admissao,desligamento),diasAviso=Math.min(90,30+3*anos),avisoIndenizado=tipo==='semJusta'&&modoAviso==='indenizado'?arredondar(salario*diasAviso/30):0,avisoDescontado=tipo==='pedido'&&modoAviso==='descontado'?arredondar(salario):0,fimProjetado=tipo==='semJusta'&&modoAviso==='indenizado'?adicionarDias(desligamento,diasAviso):desligamento;
-                const diasSaldo=diasTrabalhadosNoMes(admissao,desligamento,desligamento),saldo=arredondar(salario*diasSaldo/30),avos13Valor=avos13(admissao,fimProjetado),decimo=arredondar(salario*avos13Valor/12),avosFerias=avosFeriasProporcionais(admissao,fimProjetado),feriasProp=arredondar(salario*avosFerias/12),tercoProp=arredondar(feriasProp/3),feriasIntegrais=arredondar(salario*inteiro('feriasIntegrais')),tercoIntegrais=arredondar(feriasIntegrais/3),feriasDobro=arredondar(salario*2*inteiro('feriasDobro')),tercoDobro=arredondar(feriasDobro/3),totalFerias=feriasProp+tercoProp+feriasIntegrais+tercoIntegrais+feriasDobro+tercoDobro;
-                const pensao=calcularPensao({salario:saldo,decimo,ferias:totalFerias,aviso:avisoIndenizado}),inssSaldo=calcularINSS(saldo),inss13=calcularINSS(decimo),irrfSaldo=calcularIRRF(saldo,dependentes,pensao.salario),irrf13=calcularIRRF(decimo,dependentes,pensao.decimo);
+                const diasSaldo=diasTrabalhadosNoMes(admissao,desligamento,desligamento),saldo=arredondar(salario*diasSaldo/30),a13=avos13Rescisao(admissao,desligamento,fimProjetado),avos13Valor=a13.avosAno+a13.avosProx,decimo=arredondar(salario*avos13Valor/12),aFer=avosFeriasRescisao(admissao,desligamento,fimProjetado),avosFerias=aFer.completo+aFer.novo,feriasProp=arredondar(salario*avosFerias/12),label13=a13.avosProx>0?`${a13.avosAno}/12 de ${desligamento.getFullYear()} + ${a13.avosProx}/12 de ${fimProjetado.getFullYear()}`:`${a13.avosAno}/12`,labelFer=aFer.completo>0?`12/12 + ${aFer.novo}/12`:`${aFer.novo}/12`,tercoProp=arredondar(feriasProp/3),feriasIntegrais=arredondar(salario*inteiro('feriasIntegrais')),tercoIntegrais=arredondar(feriasIntegrais/3),feriasDobro=arredondar(salario*2*inteiro('feriasDobro')),tercoDobro=arredondar(feriasDobro/3),totalFerias=feriasProp+tercoProp+feriasIntegrais+tercoIntegrais+feriasDobro+tercoDobro;
+                const pensao=calcularPensao({salario:saldo,decimo,ferias:totalFerias,aviso:avisoIndenizado},dependentes),inssSaldo=calcularINSS(saldo),inss13=calcularINSS(decimo),irrfSaldo=calcularIRRF(saldo,dependentes,pensao.salario),irrf13=calcularIRRF(decimo,dependentes,pensao.decimo);
                 totalDireto=saldo+decimo+totalFerias+avisoIndenizado; totalDescontos=inssSaldo+inss13+irrfSaldo+irrf13+pensao.total+descBeneficios+avisoDescontado;
-                html+=linha(`Saldo de salário (${diasSaldo} dias)`,saldo)+linha(`13º proporcional (${avos13Valor}/12)`,decimo)+linha(`Férias proporcionais (${avosFerias}/12)`,feriasProp)+linha('1/3 sobre férias proporcionais',tercoProp);
+                html+=linha(`Saldo de salário (${diasSaldo} dias)`,saldo)+linha(`13º proporcional (${label13})`,decimo)+linha(`Férias proporcionais (${labelFer})`,feriasProp)+linha('1/3 sobre férias proporcionais',tercoProp);
                 if(feriasIntegrais>0)html+=linha('Férias integrais não gozadas',feriasIntegrais)+linha('1/3 sobre férias integrais',tercoIntegrais); if(feriasDobro>0)html+=linha('Férias em dobro',feriasDobro)+linha('1/3 sobre férias em dobro',tercoDobro); if(avisoIndenizado>0)html+=linha(`Aviso-prévio indenizado (${diasAviso} dias)`,avisoIndenizado); if(avisoDescontado>0)html+=linha('Aviso-prévio não cumprido',null,avisoDescontado);
                 html+=linha('INSS sobre saldo de salário',null,inssSaldo)+linha('INSS sobre 13º',null,inss13)+linha('IRRF sobre saldo de salário',null,irrfSaldo)+linha('IRRF sobre 13º',null,irrf13)+linha('Pensão alimentícia',null,pensao.total)+linha('Coparticipações VT/VR/Saúde',null,descBeneficios);
                 if(tipo==='semJusta'){
-                    let fgts; if(document.getElementById('modoFgts').value==='informado')fgts={saldo:numero('fgtsAnterior'),base:numero('baseMultaFgts')}; else fgts=projetarFgts(admissao,fimProjetado,salario,decimo); const multa=arredondar(fgts.base*0.40);
-                    html+=`<tr class="fgts-row"><td class="py-2.5 px-4">Saldo FGTS estimado/informado, fora do pagamento direto</td><td colspan="2" class="py-2.5 px-4 text-right">${formatar(fgts.saldo)}</td></tr><tr class="fgts-row"><td class="py-2.5 px-4">Multa rescisória de 40%, destinada à conta vinculada</td><td colspan="2" class="py-2.5 px-4 text-right">${formatar(multa)}</td></tr><tr class="fgts-total"><td class="py-2.5 px-4">TOTAL ESTIMADO NA CONTA FGTS</td><td colspan="2" class="py-2.5 px-4 text-right">${formatar(fgts.saldo+multa)}</td></tr>`;
+                    let fgts,depRescisao=0; if(document.getElementById('modoFgts').value==='informado'){ depRescisao=arredondar((saldo+decimo+avisoIndenizado)*0.08); fgts={saldo:numero('fgtsAnterior')+depRescisao,base:numero('baseMultaFgts')+depRescisao}; } else fgts=projetarFgts(admissao,fimProjetado,salario,arredondar(salario*(a13.avosProx>0?a13.avosProx:a13.avosAno)/12)); const multa=arredondar(fgts.base*0.40);
+                    html+=`${depRescisao>0?`<tr class="fgts-row"><td class="py-2.5 px-4">Depósito de 8% sobre saldo de salário, 13º e aviso indenizado (já somado abaixo e na base da multa)</td><td colspan="2" class="py-2.5 px-4 text-right">${formatar(depRescisao)}</td></tr>`:''}<tr class="fgts-row"><td class="py-2.5 px-4">Saldo FGTS estimado/informado, fora do pagamento direto</td><td colspan="2" class="py-2.5 px-4 text-right">${formatar(fgts.saldo)}</td></tr><tr class="fgts-row"><td class="py-2.5 px-4">Multa rescisória de 40%, destinada à conta vinculada</td><td colspan="2" class="py-2.5 px-4 text-right">${formatar(multa)}</td></tr><tr class="fgts-total"><td class="py-2.5 px-4">TOTAL ESTIMADO NA CONTA FGTS</td><td colspan="2" class="py-2.5 px-4 text-right">${formatar(fgts.saldo+multa)}</td></tr>`;
                 }
             }
             const titulo=tipo==='mensal'?'TOTAL LÍQUIDO MENSAL':'TOTAL LÍQUIDO DE PAGAMENTO DIRETO'; html+=`<tr class="total-row"><td class="py-3 px-4">${titulo}</td><td colspan="2" class="py-3 px-4 text-right">${formatar(totalDireto-totalDescontos)}</td></tr>`;
@@ -549,6 +591,24 @@
                 if (cleaned !== v) e.target.value = cleaned;
             });
         });
+
+        // Modalidade do aviso: só mostra as opções que fazem sentido para o tipo de rescisão escolhido
+        function atualizarOpcoesAviso() {
+            const tipo=document.getElementById('tipoSaida').value, sel=document.getElementById('modoAviso');
+            const permitidas={mensal:['naoAplica'],pedido:['trabalhado','descontado','naoAplica'],semJusta:['indenizado','trabalhado','naoAplica']}[tipo]||['naoAplica'];
+            const padrao={mensal:'naoAplica',pedido:'trabalhado',semJusta:'indenizado'}[tipo]||'naoAplica';
+            Array.from(sel.options).forEach(o=>{ const ok=permitidas.includes(o.value); o.disabled=!ok; o.hidden=!ok; });
+            sel.value=padrao;
+            sel.disabled=tipo==='mensal';
+        }
+        // Base bruta/líquida só se aplica à pensão percentual
+        function atualizarBasePensao() {
+            document.getElementById('baseCalcPensao').disabled=document.getElementById('tipoPensao').value!=='percentual';
+        }
+        document.getElementById('tipoSaida').addEventListener('change',atualizarOpcoesAviso);
+        document.getElementById('tipoPensao').addEventListener('change',atualizarBasePensao);
+        atualizarOpcoesAviso();
+        atualizarBasePensao();
 
         // Ao trocar o modo do campo "pensao", ajusta a apresentação sem alterar o número
         document.getElementById('tipoPensao').addEventListener('change', e => {
