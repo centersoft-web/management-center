@@ -76,7 +76,7 @@
         }
         .row-tenant-title:empty { display: none; }
 
-        /* Campos de cada inquilino distribuídos em duas linhas */
+        /* Campos de cada inquilino distribuídos em linhas */
         #main-table thead { display: none; }
         #rent-rows {
             display: block;
@@ -124,9 +124,9 @@
         #rent-rows tr td:nth-child(11)::before { content: "Extras"; }
         #rent-rows tr td:nth-child(12)::before { content: "Descrição do Extra"; }
         #rent-rows tr td:nth-child(13)::before { content: "IR retido na fonte"; }
-        #rent-rows tr td:nth-child(14)::before { content: "Aluguel Recebido"; }
-        #rent-rows tr td:nth-child(15)::before { content: "Subtotal"; }
-        #rent-rows tr td:nth-child(16)::before { content: "Ações"; }
+        #rent-rows tr td:nth-child(15)::before { content: "Aluguel Recebido"; }
+        #rent-rows tr td:nth-child(16)::before { content: "Total :"; }
+        #rent-rows tr td:nth-child(17)::before { content: "Ações"; }
 
         /* Dimensionamento individual dos campos */
         #rent-rows tr td:nth-child(1)  { grid-column: span 1; }
@@ -136,22 +136,23 @@
         #rent-rows tr td:nth-child(5)  { grid-column: span 2; }
         #rent-rows tr td:nth-child(6)  { grid-column: span 1; }
         #rent-rows tr td:nth-child(7)  { grid-column: span 2; }
-        #rent-rows tr td:nth-child(8)  { grid-column: 1 / 2; grid-row: 2; }  /* Controles rápidos */
-        #rent-rows tr td:nth-child(9)  { grid-column: 2 / 4; grid-row: 2; }  /* Depósito */
-        #rent-rows tr td:nth-child(10) { grid-column: 4 / 6; grid-row: 2; }  /* Aluguel */
-        #rent-rows tr td:nth-child(11) { grid-column: 6 / 8; grid-row: 2; }  /* Extras */
-        #rent-rows tr td:nth-child(12) { grid-column: 8 / 11; grid-row: 2; } /* Descrição */
+        #rent-rows tr td:nth-child(8)  { grid-column: 1 / 2; grid-row: 2; }   /* Controles rápidos */
+        #rent-rows tr td:nth-child(9)  { grid-column: 2 / 4; grid-row: 2; }   /* Depósito */
+        #rent-rows tr td:nth-child(10) { grid-column: 4 / 6; grid-row: 2; }   /* Aluguel */
+        #rent-rows tr td:nth-child(11) { grid-column: 6 / 8; grid-row: 2; }   /* Extras */
+        #rent-rows tr td:nth-child(12) { grid-column: 8 / 11; grid-row: 2; }  /* Descrição */
         #rent-rows tr td:nth-child(13) { grid-column: 11 / 13; grid-row: 2; } /* IR retido */
-        #rent-rows tr td:nth-child(14) { grid-column: 9 / 11; grid-row: 3; }  /* Aluguel Recebido */
-        #rent-rows tr td:nth-child(15) { grid-column: 11 / 13; grid-row: 3; } /* Total */
-        #rent-rows tr td:nth-child(16) { grid-column: 1 / -1; border-top: 1px solid #e2e8f0; padding-top: 0.75rem !important; }
-        #rent-rows tr td:nth-child(16) > div {
+        #rent-rows tr td:nth-child(14) { grid-column: 1 / -1; grid-row: 3; }  /* Cálculo fiscal (entre a 2ª e a 3ª linha) */
+        #rent-rows tr td:nth-child(15) { grid-column: 5 / 9; grid-row: 4; }   /* Aluguel Recebido */
+        #rent-rows tr td:nth-child(16) { grid-column: 9 / 13; grid-row: 4; }  /* Subtotal */
+        #rent-rows tr td:nth-child(17) { grid-column: 1 / -1; grid-row: 5; border-top: 1px solid #e2e8f0; padding-top: 0.75rem !important; }
+        #rent-rows tr td:nth-child(17) > div {
             display: grid;
             grid-template-columns: repeat(6, minmax(120px, 1fr));
             align-items: center;
             gap: 0.5rem;
         }
-        #rent-rows tr td:nth-child(16) .row-controls {
+        #rent-rows tr td:nth-child(17) .row-controls {
             margin-top: 0 !important;
             white-space: nowrap;
         }
@@ -165,8 +166,8 @@
             border-radius: 0.4rem;
             background: #f0f9ff;
         }
-        /* Subtotal compacto na terceira linha, com rótulo e valor lado a lado */
-        #rent-rows tr td:nth-child(15) {
+        /* Subtotal compacto, com rótulo e valor lado a lado */
+        #rent-rows tr td:nth-child(16) {
             flex-direction: row;
             align-items: center;
             justify-content: flex-end;
@@ -174,7 +175,7 @@
             min-height: 2.35rem;
             padding: 0.55rem 0.7rem !important;
         }
-        #rent-rows tr td:nth-child(15)::before {
+        #rent-rows tr td:nth-child(16)::before {
             content: "Total :";
             margin: 0;
             font-size: 0.7rem;
@@ -183,18 +184,88 @@
             color: #475569;
             white-space: nowrap;
         }
+
+        /* Bloco de cálculo fiscal (PF / PJ) */
+        .calc-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.5rem;
+            padding: 0.6rem;
+            border: 1px dashed #7dd3fc;
+            border-radius: 0.6rem;
+            background: #f0f9ff;
+        }
+        .calc-title {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #075985;
+            text-transform: uppercase;
+        }
+        .calc-hint { font-size: 0.6rem; font-weight: 600; color: #64748b; text-transform: none; }
+        .calc-field label {
+            display: block;
+            margin-bottom: 0.15rem;
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+        }
+        .calc-field input,
+        .calc-field select {
+            box-sizing: border-box;
+            width: 100%;
+            height: 2.1rem;
+            padding: 0.25rem 0.4rem;
+            font-size: 0.75rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.4rem;
+            background: #fff;
+            color: #0f172a;
+        }
+        .calc-out {
+            padding: 0.35rem 0.5rem;
+            border: 1px solid #bae6fd;
+            border-radius: 0.4rem;
+            background: #fff;
+        }
+        .calc-out span {
+            display: block;
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+        }
+        .calc-out b { display: block; font-size: 0.85rem; color: #0c4a6e; }
+        .calc-memo {
+            grid-column: 1 / -1;
+            font-size: 0.7rem;
+            line-height: 1.45;
+            color: #334155;
+        }
+        .calc-memo strong { color: #0f172a; }
+        .calc-cell[data-fonte="PF"] .pj-only,
+        .calc-cell[data-fonte="PJ"] .pf-only { display: none; }
+        .calc-cell[data-fonte="manual"] .calc-field:not(.fonte-field) { display: none; }
+
         @media (max-width: 900px) {
             #rent-rows tr { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            #rent-rows tr td:not(:nth-child(16)) { grid-column: span 1; }
-            #rent-rows tr td:nth-child(8), #rent-rows tr td:nth-child(9), #rent-rows tr td:nth-child(10), #rent-rows tr td:nth-child(11), #rent-rows tr td:nth-child(12), #rent-rows tr td:nth-child(13), #rent-rows tr td:nth-child(14), #rent-rows tr td:nth-child(15) { width: auto; justify-self: stretch; margin-left: 0; grid-row: auto; }
-            #rent-rows tr td:nth-child(16) > div { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            #rent-rows tr td:nth-child(16) .row-controls { grid-column: 1 / -1; }
+            #rent-rows tr td:not(:nth-child(14)):not(:nth-child(17)) { grid-column: span 1; }
+            #rent-rows tr td:nth-child(8), #rent-rows tr td:nth-child(9), #rent-rows tr td:nth-child(10), #rent-rows tr td:nth-child(11), #rent-rows tr td:nth-child(12), #rent-rows tr td:nth-child(13), #rent-rows tr td:nth-child(15), #rent-rows tr td:nth-child(16), #rent-rows tr td:nth-child(17) { width: auto; justify-self: stretch; margin-left: 0; grid-row: auto; }
+            #rent-rows tr td:nth-child(14) { grid-column: 1 / -1; grid-row: auto; }
+            #rent-rows tr td:nth-child(17) > div { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            #rent-rows tr td:nth-child(17) .row-controls { grid-column: 1 / -1; }
         }
         @media (max-width: 520px) {
             #rent-rows tr { grid-template-columns: 1fr; }
-            #rent-rows tr td:not(:nth-child(16)) { grid-column: 1; }
-            #rent-rows tr td:nth-child(16) > div { grid-template-columns: 1fr; }
-            #rent-rows tr td:nth-child(16) .row-controls { grid-column: auto; }
+            #rent-rows tr td:not(:nth-child(14)):not(:nth-child(17)) { grid-column: 1; }
+            #rent-rows tr td:nth-child(17) > div { grid-template-columns: 1fr; }
+            #rent-rows tr td:nth-child(17) .row-controls { grid-column: auto; }
         }
 
         /* Popup pontual para copiar mensagem do WhatsApp */
@@ -320,6 +391,7 @@
                                 <th class="py-3 px-3 w-[10%]">Extras</th>
                                 <th class="py-3 px-3 w-[14%]">Descrição do Extra</th>
                                 <th class="py-3 px-3 w-[12%]">IR retido na fonte</th>
+                                <th class="py-3 px-3 w-[12%]">Cálculo fiscal</th>
                                 <th class="py-3 px-3 w-[12%]">Aluguel Recebido</th>
                                 <th class="py-3 px-3 w-[10%]">Subtotal</th>
                                 <th class="py-3 px-3 text-center w-[160px]">Ações</th>
@@ -330,6 +402,26 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Resumo fiscal do mês -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                        <span class="block text-[10px] uppercase font-bold text-slate-500 tracking-wider">Base tributável PF do mês</span>
+                        <b id="res-base-pf" class="block text-base font-black text-slate-800 mt-1">R$ 0,00</b>
+                    </div>
+                    <div class="bg-sky-50 border border-sky-200 rounded-xl p-3">
+                        <span class="block text-[10px] uppercase font-bold text-sky-700 tracking-wider">Carnê-leão PF do mês (locador recolhe)</span>
+                        <b id="res-carne" class="block text-base font-black text-sky-800 mt-1">R$ 0,00</b>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                        <span class="block text-[10px] uppercase font-bold text-amber-700 tracking-wider">IRRF retido pelas PJ no mês</span>
+                        <b id="res-irpj" class="block text-base font-black text-amber-800 mt-1">R$ 0,00</b>
+                    </div>
+                </div>
+                <p id="res-aviso" style="display:none" class="text-[11px] font-semibold text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2"></p>
+                <p class="text-[11px] text-slate-500 leading-relaxed">
+                    Cálculos estimados com a mesma lógica do Simulador IRPF 2026 (tabela mensal progressiva, redução da Lei 15.270/2025 e descontos da fonte pagadora). <strong>PF:</strong> o carnê-leão do mês é calculado sobre a soma das bases PF e rateado entre as linhas PF pela proporção de cada base. <strong>PJ:</strong> o IR é retido pela empresa sobre o aluguel, sem deduções pessoais. Encargos (IPTU, condomínio, administração) abatem a base quando informados. "Extras" não entram na base. Informe previdência, dependentes e pensão em apenas uma linha PF por mês (o sistema soma as deduções de todas as linhas PF). Para IR digitado manualmente, escolha "Manual" na fonte pagadora. Confira com seu contador.
+                </p>
             </div>
 
         </div>
@@ -375,6 +467,7 @@
     }
 
     function onMoneyFocus(input) {
+        if (input.readOnly) return;
         const v = input.value.trim();
         if (!v) return;
         input.value = String(parseBR(v));
@@ -384,6 +477,184 @@
         const raw = input.value.trim();
         input.value = raw === '' ? '' : formatBR(raw);
         autoCalc(input);
+    }
+
+    /* ===== Parâmetros e funções do Simulador IRPF 2026 (mesma lógica) ===== */
+    const FISCAL = { simpM: 607.20, depM: 189.59 };
+    function round2(v) { return Math.round((Number(v) + Number.EPSILON) * 100) / 100; }
+    function brl(v) { return round2(Number(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+
+    function tabelaM(base) {
+        if (base <= 2428.80) return 0;
+        if (base <= 2826.65) return round2(base * .075 - 182.16);
+        if (base <= 3751.05) return round2(base * .15 - 394.16);
+        if (base <= 4664.68) return round2(base * .225 - 675.49);
+        return round2(base * .275 - 908.73);
+    }
+    function reducaoM(imposto, rendTrib) {
+        let r = 0;
+        if (rendTrib <= 5000) r = 312.89;
+        else if (rendTrib <= 7350) r = Math.max(0, 978.62 - .133145 * rendTrib);
+        return round2(Math.min(imposto, r));
+    }
+    function calcM(rendTrib, dedLegais = 0, permitirSimpl = true) {
+        rendTrib = round2(Math.max(0, rendTrib));
+        dedLegais = round2(Math.max(0, dedLegais));
+        const ded = round2(permitirSimpl ? Math.max(dedLegais, FISCAL.simpM) : dedLegais);
+        const base = round2(Math.max(0, rendTrib - ded));
+        const bruto = round2(Math.max(0, tabelaM(base)));
+        const red = reducaoM(bruto, rendTrib);
+        return { rendTrib, ded, base, bruto, red, ir: round2(Math.max(0, bruto - red)) };
+    }
+    function faixaM(base) {
+        if (base <= 2428.80) return { aliq: 0, parcela: 0 };
+        if (base <= 2826.65) return { aliq: .075, parcela: 182.16 };
+        if (base <= 3751.05) return { aliq: .15, parcela: 394.16 };
+        if (base <= 4664.68) return { aliq: .225, parcela: 675.49 };
+        return { aliq: .275, parcela: 908.73 };
+    }
+    function calcAluguelBase2026(rendTrib, dedLegais = 0, permitirSimpl = true) {
+        const c = calcM(rendTrib, dedLegais, permitirSimpl);
+        const metodo = !permitirSimpl ? 'Sem desconto simplificado' : (dedLegais > FISCAL.simpM ? 'Deduções legais' : 'Desconto simplificado');
+        const f = faixaM(c.base);
+        return { rendTrib: c.rendTrib, dedLegais, metodo, ded: c.ded, base: c.base, aliq: f.aliq, parcela: f.parcela, bruto: c.bruto, red: c.red, ir: c.ir };
+    }
+
+    /* ===== Cálculo fiscal do mês (PF = carnê-leão rateado; PJ = IRRF retido) ===== */
+    function recalcMes() {
+        const linhas = [...document.querySelectorAll('#rent-rows tr')];
+        const itens = linhas.map(row => {
+            const v = c => parseBR(row.querySelector('.' + c).value) || 0;
+            const fonte = row.querySelector('.in-fonte').value;
+            const alug = v('in-val'), extra = v('in-extra'), enc = v('in-enc');
+            const base = Math.max(0, alug - enc);
+            return { row, v, fonte, alug, extra, enc, base, baseCalc: base, dedLegal: 0 };
+        });
+
+        let basePF = 0, dedPF = 0;
+        itens.forEach(it => {
+            if (it.fonte === 'PF') {
+                it.dedLegal = it.v('in-prev') + Math.trunc(it.v('in-deps')) * FISCAL.depM + it.v('in-pensao');
+                basePF += it.base;
+                dedPF += it.dedLegal;
+            }
+        });
+        const cPF = calcAluguelBase2026(basePF, dedPF);
+        const carneTotal = cPF.ir;
+
+        // Rateio do carnê-leão entre as linhas PF. A sobra de centavos do arredondamento
+        // vai para a linha de maior quota, para que a soma das linhas feche com o total.
+        const pfItens = itens.filter(it => it.fonte === 'PF');
+        let somaQuotas = 0, maiorPF = null;
+        pfItens.forEach(it => {
+            it.quota = basePF > 0 ? round2(carneTotal * it.base / basePF) : 0;
+            somaQuotas += it.quota;
+            if (it.base > 0 && (!maiorPF || it.quota > maiorPF.quota)) maiorPF = it;
+        });
+        if (maiorPF) maiorPF.quota = Math.max(0, round2(maiorPF.quota + (carneTotal - somaQuotas)));
+        const linhasPFcomDeducao = pfItens.filter(it => it.dedLegal > 0).length;
+        let irPJ = 0;
+
+        itens.forEach(it => {
+            const row = it.row;
+            row.querySelector('.calc-cell').dataset.fonte = it.fonte;
+            const irInput = row.querySelector('.in-ir');
+            irInput.readOnly = it.fonte !== 'manual';
+
+            let imposto = 0, rotulo = '', metodo = '—', baseExib = it.base, memo = '';
+
+            if (it.fonte === 'PJ') {
+                const bruto = row.querySelector('.in-encpj').value === 'bruto';
+                const simpl = row.querySelector('.in-simpl').value !== 'nao';
+                it.baseCalc = bruto ? it.alug : it.base;
+                const c = calcAluguelBase2026(it.baseCalc, 0, simpl);
+                imposto = c.ir;
+                irInput.value = formatBR(imposto);
+                irPJ += imposto;
+                metodo = c.metodo;
+                baseExib = it.baseCalc;
+                rotulo = 'IRRF retido na fonte';
+                memo = `<strong>Retenção PJ:</strong> base ${brl(it.baseCalc)} ${bruto ? '(valor bruto, sem abater encargos)' : '(após abater encargos)'}; ${c.metodo.toLowerCase()}; tabela progressiva mensal e redução da Lei 15.270/2025; IR retido ${brl(imposto)}. Sem deduções pessoais (previdência, dependentes ou pensão), que só entram no ajuste anual.`;
+            } else if (it.fonte === 'PF') {
+                const quota = it.quota;
+                imposto = quota;
+                irInput.value = formatBR(0);
+                metodo = cPF.metodo;
+                rotulo = 'Carnê-leão (rateio)';
+                memo = `<strong>Carnê-leão:</strong> base desta linha ${brl(it.base)} (aluguel ${brl(it.alug)} menos encargos ${brl(it.enc)}). Rateio de ${brl(quota)} do carnê-leão mensal de ${brl(carneTotal)}, apurado sobre a base PF total de ${brl(basePF)} e deduções legais de ${brl(dedPF)} (${cPF.metodo.toLowerCase()}). Recolhido pelo locador, não reduz o valor recebido.`;
+            } else {
+                imposto = parseBR(irInput.value) || 0;
+                metodo = 'Manual';
+                rotulo = 'IR informado (manual)';
+                memo = '<strong>IR manual:</strong> o valor do IR retido foi digitado diretamente nesta linha; o carnê-leão não é calculado para ela.';
+            }
+
+            const irRecebido = it.fonte === 'PF' ? 0 : imposto;
+            const recebido = round2(it.alug + it.extra - irRecebido);
+            row.querySelector('.in-recebido').value = formatBR(recebido);
+            row.querySelector('.row-total').innerText = brl(recebido);
+            row.querySelector('.out-base').textContent = brl(baseExib);
+            row.querySelector('.out-metodo').textContent = metodo;
+            row.querySelector('.out-rotulo').textContent = rotulo;
+            row.querySelector('.out-imposto').textContent = brl(imposto);
+            row.querySelector('.calc-memo').innerHTML = memo;
+        });
+
+        document.getElementById('res-base-pf').textContent = brl(basePF);
+        document.getElementById('res-carne').textContent = brl(carneTotal);
+        document.getElementById('res-irpj').textContent = brl(irPJ);
+
+        const aviso = document.getElementById('res-aviso');
+        if (aviso) {
+            if (linhasPFcomDeducao > 1) {
+                aviso.textContent = 'Atenção: há previdência, dependentes ou pensão informados em mais de uma linha PF. O sistema soma todas as linhas; se o mesmo valor foi lançado mais de uma vez, o carnê-leão fica subestimado. Informe essas deduções em apenas uma linha.';
+                aviso.style.display = 'block';
+            } else {
+                aviso.style.display = 'none';
+            }
+        }
+    }
+
+    function criarLinha() {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+        tr.innerHTML = createRowHTML();
+        return tr;
+    }
+
+    function fonteDe(d) {
+        if (d.fonte === 'PF' || d.fonte === 'PJ' || d.fonte === 'manual') return d.fonte;
+        return parseBR(d.ir) > 0 ? 'manual' : 'PF'; // registros antigos: IR digitado é preservado
+    }
+
+    function preencherLinha(row, d, copia = false) {
+        row.querySelector('.in-name').value = d.n || '';
+        updateRowTitle(row.querySelector('.in-name'));
+        row.querySelector('.in-unidade').value = d.unidade || '';
+        row.querySelector('.in-email').value = d.email || '';
+        row.querySelector('.in-reajuste').value = d.r || '';
+        row.querySelector('.in-cdc').value = d.cdc || '';
+        row.querySelector('.in-val').value = d.v ? formatBR(d.v) : '';
+        row.querySelector('.in-extra').value = d.e ? formatBR(d.e) : '';
+        row.querySelector('.in-extra-desc').value = d.ed || '';
+        row.querySelector('.in-destino').value = d.dest || '';
+        row.querySelector('.in-fonte').value = fonteDe(d);
+        row.querySelector('.in-enc').value = d.enc ? formatBR(d.enc) : '0,00';
+        row.querySelector('.in-prev').value = d.prev ? formatBR(d.prev) : '0,00';
+        row.querySelector('.in-deps').value = d.deps || 0;
+        row.querySelector('.in-pensao').value = d.pensao ? formatBR(d.pensao) : '0,00';
+        row.querySelector('.in-simpl').value = d.simpl === 'nao' ? 'nao' : 'sim';
+        row.querySelector('.in-encpj').value = d.encpj === 'bruto' ? 'bruto' : 'abater';
+        row.querySelector('.in-ir').value = d.ir ? formatBR(d.ir) : '';
+        if (copia) {
+            if (d.d) {
+                const dia = d.d.split('-')[2];
+                const mesCorrente = (currentMonthIdx + 1).toString().padStart(2, '0');
+                row.querySelector('.in-date').value = `${currentYear}-${mesCorrente}-${dia}`;
+            }
+        } else {
+            row.querySelector('.in-date').value = d.d || '';
+        }
     }
 
     function init() {
@@ -427,8 +698,58 @@
             <td class="p-2"><input type="text" inputmode="decimal" class="in-val w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-medium text-slate-800 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" oninput="autoCalc(this)" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)"></td>
             <td class="p-2"><input type="text" inputmode="decimal" class="in-extra w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs font-medium text-slate-800 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" oninput="autoCalc(this)" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)"></td>
             <td class="p-2"><input type="text" class="in-extra-desc w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-700 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none transition" placeholder="Ex: Condomínio" oninput="saveData(false)"></td>
-            <td class="p-2"><input type="text" inputmode="decimal" class="in-ir w-full px-2 py-1.5 bg-amber-50 border border-amber-300 rounded-md text-xs font-semibold text-amber-800 focus:ring-2 focus:ring-amber-500 focus:bg-white outline-none transition" oninput="autoCalc(this)" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)"></td>
-            <td class="p-2"><input type="text" inputmode="decimal" class="in-recebido w-full px-2 py-1.5 bg-emerald-50 border border-emerald-300 rounded-md text-xs font-semibold text-emerald-800 focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition" oninput="autoCalc(this)" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)"></td>
+            <td class="p-2"><input type="text" inputmode="decimal" readonly class="in-ir w-full px-2 py-1.5 bg-amber-50 border border-amber-300 rounded-md text-xs font-semibold text-amber-800 focus:ring-2 focus:ring-amber-500 focus:bg-white outline-none transition" oninput="autoCalc(this)" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)" title="Calculado automaticamente (PJ). Use a fonte 'Manual' para digitar."></td>
+            <td class="calc-cell p-2" data-fonte="PF">
+                <div class="calc-panel">
+                    <div class="calc-title">
+                        <span><i class="fa-solid fa-calculator"></i> Cálculo fiscal do mês</span>
+                        <span class="calc-hint">Estimativa — confira com seu contador</span>
+                    </div>
+                    <div class="calc-field fonte-field">
+                        <label>Fonte pagadora</label>
+                        <select class="in-fonte" onchange="autoCalc(this)">
+                            <option value="PF">PF — carnê-leão</option>
+                            <option value="PJ">PJ — retenção na fonte</option>
+                            <option value="manual">Manual — IR informado</option>
+                        </select>
+                    </div>
+                    <div class="calc-field">
+                        <label>Encargos</label>
+                        <input type="text" inputmode="decimal" class="in-enc" value="0,00" oninput="autoCalc(this)" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)">
+                    </div>
+                    <div class="calc-field pf-only">
+                        <label>Previdência Oficial</label>
+                        <input type="text" inputmode="decimal" class="in-prev" value="0,00" oninput="autoCalc(this)" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)">
+                    </div>
+                    <div class="calc-field pf-only">
+                        <label>Dependentes</label>
+                        <input type="number" min="0" step="1" class="in-deps" value="0" oninput="autoCalc(this)">
+                    </div>
+                    <div class="calc-field pf-only">
+                        <label>Pensão judicial/mês</label>
+                        <input type="text" inputmode="decimal" class="in-pensao" value="0,00" oninput="autoCalc(this)" onfocus="onMoneyFocus(this)" onblur="onMoneyBlur(this)">
+                    </div>
+                    <div class="calc-field pj-only">
+                        <label>Desconto simplificado</label>
+                        <select class="in-simpl" onchange="autoCalc(this)">
+                            <option value="sim">Sim</option>
+                            <option value="nao">Não</option>
+                        </select>
+                    </div>
+                    <div class="calc-field pj-only">
+                        <label>Encargos na base PJ</label>
+                        <select class="in-encpj" onchange="autoCalc(this)">
+                            <option value="abater">Abater encargos</option>
+                            <option value="bruto">Valor bruto</option>
+                        </select>
+                    </div>
+                    <div class="calc-out"><span>Base de cálculo</span><b class="out-base">R$ 0,00</b></div>
+                    <div class="calc-out"><span>Método</span><b class="out-metodo">—</b></div>
+                    <div class="calc-out"><span class="out-rotulo">Imposto</span><b class="out-imposto">R$ 0,00</b></div>
+                    <div class="calc-memo"></div>
+                </div>
+            </td>
+            <td class="p-2"><input type="text" inputmode="decimal" readonly class="in-recebido w-full px-2 py-1.5 bg-emerald-50 border border-emerald-300 rounded-md text-xs font-semibold text-emerald-800 outline-none transition"></td>
             <td class="row-total p-2 font-extrabold text-brand-700 text-xs">R$ 0,00</td>
             <td class="p-2">
                 <div class="flex flex-col gap-1">
@@ -483,28 +804,19 @@
 
     function addRow(btn = null) {
         const tbody = document.getElementById('rent-rows');
-        const newRow = document.createElement('tr');
-        newRow.className = "hover:bg-slate-50 transition border-b border-slate-100";
-        newRow.innerHTML = createRowHTML();
+        const newRow = criarLinha();
         if (btn) btn.closest('tr').after(newRow);
         else tbody.appendChild(newRow);
+        recalcMes();
         saveData(false);
     }
 
     function deleteRow(btn) {
-        if(confirm("Excluir esta linha?")) { btn.closest('tr').remove(); saveData(false); }
+        if(confirm("Excluir esta linha?")) { btn.closest('tr').remove(); recalcMes(); saveData(false); }
     }
 
-    function autoCalc(inputEl) {
-        const row = inputEl.closest('tr');
-        if (!inputEl.classList.contains('in-recebido')) {
-            const aluguel = parseBR(row.querySelector('.in-val').value) || 0;
-            const extras = parseBR(row.querySelector('.in-extra').value) || 0;
-            const ir = parseBR(row.querySelector('.in-ir').value) || 0;
-            row.querySelector('.in-recebido').value = formatBR(aluguel + extras - ir);
-        }
-        const recebido = parseBR(row.querySelector('.in-recebido').value) || 0;
-        row.querySelector('.row-total').innerText = recebido.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+    function autoCalc() {
+        recalcMes();
         saveData(false);
     }
 
@@ -513,7 +825,10 @@
             n: row.querySelector('.in-name').value, unidade: row.querySelector('.in-unidade').value, email: row.querySelector('.in-email').value, d: row.querySelector('.in-date').value,
             r: row.querySelector('.in-reajuste').value, v: row.querySelector('.in-val').value, 
             e: row.querySelector('.in-extra').value, ed: row.querySelector('.in-extra-desc').value, dest: row.querySelector('.in-destino').value,
-            ir: row.querySelector('.in-ir').value, recebido: row.querySelector('.in-recebido').value, cdc: row.querySelector('.in-cdc').value
+            ir: row.querySelector('.in-ir').value, recebido: row.querySelector('.in-recebido').value, cdc: row.querySelector('.in-cdc').value,
+            fonte: row.querySelector('.in-fonte').value, enc: row.querySelector('.in-enc').value, prev: row.querySelector('.in-prev').value,
+            deps: row.querySelector('.in-deps').value, pensao: row.querySelector('.in-pensao').value,
+            simpl: row.querySelector('.in-simpl').value, encpj: row.querySelector('.in-encpj').value
         }));
         localStorage.setItem(`data_${currentYear}_mes_${currentMonthIdx}`, JSON.stringify(data));
         updateAnnualTotal(); 
@@ -525,30 +840,14 @@
         const tbody = document.getElementById('rent-rows');
         tbody.innerHTML = '';
         if(saved) {
-            const data = JSON.parse(saved);
-            data.forEach(d => {
-                const row = document.createElement('tr');
-                row.className = "hover:bg-slate-50 transition border-b border-slate-100";
-                row.innerHTML = createRowHTML();
-                row.querySelector('.in-name').value = d.n || '';
-                updateRowTitle(row.querySelector('.in-name')); 
-                row.querySelector('.in-unidade').value = d.unidade || '';
-                row.querySelector('.in-email').value = d.email || '';
-                row.querySelector('.in-date').value = d.d || ''; 
-                row.querySelector('.in-reajuste').value = d.r || ''; 
-                row.querySelector('.in-val').value = d.v ? formatBR(d.v) : ''; 
-                row.querySelector('.in-extra').value = d.e ? formatBR(d.e) : ''; 
-                row.querySelector('.in-extra-desc').value = d.ed || '';
-                row.querySelector('.in-ir').value = d.ir ? formatBR(d.ir) : '';
-                row.querySelector('.in-destino').value = d.dest || '';
-                row.querySelector('.in-cdc').value = d.cdc || '';
-                const recebido = d.recebido !== undefined ? parseBR(d.recebido) : (parseBR(d.v) + parseBR(d.e) - parseBR(d.ir));
-                row.querySelector('.in-recebido').value = formatBR(recebido);
-                row.querySelector('.row-total').innerText = recebido.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+            JSON.parse(saved).forEach(d => {
+                const row = criarLinha();
+                preencherLinha(row, d, false);
                 tbody.appendChild(row);
             });
         }
         if(tbody.children.length === 0) for(let i=0; i < 5; i++) addRow();
+        recalcMes();
     }
 
     function switchMonth(idx) { 
@@ -572,34 +871,14 @@
         if(currentMonthIdx === 0) return alert("Não há mês anterior."); 
         const prev = localStorage.getItem(`data_${currentYear}_mes_${currentMonthIdx - 1}`); 
         if(prev) { 
-            const data = JSON.parse(prev); 
             const tbody = document.getElementById('rent-rows'); 
             tbody.innerHTML = ''; 
-            data.forEach((d) => { 
-                const row = document.createElement('tr'); 
-                row.className = "hover:bg-slate-50 transition border-b border-slate-100";
-                row.innerHTML = createRowHTML(); 
-                row.querySelector('.in-name').value = d.n || '';
-                updateRowTitle(row.querySelector('.in-name')); 
-                row.querySelector('.in-unidade').value = d.unidade || '';
-                row.querySelector('.in-email').value = d.email || '';
-                row.querySelector('.in-reajuste').value = d.r || ''; 
-                row.querySelector('.in-cdc').value = d.cdc || ''; 
-                row.querySelector('.in-val').value = d.v ? formatBR(d.v) : ''; 
-                row.querySelector('.in-extra').value = d.e ? formatBR(d.e) : ''; 
-                row.querySelector('.in-extra-desc').value = d.ed || '';
-                row.querySelector('.in-ir').value = d.ir ? formatBR(d.ir) : '';
-                row.querySelector('.in-destino').value = d.dest || ''; 
-                const recebido = d.recebido !== undefined ? parseBR(d.recebido) : (parseBR(d.v) + parseBR(d.e) - parseBR(d.ir));
-                row.querySelector('.in-recebido').value = formatBR(recebido);
-                if(d.d) { 
-                    const dia = d.d.split('-')[2]; 
-                    const mesCorrente = (currentMonthIdx + 1).toString().padStart(2, '0'); 
-                    row.querySelector('.in-date').value = `${currentYear}-${mesCorrente}-${dia}`; 
-                } 
-                row.querySelector('.row-total').innerText = recebido.toLocaleString('pt-BR', {style:'currency', currency:'BRL'}); 
+            JSON.parse(prev).forEach((d) => { 
+                const row = criarLinha();
+                preencherLinha(row, d, true);
                 tbody.appendChild(row); 
             }); 
+            recalcMes();
             saveData(false); 
         } 
     }
@@ -953,7 +1232,7 @@
                 <thead><tr><th>Item / Descrição</th><th style="text-align: right;">Valor (R$)</th></tr></thead>
                 <tbody>
                     <tr><td>Aluguel Mensal de Imóvel</td><td style="text-align: right;">${val.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td></tr>
-                    <tr><td>Encargos / Extras / Descontos / Retenção IR<br><span style="font-size: 0.85rem; color: #555;"><strong>Discriminação:</strong> ${extraDesc}</span></td><td style="text-align: right;" class="${extra < 0 ? 'val-negativo' : ''}">${extra.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td></tr>
+                    <tr><td>Encargos / Extras / Descontos<br><span style="font-size: 0.85rem; color: #555;"><strong>Discriminação:</strong> ${extraDesc}</span></td><td style="text-align: right;" class="${extra < 0 ? 'val-negativo' : ''}">${extra.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td></tr>
                     <tr><td>IR retido na fonte</td><td style="text-align: right;" class="${ir > 0 ? 'val-negativo' : ''}">-${ir.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td></tr>
                     <tr style="font-weight: bold; background: #eee !important;">
                         <td>TOTAL GERAL A RECEBER</td>
