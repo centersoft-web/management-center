@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#060b1a">
+    <meta name="description"
+          content="Painel para organizar e abrir módulos de gestão patrimonial, financeira e administrativa."> 
     <title>Management Center by Center Soft Inc.®</title>
     <link rel="icon" href="icon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="icon.ico" type="image/x-icon">
@@ -1128,10 +1130,12 @@
         });
 
         renderizarModulos();
-   </script>
+  </script>
 <script>
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./sw.js");
+  navigator.serviceWorker.register("/management-center/sw.js", {
+    scope: "/management-center/"
+  });
 }
 </script>
 </body>
