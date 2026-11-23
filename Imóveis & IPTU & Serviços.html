@@ -4,33 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Imóveis & IPTU & Serviços</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
                         brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#0369a1',
-                            700: '#035485',
-                            800: '#075985',
-                            900: '#0c4a6e',
-                        },
-                        emerald: {
-                            500: '#10b981',
-                            600: '#059669',
-                            700: '#047857',
+                            50: '#f0f9ff', 100: '#e0f2fe', 500: '#0284c7',
+                            600: '#0369a1', 700: '#035485', 800: '#075985', 900: '#0c4a6e'
                         }
                     }
                 }
@@ -38,38 +23,17 @@
         }
     </script>
     <style>
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        /* Popup pontual para copiar mensagem do WhatsApp */
-        #whatsapp-popup { display:none; position:fixed; inset:0; z-index:1000; align-items:center; justify-content:center; padding:1rem; background:rgba(15,23,42,.68); }
-        #whatsapp-popup.ativo { display:flex; }
-        .whatsapp-popup-box { width:min(620px,100%); padding:1.25rem; border-radius:.9rem; background:#fff; box-shadow:0 20px 50px rgba(0,0,0,.25); }
-        #whatsapp-texto { width:100%; min-height:300px; margin-top:.75rem; padding:.85rem; border:1px solid #cbd5e1; border-radius:.55rem; resize:vertical; font:14px/1.5 Arial,sans-serif; }
-        .whatsapp-popup-botoes { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:.6rem; margin-top:.85rem; }
-        .whatsapp-popup-botoes button { padding:.65rem 1rem; border:0; border-radius:.5rem; color:#fff; font-weight:700; cursor:pointer; }
-        .btn-whatsapp-copiar { background:#16a34a; } .btn-whatsapp-fechar { background:#475569; }
-        /* Estilos de Impressão */
         @media print {
             .no-print { display: none !important; }
             body { background: white !important; color: black !important; zoom: 80%; }
             main { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
             header, nav { display: none !important; }
             th:nth-child(1), td:nth-child(1) { display: none !important; }
-            tr.linha-comunicacao { display: none !important; }
             .table-container { border: none !important; box-shadow: none !important; }
             th, td { border-bottom: 1px solid #ddd !important; }
         }
@@ -77,7 +41,6 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
 
-    <!-- Header Navbar -->
     <header class="bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white shadow-lg sticky top-0 z-50 no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
@@ -89,8 +52,6 @@
                     <p class="text-xs text-slate-300 font-medium">Gestão Integrada de Patrimônio e Contas</p>
                 </div>
             </div>
-
-            <!-- Botões Globais de Backup -->
             <div class="flex items-center gap-2">
                 <button onclick="exportarDados()" class="inline-flex items-center justify-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition shadow-sm">
                     <i class="fa-solid fa-file-export"></i> Exportar
@@ -103,11 +64,8 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow">
         <div class="space-y-6">
-            
-            <!-- Abas de Categorias -->
             <div class="bg-white rounded-2xl border border-slate-200/80 p-3 shadow-sm no-print">
                 <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-1.5" id="category-tabs">
                     <button onclick="switchTab('imoveis')" id="tab-imoveis" class="cat-btn py-2 px-1 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-lg text-xs text-slate-700 transition shadow-sm flex items-center justify-center gap-1.5 !border-brand-600 !text-brand-600 !bg-brand-50 shadow-inner">
@@ -137,15 +95,10 @@
                 </div>
             </div>
 
-            <!-- Sections Container -->
             <div id="main-content"></div>
-
         </div>
     </main>
 
-    <!-- Popup de mensagem para WhatsApp -->
-    <div id="whatsapp-popup" class="no-print" role="dialog" aria-modal="true" aria-labelledby="whatsapp-popup-titulo"><div class="whatsapp-popup-box"><div class="flex items-center justify-between gap-3"><h3 id="whatsapp-popup-titulo" class="text-lg font-bold text-slate-900">Mensagem para WhatsApp</h3><button type="button" onclick="fecharWhatsAppPopup()" class="text-slate-500 hover:text-slate-900 text-xl" aria-label="Fechar">&times;</button></div><p class="mt-1 text-xs text-slate-500">Copie o texto abaixo e cole na conversa desejada.</p><textarea id="whatsapp-texto" readonly></textarea><div class="whatsapp-popup-botoes"><button type="button" class="btn-whatsapp-fechar" onclick="fecharWhatsAppPopup()">Fechar</button><button type="button" class="btn-whatsapp-copiar" onclick="copiarTextoWhatsApp()">Copiar texto</button></div></div></div>
-    <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500 no-print">
         <div class="max-w-7xl mx-auto px-4">
             <p>Sistema Integrado de Gestão Patrimonial e Utilitários.</p>
@@ -154,70 +107,114 @@
     </footer>
 
     <script>
+        const STORAGE_KEY = 'asset_pro_master_data';
+
         const categoryConfig = {
-            imoveis: { label: "Imóveis & IPTU", icon: "fa-house", fields: ["Nome", "Cidade", "Inscrição", "Cadastro IPTU", "Consulta IPTU"] },
-            matriculas: { label: "Matrículas (Reg. Imóveis)", icon: "fa-scroll", fields: ["Nome", "Cidade", "Matrícula", "Link"] },
-            condominios: { label: "Condomínios", icon: "fa-city", fields: ["Condomínio", "Cidade", "Ref/Inscrição", "Link"] },
-            luz: { label: "Luz", icon: "fa-bolt", fields: ["Identificação", "Cidade", "Instalação", "Link"] },
-            agua: { label: "Água", icon: "fa-droplet", fields: ["Identificação", "Cidade", "RGI", "Link"] },
-            telefone: { label: "Telefone", icon: "fa-phone", fields: ["Linha/ID", "Operadora", "Número", "Link"] },
-            gas: { label: "Gás", icon: "fa-fire", fields: ["Identificação", "Cidade", "Código", "Link"] },
-            saude: { label: "Assistência Médica", icon: "fa-notes-medical", fields: ["Plano", "Operadora", "Matrícula", "Link"] }
+            imoveis:    { label: "Imóveis & IPTU",            icon: "fa-house",         fields: ["Nome", "Cidade", "Inscrição", "Cadastro IPTU", "Consulta IPTU"] },
+            matriculas: { label: "Matrículas (Reg. Imóveis)", icon: "fa-scroll",        fields: ["Nome", "Cidade", "Matrícula", "Link"] },
+            condominios:{ label: "Condomínios",               icon: "fa-city",          fields: ["Condomínio", "Cidade", "Ref/Inscrição", "Link"] },
+            luz:        { label: "Luz",                       icon: "fa-bolt",          fields: ["Identificação", "Cidade", "Instalação", "Link"] },
+            agua:       { label: "Água",                      icon: "fa-droplet",       fields: ["Identificação", "Cidade", "RGI", "Link"] },
+            telefone:   { label: "Telefone",                  icon: "fa-phone",         fields: ["Linha/ID", "Operadora", "Número", "Link"] },
+            gas:        { label: "Gás",                       icon: "fa-fire",          fields: ["Identificação", "Cidade", "Código", "Link"] },
+            saude:      { label: "Assistência Médica",        icon: "fa-notes-medical", fields: ["Plano", "Operadora", "Matrícula", "Link"] }
         };
 
-        let data = JSON.parse(localStorage.getItem('asset_pro_master_data')) || {};
-        Object.keys(categoryConfig).forEach(cat => { if(!data[cat]) data[cat] = []; });
+        // Imóveis e Matrículas são pares: cada item de uma lista tem um par na outra com o mesmo id.
+        const PARES = ['imoveis', 'matriculas'];
+        const isPar = t => PARES.includes(t);
+        const outroTipo = t => (t === 'imoveis' ? 'matriculas' : 'imoveis');
 
+        const INPUT_FORM = "px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition";
+        const INPUT_EDIT = "w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs";
+
+        // ---------- Utilitários ----------
+        let _seq = 0;
+        function novoId() {
+            _seq = (_seq + 1) % 1000;
+            return Date.now() * 1000 + _seq;
+        }
+
+        function esc(v) {
+            return String(v ?? '')
+                .replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+                .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function val(id) {
+            const el = document.getElementById(id);
+            return el ? el.value : '';
+        }
+
+        // Garante que cada categoria exista e que cada item tenha id único dentro da sua lista.
+        function normalizarDados(d) {
+            const out = {};
+            Object.keys(categoryConfig).forEach(cat => {
+                out[cat] = Array.isArray(d && d[cat]) ? d[cat] : [];
+                const vistos = new Set();
+                out[cat].forEach(item => {
+                    if (item.id == null || vistos.has(item.id)) item.id = novoId();
+                    vistos.add(item.id);
+                });
+            });
+            return out;
+        }
+
+        function carregarDados() {
+            try {
+                return normalizarDados(JSON.parse(localStorage.getItem(STORAGE_KEY)));
+            } catch (e) {
+                return normalizarDados({});
+            }
+        }
+
+        let data = carregarDados();
         let editIdx = { type: null, index: null };
 
+        // ---------- Layout ----------
         function initLayout() {
             const main = document.getElementById('main-content');
             main.innerHTML = '';
             Object.keys(categoryConfig).forEach(cat => {
-                const config = categoryConfig[cat];
+                const cfg = categoryConfig[cat];
                 const section = document.createElement('div');
                 section.id = `section-${cat}`;
                 section.className = `view-section ${cat === 'imoveis' ? 'block' : 'hidden'}`;
+
+                const inputs = cfg.fields.map((placeholder, i) => {
+                    const extra = (cat === 'telefone' && i === 2) ? 'oninput="maskTel(this)" maxlength="15"' : '';
+                    return `<input type="text" id="${cat}F${i + 1}" placeholder="${placeholder}" ${extra} class="${INPUT_FORM}">`;
+                }).join('');
+
+                const headers = cfg.fields.map(f => `<th class="py-3 px-3 text-left">${f}</th>`).join('');
+
                 section.innerHTML = `
                     <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-4">
                         <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
-                            <i class="fa-solid ${config.icon} text-brand-600 text-lg"></i>
-                            <h2 class="text-base font-bold text-slate-900">${config.label}</h2>
+                            <i class="fa-solid ${cfg.icon} text-brand-600 text-lg"></i>
+                            <h2 class="text-base font-bold text-slate-900">${cfg.label}</h2>
                         </div>
 
-                        <!-- Form Cadastro -->
                         <div class="no-print bg-slate-50 p-3.5 rounded-xl border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5">
-                            <input type="text" id="${cat}F1" placeholder="${config.fields[0]}" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition">
-                            <input type="text" id="${cat}F2" placeholder="${config.fields[1]}" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition">
-                            <input type="text" id="${cat}F3" placeholder="${config.fields[2]}" ${cat === 'telefone' ? 'oninput="maskTel(this)" maxlength="15"' : ''} class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition">
-                            <input type="text" id="${cat}F4" placeholder="${config.fields[3]}" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition">
-                            ${cat === 'imoveis' ? `<input type="text" id="${cat}F5" placeholder="${config.fields[4]}" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition">` : ''}
-                            ${false ? `<input type="email" id="${cat}Email" placeholder="Email" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-semibold focus:ring-2 focus:ring-brand-500 outline-none transition">` : ''}
+                            ${inputs}
                             <button class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-sm flex items-center justify-center gap-1.5" onclick="addItem('${cat}')">
                                 <i class="fa-solid fa-plus-circle"></i> Adicionar
                             </button>
                         </div>
 
-                        <!-- Tabela -->
                         <div class="table-container overflow-x-auto rounded-xl border border-slate-200">
                             <table class="w-full text-left text-xs border-collapse">
                                 <thead>
                                     <tr class="bg-slate-900 text-white font-bold uppercase tracking-wider text-[11px]">
                                         <th class="py-3 px-3 text-center w-[60px]">Ordem</th>
-                                        <th class="py-3 px-3 text-left">${config.fields[0]}</th>
-                                        ${false ? '<th class="py-3 px-3">Email</th>' : ''}
-                                        <th class="py-3 px-3 text-left">${config.fields[1]}</th>
-                                        <th class="py-3 px-3 text-left">${config.fields[2]}</th>
-                                        <th class="py-3 pl-0 px-3 text-left">${config.fields[3]}</th>
-                                        ${cat === 'imoveis' ? `<th class="py-3 pl-0 px-3 text-left">${config.fields[4]}</th>` : ''}
+                                        ${headers}
                                         <th class="no-print py-3 px-3 text-center w-[180px]">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody id="body-${cat}" class="divide-y divide-slate-100 bg-white font-medium text-slate-700"></tbody>
                             </table>
                         </div>
-                    </div>
-                `;
+                    </div>`;
                 main.appendChild(section);
             });
             render();
@@ -238,294 +235,249 @@
             document.querySelectorAll('.cat-btn').forEach(n => {
                 n.classList.remove('!border-brand-600', '!text-brand-600', '!bg-brand-50', 'shadow-inner');
             });
-            
-            const targetSection = document.getElementById('section-' + tab);
-            if(targetSection) {
-                targetSection.classList.remove('hidden');
-                targetSection.classList.add('block');
-            }
-            
+            const target = document.getElementById('section-' + tab);
+            if (target) { target.classList.remove('hidden'); target.classList.add('block'); }
             const targetTab = document.getElementById('tab-' + tab);
-            if(targetTab) {
-                targetTab.classList.add('!border-brand-600', '!text-brand-600', '!bg-brand-50', 'shadow-inner');
-            }
+            if (targetTab) targetTab.classList.add('!border-brand-600', '!text-brand-600', '!bg-brand-50', 'shadow-inner');
         }
 
-        function mover(type, index, direcao) {
-            const novoIndex = index + direcao;
-            if (novoIndex >= 0 && novoIndex < data[type].length) {
-                const temp = data[type][index];
-                data[type][index] = data[type][novoIndex];
-                data[type][novoIndex] = temp;
-                
-                // Sincronização de ordem para Imóveis e Matrículas
-                if (type === 'imoveis' || type === 'matriculas') {
-                    const other = (type === 'imoveis') ? 'matriculas' : 'imoveis';
-                    const tempOther = data[other][index];
-                    data[other][index] = data[other][novoIndex];
-                    data[other][novoIndex] = tempOther;
-                }
-                render();
-            }
-        }
-
+        // ---------- Renderização ----------
         function render() {
-            Object.keys(categoryConfig).forEach(cat => renderTable(cat));
-            localStorage.setItem('asset_pro_master_data', JSON.stringify(data));
+            Object.keys(categoryConfig).forEach(renderTable);
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            } catch (e) {
+                console.error('Falha ao salvar no localStorage', e);
+            }
         }
 
         function renderTable(type) {
             const body = document.getElementById(`body-${type}`);
             if (!body) return;
-            body.innerHTML = '';
-            
-            data[type].forEach((item, index) => {
-                const isSync = (type === 'imoveis' || type === 'matriculas');
-                if (editIdx.type === type && editIdx.index === index) {
-                    body.innerHTML += `
-                    <tr class="bg-amber-50/50">
-                        <td></td>
-                        <td class="p-2"><input type="text" id="edit-f1" value="${item.nome || ''}" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"></td>
-                        ${false ? `<td class="p-2"><input type="email" id="edit-email" value="${item.email || ''}" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"></td>` : ''}
-                        <td class="p-2"><input type="text" id="edit-f2" value="${item.cidade || ''}" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"></td>
-                        <td class="p-2"><input type="text" id="edit-f3" value="${item.insc || ''}" ${type === 'telefone' ? 'oninput="maskTel(this)" maxlength="15"' : ''} class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"></td>
-                        <td class="p-2"><input type="text" id="edit-f4" value="${type === 'imoveis' ? (item.cadastroIptu || '') : (item.link || '')}" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"></td>
-                        ${type === 'imoveis' ? `<td class="p-2"><input type="text" id="edit-f5" value="${item.link || ''}" class="w-full px-2 py-1 bg-white border border-slate-300 rounded text-xs"></td>` : ''}
-                        <td class="no-print p-2 text-center">
-                            <div class="flex items-center justify-center gap-1">
-                                <button class="bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold px-2 py-1 rounded transition" onclick="saveEdit('${type}', ${index})">Salvar</button>
-                                <button class="bg-slate-400 hover:bg-slate-500 text-white text-[11px] font-bold px-2 py-1 rounded transition" onclick="cancelEdit()">Cancelar</button>
-                            </div>
-                        </td>
-                    </tr>`;
-                } else {
-                    body.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
-                        <td class="no-print p-2 text-center align-middle">
-                            <div class="flex flex-col gap-1 items-center justify-center">
-                                <button class="w-7 h-5 bg-slate-100 hover:bg-brand-600 hover:text-white border border-slate-300 rounded text-slate-600 flex items-center justify-center font-bold text-xs transition" onclick="mover('${type}', ${index}, -1)"><i class="fa-solid fa-chevron-up text-[10px]"></i></button>
-                                <button class="w-7 h-5 bg-slate-100 hover:bg-brand-600 hover:text-white border border-slate-300 rounded text-slate-600 flex items-center justify-center font-bold text-xs transition" onclick="mover('${type}', ${index}, 1)"><i class="fa-solid fa-chevron-down text-[10px]"></i></button>
-                            </div>
-                        </td>
-                        <td class="p-2.5">
-                            <div class="flex items-center gap-1.5">
-                                ${isSync ? '<i class="fa-solid fa-rotate text-brand-500 text-[10px]" title="Sincronizado"></i>' : ''}
-                                <span class="font-bold text-slate-900">${item.nome || ''}</span>
-                            </div>
-                        </td>
-                        ${false ? `<td class="p-2.5">${item.email || ''}</td>` : ''}
-                        <td class="p-2.5">${item.cidade || ''}</td>
-                        <td class="p-2.5">
-                            <div class="flex items-center gap-2">
-                                <code class="bg-slate-100 px-1.5 py-0.5 rounded text-[11px] font-mono border border-slate-200 text-slate-800">${item.insc || ''}</code>
-                                ${item.insc ? `<button class="bg-white hover:bg-slate-100 border border-slate-300 text-slate-600 text-[10px] px-1.5 py-0.5 rounded transition shadow-xs" onclick="copiar('${item.insc}', this)"><i class="fa-regular fa-copy"></i> Copiar</button>` : ''}
-                            </div>
-                        </td>
-                        <td class="p-2.5">
-                            ${(type === 'imoveis' ? item.cadastroIptu : item.link) ? `<a href="${type === 'imoveis' ? item.cadastroIptu : item.link}" target="_blank" class="inline-flex items-center gap-1 text-brand-600 hover:text-brand-800 font-semibold text-xs hover:underline"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Portal</a>` : '<span class="text-slate-400">-</span>'}
-                        </td>
-                        ${type === 'imoveis' ? `<td class="p-2.5">
-                            ${item.link ? `<a href="${item.link}" target="_blank" class="inline-flex items-center gap-1 text-brand-600 hover:text-brand-800 font-semibold text-xs hover:underline"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Portal</a>` : '<span class="text-slate-400">-</span>'}
-                        </td>` : ''}
-                        ${false ? `
-                        <td class="no-print p-2.5 text-center">
-                            <div class="flex items-center justify-center gap-1">
-                                <button class="text-emerald-600 hover:bg-emerald-50 p-1.5 rounded text-sm transition" title="Inserir Abaixo" onclick="insertRow('${type}', ${index})"><i class="fa-solid fa-circle-plus"></i></button>
-                                <button class="text-violet-600 hover:bg-violet-50 p-1.5 rounded text-sm transition" title="Duplicar item abaixo" aria-label="Duplicar item abaixo" onclick="duplicateRow('${type}', ${index})"><i class="fa-solid fa-copy"></i></button>
-                                <button class="text-brand-600 hover:bg-brand-50 p-1.5 rounded text-sm transition" title="Editar" onclick="setEdit('${type}', ${index})"><i class="fa-solid fa-pen-to-square"></i></button>
-                                <button class="text-rose-600 hover:bg-rose-50 p-1.5 rounded text-sm transition" title="Excluir" onclick="removeItem('${type}', ${index})"><i class="fa-solid fa-trash-can"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr class="linha-comunicacao no-print bg-slate-50 border-b border-slate-200">
-                        <td colspan="7" class="p-2.5">
-                            <div class="flex flex-wrap items-center justify-center gap-2">
-                                <button class="border border-red-600 text-red-700 hover:bg-red-600 hover:text-white py-1.5 px-2.5 rounded text-[10px] font-bold uppercase transition" onclick="abrirGmail('${type}', ${index})"><i class="fa-solid fa-envelope"></i> Gmail</button>
-                                <button class="border border-green-600 text-green-700 hover:bg-green-600 hover:text-white py-1.5 px-2.5 rounded text-[10px] font-bold uppercase transition" onclick="abrirWhatsApp('${type}', ${index})"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
-                                <button class="border border-rose-500 text-rose-600 hover:bg-rose-500 hover:text-white py-1.5 px-2.5 rounded text-[10px] font-bold uppercase transition" onclick="abrirGmailAgradecimento('${type}', ${index})"><i class="fa-solid fa-envelope-circle-check"></i> Agradecer Gmail</button>
-                                <button class="border border-teal-600 text-teal-700 hover:bg-teal-600 hover:text-white py-1.5 px-2.5 rounded text-[10px] font-bold uppercase transition" onclick="abrirWhatsAppAgradecimento('${type}', ${index})"><i class="fa-brands fa-whatsapp"></i> Agradecer WhatsApp</button>
-                            </div>
-                        </td>
-                    </tr>` : `
-                        <td class="no-print p-2.5 text-center">
-                            <div class="flex items-center justify-center gap-1">
-                                <button class="text-emerald-600 hover:bg-emerald-50 p-1.5 rounded text-sm transition" title="Inserir Abaixo" onclick="insertRow('${type}', ${index})"><i class="fa-solid fa-circle-plus"></i></button>
-                                <button class="text-violet-600 hover:bg-violet-50 p-1.5 rounded text-sm transition" title="Duplicar item abaixo" aria-label="Duplicar item abaixo" onclick="duplicateRow('${type}', ${index})"><i class="fa-solid fa-copy"></i></button>
-                                <button class="text-brand-600 hover:bg-brand-50 p-1.5 rounded text-sm transition" title="Editar" onclick="setEdit('${type}', ${index})"><i class="fa-solid fa-pen-to-square"></i></button>
-                                <button class="text-rose-600 hover:bg-rose-50 p-1.5 rounded text-sm transition" title="Excluir" onclick="removeItem('${type}', ${index})"><i class="fa-solid fa-trash-can"></i></button>
-                            </div>
-                        </td>
-                    </tr>`}`;
-                }
-            });
+            body.innerHTML = data[type].map((item, index) => {
+                const emEdicao = editIdx.type === type && editIdx.index === index;
+                return emEdicao ? linhaEdicao(type, item, index) : linhaNormal(type, item, index);
+            }).join('');
         }
 
+        function portal(url) {
+            return url
+                ? `<a href="${esc(url)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-brand-600 hover:text-brand-800 font-semibold text-xs hover:underline"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Portal</a>`
+                : '<span class="text-slate-400">-</span>';
+        }
+
+        function linhaNormal(type, item, index) {
+            const linkPrincipal = type === 'imoveis' ? item.cadastroIptu : item.link;
+            const colunaExtra = type === 'imoveis'
+                ? `<td class="p-2.5">${portal(item.link)}</td>`
+                : '';
+            const sync = isPar(type)
+                ? '<i class="fa-solid fa-rotate text-brand-500 text-[10px]" title="Sincronizado"></i>'
+                : '';
+            const copiar = item.insc
+                ? `<button class="bg-white hover:bg-slate-100 border border-slate-300 text-slate-600 text-[10px] px-1.5 py-0.5 rounded transition shadow-sm" data-copiar="${esc(item.insc)}" onclick="copiarDe(this)"><i class="fa-regular fa-copy"></i> Copiar</button>`
+                : '';
+
+            return `
+                <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                    <td class="no-print p-2 text-center align-middle">
+                        <div class="flex flex-col gap-1 items-center justify-center">
+                            <button class="w-7 h-5 bg-slate-100 hover:bg-brand-600 hover:text-white border border-slate-300 rounded text-slate-600 flex items-center justify-center text-xs transition" onclick="mover('${type}', ${index}, -1)"><i class="fa-solid fa-chevron-up text-[10px]"></i></button>
+                            <button class="w-7 h-5 bg-slate-100 hover:bg-brand-600 hover:text-white border border-slate-300 rounded text-slate-600 flex items-center justify-center text-xs transition" onclick="mover('${type}', ${index}, 1)"><i class="fa-solid fa-chevron-down text-[10px]"></i></button>
+                        </div>
+                    </td>
+                    <td class="p-2.5">
+                        <div class="flex items-center gap-1.5">
+                            ${sync}
+                            <span class="font-bold text-slate-900">${esc(item.nome)}</span>
+                        </div>
+                    </td>
+                    <td class="p-2.5">${esc(item.cidade)}</td>
+                    <td class="p-2.5">
+                        <div class="flex items-center gap-2">
+                            <code class="bg-slate-100 px-1.5 py-0.5 rounded text-[11px] font-mono border border-slate-200 text-slate-800">${esc(item.insc)}</code>
+                            ${copiar}
+                        </div>
+                    </td>
+                    <td class="p-2.5">${portal(linkPrincipal)}</td>
+                    ${colunaExtra}
+                    <td class="no-print p-2.5 text-center">
+                        <div class="flex items-center justify-center gap-1">
+                            <button class="text-emerald-600 hover:bg-emerald-50 p-1.5 rounded text-sm transition" title="Inserir abaixo" onclick="insertRow('${type}', ${index})"><i class="fa-solid fa-circle-plus"></i></button>
+                            <button class="text-violet-600 hover:bg-violet-50 p-1.5 rounded text-sm transition" title="Duplicar item abaixo" onclick="duplicateRow('${type}', ${index})"><i class="fa-solid fa-copy"></i></button>
+                            <button class="text-brand-600 hover:bg-brand-50 p-1.5 rounded text-sm transition" title="Editar" onclick="setEdit('${type}', ${index})"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button class="text-rose-600 hover:bg-rose-50 p-1.5 rounded text-sm transition" title="Excluir" onclick="removeItem('${type}', ${index})"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </td>
+                </tr>`;
+        }
+
+        function linhaEdicao(type, item, index) {
+            const campo4 = type === 'imoveis' ? item.cadastroIptu : item.link;
+            const extra = type === 'imoveis'
+                ? `<td class="p-2"><input type="text" id="edit-f5" value="${esc(item.link)}" class="${INPUT_EDIT}"></td>`
+                : '';
+            const mascara = type === 'telefone' ? 'oninput="maskTel(this)" maxlength="15"' : '';
+
+            return `
+                <tr class="bg-amber-50/50">
+                    <td></td>
+                    <td class="p-2"><input type="text" id="edit-f1" value="${esc(item.nome)}" class="${INPUT_EDIT}"></td>
+                    <td class="p-2"><input type="text" id="edit-f2" value="${esc(item.cidade)}" class="${INPUT_EDIT}"></td>
+                    <td class="p-2"><input type="text" id="edit-f3" value="${esc(item.insc)}" ${mascara} class="${INPUT_EDIT}"></td>
+                    <td class="p-2"><input type="text" id="edit-f4" value="${esc(campo4)}" class="${INPUT_EDIT}"></td>
+                    ${extra}
+                    <td class="no-print p-2 text-center">
+                        <div class="flex items-center justify-center gap-1">
+                            <button class="bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold px-2 py-1 rounded transition" onclick="saveEdit('${type}', ${index})">Salvar</button>
+                            <button class="bg-slate-400 hover:bg-slate-500 text-white text-[11px] font-bold px-2 py-1 rounded transition" onclick="cancelEdit()">Cancelar</button>
+                        </div>
+                    </td>
+                </tr>`;
+        }
+
+        // ---------- Ações ----------
         function setEdit(type, index) { editIdx = { type, index }; render(); }
         function cancelEdit() { editIdx = { type: null, index: null }; render(); }
 
         function saveEdit(type, index) {
             const item = data[type][index];
-            const newNome = document.getElementById('edit-f1').value;
-            const newCidade = document.getElementById('edit-f2').value;
+            if (!item) return;
 
-            item.nome = newNome;
-            item.cidade = newCidade;
-            item.insc = document.getElementById('edit-f3').value;
+            item.nome = val('edit-f1');
+            item.cidade = val('edit-f2');
+            item.insc = val('edit-f3');
             if (type === 'imoveis') {
-                item.cadastroIptu = document.getElementById('edit-f4').value;
-                item.link = document.getElementById('edit-f5').value;
+                item.cadastroIptu = val('edit-f4');
+                item.link = val('edit-f5');
             } else {
-                item.link = document.getElementById('edit-f4').value;
+                item.link = val('edit-f4');
             }
 
-            if (type === 'imoveis' || type === 'matriculas') {
-                const other = (type === 'imoveis') ? 'matriculas' : 'imoveis';
-                const target = data[other].find(i => i.id === item.id);
-                if (target) {
-                    target.nome = newNome;
-                    target.cidade = newCidade;
-                }
+            // Mantém nome e cidade iguais no par (Imóveis <-> Matrículas)
+            if (isPar(type)) {
+                const par = data[outroTipo(type)].find(i => i.id === item.id);
+                if (par) { par.nome = item.nome; par.cidade = item.cidade; }
             }
             cancelEdit();
         }
 
         function addItem(type) {
-            const f1Val = document.getElementById(type + 'F1').value;
-            if (!f1Val) return;
-            const newItem = { 
-                id: Date.now(), 
-                nome: f1Val, 
-                cidade: document.getElementById(type + 'F2').value, 
-                insc: document.getElementById(type + 'F3').value, 
-                link: type === 'imoveis' ? document.getElementById(type + 'F5').value : document.getElementById(type + 'F4').value,
-                cadastroIptu: type === 'imoveis' ? document.getElementById(type + 'F4').value : '',
-                email: ''
+            const nome = val(type + 'F1').trim();
+            if (!nome) return;
+
+            const novo = {
+                id: novoId(),
+                nome,
+                cidade: val(type + 'F2'),
+                insc: val(type + 'F3'),
+                cadastroIptu: '',
+                link: ''
             };
-            data[type].push(newItem);
-            
-            if (type === 'imoveis' || type === 'matriculas') {
-                const other = (type === 'imoveis') ? 'matriculas' : 'imoveis';
-                data[other].push({ ...newItem, insc: "", link: "" });
+            if (type === 'imoveis') {
+                novo.cadastroIptu = val('imoveisF4');
+                novo.link = val('imoveisF5');
+            } else {
+                novo.link = val(type + 'F4');
             }
-            
+
+            data[type].push(novo);
+            if (isPar(type)) {
+                data[outroTipo(type)].push({ ...novo, insc: '', link: '' });
+            }
+
+            for (let n = 1; n <= 5; n++) {
+                const el = document.getElementById(type + 'F' + n);
+                if (el) el.value = '';
+            }
             render();
-            ['F1', 'F2', 'F3', 'F4', 'F5', 'Email'].forEach(f => {
-                const el = document.getElementById(type + f);
-                if(el) el.value = '';
-            });
         }
 
         function insertRow(type, index) {
-            const newId = Date.now();
-            const newItem = { id: newId, nome: "", cidade: "", insc: "", cadastroIptu: "", link: "", email: "" };
-            data[type].splice(index + 1, 0, newItem);
-            if (type === 'imoveis' || type === 'matriculas') {
-                const other = (type === 'imoveis') ? 'matriculas' : 'imoveis';
-                data[other].splice(index + 1, 0, { id: newId, nome: "", cidade: "", insc: "", link: "" });
+            const src = data[type][index];
+            if (!src) return;
+            const id = novoId();
+
+            data[type].splice(index + 1, 0, { id, nome: '', cidade: '', insc: '', cadastroIptu: '', link: '' });
+
+            if (isPar(type)) {
+                const outro = data[outroTipo(type)];
+                const pos = outro.findIndex(i => i.id === src.id);
+                outro.splice(pos === -1 ? outro.length : pos + 1, 0,
+                    { id, nome: '', cidade: '', insc: '', cadastroIptu: '', link: '' });
             }
             setEdit(type, index + 1);
         }
 
         function duplicateRow(type, index) {
-            const source = data[type][index];
-            if (!source) return;
-            const newId = Date.now();
-            const copy = { ...source, id: newId };
-            data[type].splice(index + 1, 0, copy);
+            const src = data[type][index];
+            if (!src) return;
+            const id = novoId();
 
-            // Imóveis e Matrículas permanecem sincronizados pelo mesmo ID e posição.
-            if (type === 'imoveis' || type === 'matriculas') {
-                const other = (type === 'imoveis') ? 'matriculas' : 'imoveis';
-                const otherSource = data[other].find(item => item.id === source.id) || data[other][index];
-                const otherCopy = otherSource
-                    ? { ...otherSource, id: newId }
-                    : { id: newId, nome: source.nome || '', cidade: source.cidade || '', insc: '', link: '' };
-                data[other].splice(index + 1, 0, otherCopy);
+            data[type].splice(index + 1, 0, { ...src, id });
+
+            if (isPar(type)) {
+                const outro = data[outroTipo(type)];
+                const pos = outro.findIndex(i => i.id === src.id);
+                const copia = pos === -1
+                    ? { id, nome: src.nome, cidade: src.cidade, insc: '', cadastroIptu: '', link: '' }
+                    : { ...outro[pos], id };
+                outro.splice(pos === -1 ? outro.length : pos + 1, 0, copia);
             }
             render();
         }
 
+        // Exclui somente o item clicado (e, em pares, somente o seu par — pelo id).
         function removeItem(type, index) {
-            if(!confirm("Excluir item?")) return;
+            if (!confirm("Excluir este item?")) return;
             const item = data[type][index];
-            if (type === 'imoveis' || type === 'matriculas') {
-                data.imoveis = data.imoveis.filter(i => i.id !== item.id);
-                data.matriculas = data.matriculas.filter(i => i.id !== item.id);
-            } else {
-                data[type].splice(index, 1);
+            if (!item) return;
+
+            data[type].splice(index, 1);
+
+            if (isPar(type)) {
+                const outro = data[outroTipo(type)];
+                const pos = outro.findIndex(i => i.id === item.id);
+                if (pos !== -1) outro.splice(pos, 1);
             }
+
+            editIdx = { type: null, index: null };
             render();
         }
 
-        function saudacaoAtual() {
-            const hora = new Date().getHours();
-            return hora < 12 ? 'bom dia' : hora < 18 ? 'boa tarde' : 'boa noite';
+        // Move o item para cima/baixo; em pares, espelha a troca no outro lado pelo id.
+        function mover(type, index, direcao) {
+            const lista = data[type];
+            const novo = index + direcao;
+            if (novo < 0 || novo >= lista.length) return;
+
+            [lista[index], lista[novo]] = [lista[novo], lista[index]];
+
+            if (isPar(type)) {
+                const outro = data[outroTipo(type)];
+                const a = outro.findIndex(i => i.id === lista[index].id);
+                const b = outro.findIndex(i => i.id === lista[novo].id);
+                if (a !== -1 && b !== -1) [outro[a], outro[b]] = [outro[b], outro[a]];
+            }
+            editIdx = { type: null, index: null };
+            render();
         }
-        function prepararMensagem(type, index, agradecimento, exigirEmail) {
-            const item = data[type][index];
-            if (!item) return null;
-            if (exigirEmail && !String(item.email || '').trim()) { alert('Preencha o Email.'); return null; }
-            const categoria = type === 'imoveis' ? 'IPTU' : 'Condomínio';
-            return { item, competencia: 'Dezembro / 2026', dataPagamento: '', valor: '', categoria, saudacao: saudacaoAtual() };
-        }
-        function montarMensagem(d, agradecimento, canal) {
-            const abertura = canal === 'whatsapp' ? `🙋🏻‍♂️Olá, ${d.saudacao} 🍀` : `${d.item.nome || ''}, ${d.saudacao} 🍀`;
-            const acao = agradecimento ? `Agradeço pela realização do pagamento do ${d.categoria}.` : `Segue em anexo o demonstrativo de pagamento do ${d.categoria}.`;
-            const dataRotulo = agradecimento ? 'Data do pagamento' : 'Data de pagamento';
-            const valorRotulo = agradecimento ? 'Valor recebido' : 'Valor a pagar';
-            const finalizacao = agradecimento ? `\n\nPagamento registrado com sucesso.✍️` : `\n\nEm caso de dúvidas, fico à disposição.`;
-            return `${abertura}\n\n${acao}\n\nCompetência: ${d.competencia}\n${dataRotulo}: ${d.dataPagamento}\n${valorRotulo}: R$ ${d.valor}${finalizacao}\n\nObrigado Sempre !!✨🙌`;
-        }
-        function abrirGmail(type, index) {
-            const d = prepararMensagem(type, index, false, true); if (!d) return;
-            const assunto = `Demonstrativo de pagamento do ${d.categoria} - ${d.competencia}`;
-            abrirCompositorGmail(d.item.email, assunto, montarMensagem(d, false, 'gmail'));
-        }
-        function abrirGmailAgradecimento(type, index) {
-            const d = prepararMensagem(type, index, true, true); if (!d) return;
-            const assunto = `Agradecimento pelo pagamento do ${d.categoria} - ${d.competencia}`;
-            abrirCompositorGmail(d.item.email, assunto, montarMensagem(d, true, 'gmail'));
-        }
-        function abrirCompositorGmail(email, assunto, corpo) {
-            const url = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(email) + '&su=' + encodeURIComponent(assunto) + '&body=' + encodeURIComponent(corpo);
-            const janela = window.open(url, '_blank');
-            if (!janela) alert('O navegador bloqueou a abertura do Gmail. Permita pop-ups para este arquivo.');
-        }
-        function abrirWhatsApp(type, index) {
-            const d = prepararMensagem(type, index, false, false); if (!d) return;
-            document.getElementById('whatsapp-popup-titulo').textContent = 'Mensagem para WhatsApp';
-            document.getElementById('whatsapp-texto').value = montarMensagem(d, false, 'whatsapp');
-            document.getElementById('whatsapp-popup').classList.add('ativo');
-        }
-        function abrirWhatsAppAgradecimento(type, index) {
-            const d = prepararMensagem(type, index, true, false); if (!d) return;
-            document.getElementById('whatsapp-popup-titulo').textContent = 'Agradecimento para WhatsApp';
-            document.getElementById('whatsapp-texto').value = montarMensagem(d, true, 'whatsapp');
-            document.getElementById('whatsapp-popup').classList.add('ativo');
-        }
-        function fecharWhatsAppPopup() { document.getElementById('whatsapp-popup').classList.remove('ativo'); }
-        async function copiarTextoWhatsApp() {
-            const campo = document.getElementById('whatsapp-texto');
-            try { await navigator.clipboard.writeText(campo.value); alert('Texto copiado. Agora cole no WhatsApp.'); }
-            catch (erro) { campo.focus(); campo.select(); document.execCommand('copy'); alert('Texto copiado. Agora cole no WhatsApp.'); }
-        }
-        function copiar(texto, btn) {
-            if(!texto || texto === "-") return;
-            navigator.clipboard.writeText(texto);
-            const old = btn.innerHTML; 
+
+        function copiarDe(btn) {
+            const texto = btn.dataset.copiar;
+            if (!texto || texto === '-') return;
+            navigator.clipboard.writeText(texto).catch(() => {});
+            const old = btn.innerHTML;
             btn.innerHTML = "<i class='fa-solid fa-check text-emerald-600'></i> OK!";
             setTimeout(() => { btn.innerHTML = old; }, 1000);
         }
 
+        // ---------- Exportar / Importar ----------
         function exportarDados() {
             const agora = new Date();
-            const dia = String(agora.getDate()).padStart(2, '0');
-            const mes = String(agora.getMonth() + 1).padStart(2, '0');
-            const ano = agora.getFullYear();
-            const hora = String(agora.getHours()).padStart(2, '0');
-            const min = String(agora.getMinutes()).padStart(2, '0');
-            const nomeArquivo = `Imóveis_&_IPTU_${ano}_${dia}-${mes}-${ano}_${hora}h${min}.json`;
-            const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+            const p = n => String(n).padStart(2, '0');
+            const nomeArquivo = `Imoveis_IPTU_${agora.getFullYear()}-${p(agora.getMonth() + 1)}-${p(agora.getDate())}_${p(agora.getHours())}h${p(agora.getMinutes())}.json`;
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -535,18 +487,20 @@
         }
 
         function importarDados(e) {
+            const file = e.target.files[0];
+            if (!file) return;
             const reader = new FileReader();
-            reader.onload = (ev) => { 
-                try { 
-                    const imported = JSON.parse(ev.target.result);
-                    Object.keys(categoryConfig).forEach(cat => {
-                        if(!imported[cat]) imported[cat] = [];
-                    });
-                    data = imported;
-                    render(); 
-                } catch(err) { alert("Erro ao importar."); } 
+            reader.onload = ev => {
+                try {
+                    data = normalizarDados(JSON.parse(ev.target.result));
+                    editIdx = { type: null, index: null };
+                    render();
+                } catch (err) {
+                    alert("Erro ao importar o arquivo.");
+                }
+                e.target.value = '';
             };
-            reader.readAsText(e.target.files[0]);
+            reader.readAsText(file);
         }
 
         window.onload = initLayout;
