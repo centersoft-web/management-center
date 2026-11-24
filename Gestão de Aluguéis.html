@@ -531,7 +531,7 @@
     }
     function calcAluguelBase2026(rendTrib, dedLegais = 0, permitirSimpl = true) {
         const c = calcM(rendTrib, dedLegais, permitirSimpl);
-        const metodo = !permitirSimpl ? 'Completo' : (dedLegais > FISCAL.simpM ? 'Deduções legais' : 'Simplificado');
+        const metodo = !permitirSimpl ? 'Legais' : (dedLegais > FISCAL.simpM ? 'Deduções legais' : 'Simplificado');
         const f = faixaM(c.base);
         return { rendTrib: c.rendTrib, dedLegais, metodo, ded: c.ded, base: c.base, aliq: f.aliq, parcela: f.parcela, bruto: c.bruto, red: c.red, ir: c.ir };
     }
@@ -760,7 +760,7 @@
                         </select>
                     </div>
                     <div class="calc-out"><span>Base de cálculo</span><b class="out-base">R$ 0,00</b></div>
-                    <div class="calc-out"><span>Método</span><b class="out-metodo">—</b></div>
+                    <div class="calc-out"><span>Deduções</span><b class="out-metodo">—</b></div>
                     <div class="calc-out"><span class="out-rotulo">Imposto</span><b class="out-imposto">R$ 0,00</b></div>
                     <div class="calc-memo"></div>
                 </div>
