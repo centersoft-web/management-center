@@ -248,7 +248,22 @@
             font-size: 0.7rem;
             line-height: 1.45;
             color: #334155;
-        }
+        }        
+        /* Caixas de saída com a mesma altura dos campos de entrada */
+        .calc-out {
+        align-self: end;          /* alinha a base da caixa com a base do campo */
+        height: 2.65rem;          /* mesma altura do input/select */
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 0.15rem 0.5rem;
+        overflow: hidden;
+       }
+       .calc-out span,
+       .calc-out b {
+       line-height: 1.1;         /* evita que o texto estoure a altura */
+       }
         .calc-memo strong { color: #0f172a; }
         .calc-cell[data-fonte="PF"] .pj-only,
         .calc-cell[data-fonte="PJ"] .pf-only { display: none; }
@@ -516,7 +531,7 @@
     }
     function calcAluguelBase2026(rendTrib, dedLegais = 0, permitirSimpl = true) {
         const c = calcM(rendTrib, dedLegais, permitirSimpl);
-        const metodo = !permitirSimpl ? 'Sem desconto simplificado' : (dedLegais > FISCAL.simpM ? 'Deduções legais' : 'Desconto simplificado');
+        const metodo = !permitirSimpl ? 'Completo' : (dedLegais > FISCAL.simpM ? 'Deduções legais' : 'Simplificado');
         const f = faixaM(c.base);
         return { rendTrib: c.rendTrib, dedLegais, metodo, ded: c.ded, base: c.base, aliq: f.aliq, parcela: f.parcela, bruto: c.bruto, red: c.red, ir: c.ir };
     }
@@ -586,7 +601,7 @@
             } else {
                 imposto = parseBR(irInput.value) || 0;
                 metodo = 'Manual';
-                rotulo = 'IR informado (manual)';
+                rotulo = 'IR informado';
                 memo = '<strong>IR manual:</strong> o valor do IR retido foi digitado diretamente nesta linha; o carnê-leão não é calculado para ela.';
             }
 
@@ -710,8 +725,8 @@
                         <label>Fonte pagadora</label>
                         <select class="in-fonte" onchange="autoCalc(this)">
                             <option value="PF">PF — carnê-leão</option>
-                            <option value="PJ">PJ — retenção na fonte</option>
-                            <option value="manual">Manual — IR informado</option>
+                            <option value="PJ">PJ — IR na fonte</option>
+                            <option value="manual">Manual</option>
                         </select>
                     </div>
                     <div class="calc-field">
