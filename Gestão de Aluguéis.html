@@ -589,14 +589,14 @@
                 irPJ += imposto;
                 metodo = c.metodo;
                 baseExib = it.baseCalc;
-                rotulo = 'IRRF retido na fonte';
+                rotulo = 'IRRF retido';
                 memo = `<strong>Retenção PJ:</strong> base ${brl(it.baseCalc)} ${bruto ? '(valor bruto, sem abater encargos)' : '(após abater encargos)'}; ${c.metodo.toLowerCase()}; tabela progressiva mensal e redução da Lei 15.270/2025; IR retido ${brl(imposto)}. Sem deduções pessoais (previdência, dependentes ou pensão), que só entram no ajuste anual.`;
             } else if (it.fonte === 'PF') {
                 const quota = it.quota;
                 imposto = quota;
                 irInput.value = formatBR(0);
                 metodo = cPF.metodo;
-                rotulo = 'Carnê-leão (rateio)';
+                rotulo = 'Carnê-leão';
                 memo = `<strong>Carnê-leão:</strong> base desta linha ${brl(it.base)} (aluguel ${brl(it.alug)} menos encargos ${brl(it.enc)}). Rateio de ${brl(quota)} do carnê-leão mensal de ${brl(carneTotal)}, apurado sobre a base PF total de ${brl(basePF)} e deduções legais de ${brl(dedPF)} (${cPF.metodo.toLowerCase()}). Recolhido pelo locador, não reduz o valor recebido.`;
             } else {
                 imposto = parseBR(irInput.value) || 0;
@@ -725,8 +725,8 @@
                         <label>Fonte pagadora</label>
                         <select class="in-fonte" onchange="autoCalc(this)">
                             <option value="PF">PF: Carnê-Leão</option>
-                            <option value="PJ">PJ: IR na fonte</option>
-                            <option value="manual">Manual</option>
+                            <option value="PJ">PJ: IR na Fonte</option>
+                            <option value="manual">PJ/PF: Manual</option>
                         </select>
                     </div>
                     <div class="calc-field">
