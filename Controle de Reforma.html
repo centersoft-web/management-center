@@ -54,8 +54,26 @@
             background: #94a3b8;
         }
 
+        /* Cabeçalho da tabela fixo ao rolar a lista de itens */
+        .table-responsive thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #0f172a;
+        }
+
         /* Estilos para impressão (PDF) */
         @media print {
+            html, body {
+                height: auto !important;
+                overflow: visible !important;
+            }
+            main, .panel-card, .table-responsive {
+                flex: none !important;
+                height: auto !important;
+                min-height: 0 !important;
+                overflow: visible !important;
+            }
             header, .no-print, button, input[type="file"] {
                 display: none !important;
             }
@@ -101,10 +119,10 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
+<body class="bg-slate-50 text-slate-800 font-sans antialiased h-screen overflow-hidden flex flex-col">
 
-    <!-- Header Navbar Sticky -->
-    <header class="bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white shadow-lg sticky top-0 z-50">
+    <!-- Header Navbar -->
+    <header class="shrink-0 bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white shadow-lg z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
                 <div class="p-2 bg-brand-500/20 rounded-xl border border-brand-500/30">
@@ -133,36 +151,36 @@
     </header>
 
     <!-- Conteúdo Principal -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow space-y-6">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 w-full flex-1 min-h-0 flex flex-col overflow-hidden">
 
-        <!-- Card da Tabela -->
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6">
+        <!-- Card da Tabela (painel fixo; somente os itens rolam) -->
+        <div class="panel-card flex-1 min-h-0 flex flex-col gap-3 bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4">
             
             <!-- Barra de Ação Superior da Tabela -->
-            <div class="actions-bar flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4">
+            <div class="actions-bar shrink-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-2">
                 <div>
-                    <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                    <h2 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
                         <i class="fa-solid fa-list-check text-brand-600"></i> Itens da Reforma
                     </h2>
-                    <p class="text-xs text-slate-500">Adicione ou edite os materiais, peças e mão de obra abaixo</p>
+                    <p class="text-[11px] leading-tight text-slate-500">Adicione ou edite os materiais, peças e mão de obra abaixo</p>
                 </div>
                 
-                <button onclick="adicionarLinha()" class="btn btn-add no-print flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg shadow-sm transition">
+                <button onclick="adicionarLinha()" class="btn btn-add no-print flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg shadow-sm transition">
                     <i class="fa-solid fa-plus"></i> Adicionar Item
                 </button>
             </div>
 
-            <!-- Tabela Responsiva -->
-            <div class="table-responsive overflow-x-auto">
+            <!-- Tabela Responsiva com rolagem vertical -->
+            <div class="table-responsive flex-1 min-h-0 overflow-auto">
                 <table id="tabelaReforma" class="w-full text-left border-collapse text-xs">
                     <thead>
                         <tr class="bg-slate-900 text-white uppercase tracking-wider font-semibold">
-                            <th style="width: 18%;" class="py-3 px-3 rounded-l-lg">Tipo</th>
-                            <th style="width: 32%;" class="py-3 px-3">Descrição</th>
-                            <th style="width: 10%;" class="py-3 px-3 text-center">Qtd</th>
-                            <th style="width: 15%;" class="py-3 px-3 text-right">Valor Unitário (R$)</th>
-                            <th style="width: 15%;" class="py-3 px-3 text-right">Subtotal (R$)</th>
-                            <th style="width: 10%;" class="py-3 px-3 text-center rounded-r-lg no-print">Ações</th>
+                            <th style="width: 18%;" class="py-2 px-3 rounded-l-lg">Tipo</th>
+                            <th style="width: 32%;" class="py-2 px-3">Descrição</th>
+                            <th style="width: 10%;" class="py-2 px-3 text-center">Qtd</th>
+                            <th style="width: 15%;" class="py-2 px-3 text-right">Valor Unitário (R$)</th>
+                            <th style="width: 15%;" class="py-2 px-3 text-right">Subtotal (R$)</th>
+                            <th style="width: 10%;" class="py-2 px-3 text-center rounded-r-lg no-print">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="corpoTabela" class="divide-y divide-slate-100 font-medium">
@@ -172,9 +190,9 @@
             </div>
 
             <!-- Card de Total Geral -->
-            <div class="total-container total-card bg-emerald-50 border border-emerald-200/80 rounded-xl p-4 flex flex-col sm:flex-row justify-between sm:justify-end items-center gap-2 text-slate-800">
-                <span class="text-sm font-semibold text-emerald-950 uppercase tracking-wide">Total Geral da Reforma:</span>
-                <span id="totalGeral" class="text-2xl font-extrabold text-emerald-600">R$ 0,00</span>
+            <div class="total-container total-card shrink-0 bg-emerald-50 border border-emerald-200/80 rounded-lg px-3 py-2 flex flex-row justify-between sm:justify-end items-center gap-3 text-slate-800">
+                <span class="text-xs font-semibold text-emerald-950 uppercase tracking-wide">Total Geral da Reforma:</span>
+                <span id="totalGeral" class="text-base font-extrabold text-emerald-600">R$ 0,00</span>
             </div>
 
         </div>
@@ -182,10 +200,9 @@
     </main>
 
     <!-- Rodapé -->
-    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+    <footer class="shrink-0 bg-white border-t border-slate-200 py-2 text-center text-xs text-slate-500">
         <div class="max-w-7xl mx-auto px-4">
-            <p>Controle e Gestão de Gastos da Reforma.</p>
-            <p class="mt-1 text-slate-400">&copy; Todos os direitos reservados.</p>
+            <p>Controle e Gestão de Gastos da Reforma. <span class="text-slate-400">&copy; Todos os direitos reservados.</span></p>
         </div>
     </footer>
 
