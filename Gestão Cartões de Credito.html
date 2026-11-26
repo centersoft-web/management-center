@@ -4,109 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão de Cartões de Crédito</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#0369a1',
-                            700: '#035485',
-                            800: '#075985',
-                            900: '#0c4a6e',
-                        },
-                        emerald: {
-                            500: '#10b981',
-                            600: '#059669',
-                            700: '#047857',
-                        }
+                        brand: { 50:'#f0f9ff',100:'#e0f2fe',500:'#0284c7',600:'#0369a1',700:'#035485',800:'#075985',900:'#0c4a6e' },
+                        emerald: { 500:'#10b981',600:'#059669',700:'#047857' }
                     }
                 }
             }
         }
     </script>
     <style>
-        /* Scrollbar personalizada */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Cabeçalho da tabela fixo ao rolar o corpo */
+        .table-container thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #0f172a;
         }
 
-        /* Elemento de Cabeçalho de Impressão (Escondido na tela) */
         #print-header { display: none; }
 
-        /* Estilos de Impressão */
         @media print {
+            html, body { height: auto !important; overflow: visible !important; }
+            main, #section-cartao, .table-container {
+                flex: none !important;
+                height: auto !important;
+                min-height: 0 !important;
+                overflow: visible !important;
+            }
             header, .no-print, button, input[type="file"], .add-form {
                 display: none !important;
             }
-            body {
-                background: white !important;
-                color: black !important;
-            }
-            #print-header { 
-                display: block !important; 
-                text-align: center; 
-                margin-bottom: 20px; 
+            body { background: white !important; color: black !important; }
+            #print-header {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 20px;
                 border-bottom: 2px solid #0f172a;
                 padding-bottom: 10px;
             }
             #print-header h2 { margin: 0; font-size: 20px; text-transform: uppercase; color: #0f172a; font-weight: 800; }
             #print-header p { margin: 4px 0 0; font-size: 12px; color: #475569; font-weight: 600; }
-
-            main {
-                max-width: 100% !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            .shadow-sm, .shadow-xl, .shadow-lg {
-                box-shadow: none !important;
-            }
-            .border {
-                border-color: #e2e8f0 !important;
-            }
-            table {
-                width: 100% !important;
-                border: 1px solid #cbd5e1 !important;
-            }
+            main { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+            .shadow-sm, .shadow-xl, .shadow-lg { box-shadow: none !important; }
+            .border { border-color: #e2e8f0 !important; }
+            table { width: 100% !important; border: 1px solid #cbd5e1 !important; }
             th {
                 background-color: #0f172a !important;
                 color: white !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
-            td input {
-                border: none !important;
-                background: transparent !important;
-                padding: 0 !important;
-                font-weight: 600 !important;
-            }
+            td input { border: none !important; background: transparent !important; padding: 0 !important; font-weight: 600 !important; }
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
+<body class="bg-slate-50 text-slate-800 font-sans antialiased h-screen overflow-hidden flex flex-col">
 
     <div id="print-header">
         <h2>Relatório de Cartões de Crédito</h2>
@@ -114,8 +79,7 @@
         <p>Data de emissão: <span id="print-date"></span></p>
     </div>
 
-    <!-- Header Navbar Sticky -->
-    <header class="bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white shadow-lg sticky top-0 z-50">
+    <header class="shrink-0 bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white shadow-lg z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
                 <div class="p-2 bg-brand-500/20 rounded-xl border border-brand-500/30">
@@ -131,7 +95,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="flex items-center gap-2 flex-wrap justify-center no-print">
                 <button onclick="exportarDados()" class="btn flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs px-3.5 py-2 rounded-lg shadow-sm transition">
                     <i class="fa-solid fa-file-export"></i> Exportar
@@ -148,33 +112,30 @@
         </div>
     </header>
 
-    <!-- Conteúdo Principal -->
-    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow space-y-6">
+    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 w-full flex-1 min-h-0 flex flex-col overflow-hidden">
 
-        <div id="section-cartao" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6">
-            
-            <!-- Form de Adição -->
-            <div class="add-form bg-slate-50 border border-slate-200/80 p-4 rounded-xl space-y-3 no-print">
-                <div class="border-b border-slate-200 pb-2">
-                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+        <div id="section-cartao" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 flex-1 min-h-0 flex flex-col gap-4">
+
+            <!-- Form de Adição (botão inline) -->
+            <div class="add-form shrink-0 bg-slate-50 border border-slate-200/80 p-3 rounded-xl space-y-2 no-print">
+                <div class="border-b border-slate-200 pb-1.5">
+                    <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
                         <i class="fa-solid fa-plus-circle text-brand-600"></i> Adicionar Novo Cartão
                     </h2>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <input type="text" id="cartaoF1" placeholder="Nome do Cartão (ex: Itaú)" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
-                    <input type="text" id="cartaoF2" placeholder="Banco (ex: Itaú Pagamentos)" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
-                    <input type="text" id="cartaoF3" placeholder="Número (16 dígitos)" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
-                    <input type="text" id="cartaoF4" placeholder="Link do Portal/Fatura" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
-                </div>
-                <div class="flex justify-end pt-1">
-                    <button class="bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs px-5 py-2 rounded-lg shadow-sm transition flex items-center gap-2" onclick="addItem()">
+                <div class="flex flex-wrap gap-2 items-center">
+                    <input type="text" id="cartaoF1" placeholder="Nome do Cartão (ex: Itaú)" class="flex-1 min-w-[150px] px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                    <input type="text" id="cartaoF2" placeholder="Banco (ex: Itaú Pagamentos)" class="flex-1 min-w-[150px] px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                    <input type="text" id="cartaoF3" placeholder="Número (16 dígitos)" class="flex-1 min-w-[150px] px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                    <input type="text" id="cartaoF4" placeholder="Link do Portal/Fatura" class="flex-1 min-w-[150px] px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                    <button class="shrink-0 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs px-5 py-2 rounded-lg shadow-sm transition flex items-center justify-center gap-2 whitespace-nowrap" onclick="addItem()">
                         <i class="fa-solid fa-plus"></i> Adicionar
                     </button>
                 </div>
             </div>
 
-            <!-- Tabela Responsiva -->
-            <div class="table-container overflow-x-auto">
+            <!-- Tabela com cabeçalho fixo + scroll vertical no corpo -->
+            <div class="table-container flex-1 min-h-0 overflow-auto rounded-lg">
                 <table class="w-full text-left border-collapse text-xs">
                     <thead>
                         <tr class="bg-slate-900 text-white uppercase tracking-wider font-semibold">
@@ -193,8 +154,7 @@
 
     </main>
 
-    <!-- Rodapé -->
-    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+    <footer class="shrink-0 bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500">
         <div class="max-w-7xl mx-auto px-4">
             <p>Gestão e Organização de Cartões de Crédito.</p>
             <p class="mt-1 text-slate-400">&copy; Todos os direitos reservados.</p>
@@ -228,7 +188,7 @@
             const body = document.getElementById(`body-cartao`);
             if (!body) return;
             body.innerHTML = '';
-            
+
             document.getElementById('nome-usuario').value = data.usuario || "";
             syncPrintHeader();
 
@@ -271,12 +231,12 @@
         function addItem() {
             const f1Val = document.getElementById('cartaoF1').value;
             if (!f1Val) return;
-            data.cartao.push({ 
-                id: Date.now(), 
-                nome: f1Val, 
+            data.cartao.push({
+                id: Date.now(),
+                nome: f1Val,
                 cidade: document.getElementById('cartaoF2').value,
                 insc: document.getElementById('cartaoF3').value,
-                link: document.getElementById('cartaoF4').value 
+                link: document.getElementById('cartaoF4').value
             });
             limparFormulario();
             render();
@@ -300,7 +260,7 @@
         }
 
         function removeItem(index) {
-            if(confirm("Excluir este cartão?")) { data.cartao.splice(index, 1); render(); }
+            if (confirm("Excluir este cartão?")) { data.cartao.splice(index, 1); render(); }
         }
 
         function limparFormulario() {
@@ -308,7 +268,7 @@
         }
 
         function copiar(texto, btn) {
-            if(!texto || texto === "") return;
+            if (!texto || texto === "") return;
             navigator.clipboard.writeText(texto);
             const old = btn.innerText; btn.innerText = "Copiado!";
             setTimeout(() => { btn.innerText = old; }, 1000);
@@ -323,7 +283,7 @@
             const min = String(agora.getMinutes()).padStart(2, '0');
             const nomeArquivo = `Cartões_de_Crédito_${ano}_${dia}-${mes}-${ano}_${hora}h${min}.json`;
 
-            const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+            const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -334,11 +294,11 @@
 
         function importarDados(e) {
             const reader = new FileReader();
-            reader.onload = (ev) => { 
-                try { 
+            reader.onload = (ev) => {
+                try {
                     const imported = JSON.parse(ev.target.result);
-                    if(imported.cartao) { data = imported; render(); }
-                } catch(err) { alert("Arquivo inválido."); } 
+                    if (imported.cartao) { data = imported; render(); }
+                } catch (err) { alert("Arquivo inválido."); }
             };
             reader.readAsText(e.target.files[0]);
         }
