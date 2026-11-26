@@ -49,6 +49,32 @@
             background: #94a3b8;
         }
 
+        /* Tabela com cabeçalho congelado e rolagem vertical */
+        .table-container {
+            overflow-y: scroll;
+            background: #fff;
+        }
+        /* Tela: a página não rola; só a tabela rola, com o cabeçalho fixo */
+        @media screen {
+            .table-container { max-height: 65vh; min-height: 220px; }
+        }
+        @media screen and (min-width: 640px) and (min-height: 560px) {
+            body { height: 100vh; height: 100dvh; overflow: hidden; }
+            main { min-height: 0; display: flex; flex-direction: column; padding-top: 0.5rem; padding-bottom: 0.75rem; }
+            #section-bancos { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+            .table-container { flex: 1 1 auto; min-height: 0; max-height: none; }
+            footer { flex-shrink: 0; padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+            header { flex-shrink: 0; }
+        }
+        .table-container thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: #0f172a;
+            color: #fff;
+            box-shadow: 0 1px 0 #0f172a;
+        }
+
         /* Elemento de Cabeçalho de Impressão (Escondido na tela) */
         #print-header { display: none; }
 
@@ -82,6 +108,14 @@
             .border {
                 border-color: #e2e8f0 !important;
             }
+            .table-container {
+                height: auto !important;
+                min-height: 0 !important;
+                max-height: none !important;
+                overflow: visible !important;
+                border: none !important;
+            }
+            .table-container thead th { position: static !important; }
             table {
                 width: 100% !important;
                 border: 1px solid #cbd5e1 !important;
@@ -144,46 +178,42 @@
     </header>
 
     <!-- Conteúdo Principal -->
-    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow space-y-6">
+    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-6 w-full flex-grow space-y-6">
 
-        <div id="section-bancos" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6">
+        <div id="section-bancos" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm px-6 pb-6 pt-3 space-y-3">
             
             <!-- Form de Adição -->
-            <div class="add-form bg-slate-50 border border-slate-200/80 p-4 rounded-xl space-y-3 no-print">
-                <div class="border-b border-slate-200 pb-2">
-                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
-                        <i class="fa-solid fa-plus-circle text-brand-600"></i> Adicionar Nova Conta Bancária
-                    </h2>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <input type="text" id="bancoF1" placeholder="Instituição (Ex: Itaú)" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
-                    <select id="bancoF2" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+            <div class="add-form bg-slate-50 border border-slate-200/80 px-3 py-2 rounded-xl space-y-1.5 no-print">
+                <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                    <i class="fa-solid fa-plus-circle text-brand-600"></i> Adicionar Nova Conta Bancária
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1.2fr_auto] gap-2 items-center">
+                    <input type="text" id="bancoF1" placeholder="Instituição (Ex: Itaú)" class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                    <select id="bancoF2" class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
                         <option value="Corrente">Conta Corrente</option>
                         <option value="Poupança">Poupança</option>
                         <option value="Investimento">Investimento</option>
                         <option value="Digital">Conta Digital</option>
                     </select>
-                    <input type="text" id="bancoF3" placeholder="Agência / Conta" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
-                    <input type="text" id="bancoF4" placeholder="Link Internet Banking" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
-                </div>
-                <div class="flex justify-end pt-1">
-                    <button class="bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs px-5 py-2 rounded-lg shadow-sm transition flex items-center gap-2" onclick="addItem()">
+                    <input type="text" id="bancoF3" placeholder="Agência / Conta" class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                    <input type="text" id="bancoF4" placeholder="Link Internet Banking" class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                    <button class="bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs px-4 py-1.5 rounded-lg shadow-sm transition flex items-center justify-center gap-2 whitespace-nowrap" onclick="addItem()">
                         <i class="fa-solid fa-plus"></i> Adicionar
                     </button>
                 </div>
             </div>
 
             <!-- Tabela Responsiva -->
-            <div class="table-container overflow-x-auto">
+            <div class="table-container overflow-auto border border-slate-200 rounded-lg">
                 <table class="w-full text-left border-collapse text-xs">
                     <thead>
-                        <tr class="bg-slate-900 text-white uppercase tracking-wider font-semibold">
-                            <th class="no-print py-3 px-3 rounded-l-lg text-center" style="width: 80px;">Ordem</th>
+                        <tr class="uppercase tracking-wider font-semibold">
+                            <th class="no-print py-3 px-3 text-center" style="width: 80px;">Ordem</th>
                             <th class="py-3 px-3">Instituição</th>
                             <th class="py-3 px-3">Tipo</th>
                             <th class="py-3 px-3">Dados Bancários</th>
                             <th class="py-3 px-3">Acesso</th>
-                            <th class="no-print py-3 px-3 text-center rounded-r-lg">Ações</th>
+                            <th class="no-print py-3 px-3 text-center">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="body-bancos" class="divide-y divide-slate-100 font-medium"></tbody>
