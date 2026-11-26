@@ -28,20 +28,32 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
+        /* Cabeçalho da tabela fixo ao rolar a lista de itens */
+        .table-container thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #0f172a;
+        }
+
         @media print {
             .no-print { display: none !important; }
+            html, body { height: auto !important; overflow: visible !important; }
             body { background: white !important; color: black !important; zoom: 80%; }
+            main, #main-content, .view-section, .view-section > div {
+                flex: none !important; height: auto !important; min-height: 0 !important; overflow: visible !important;
+            }
             main { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
             header, nav { display: none !important; }
             th:nth-child(1), td:nth-child(1) { display: none !important; }
-            .table-container { border: none !important; box-shadow: none !important; }
+            .table-container { border: none !important; box-shadow: none !important; overflow: visible !important; flex: none !important; }
             th, td { border-bottom: 1px solid #ddd !important; }
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
+<body class="bg-slate-50 text-slate-800 font-sans antialiased h-screen overflow-hidden flex flex-col">
 
-    <header class="bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white shadow-lg sticky top-0 z-50 no-print">
+    <header class="shrink-0 bg-gradient-to-r from-slate-900 via-brand-900 to-slate-900 text-white shadow-lg z-50 no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
                 <div class="p-2 bg-brand-500/20 rounded-xl border border-brand-500/30">
@@ -64,45 +76,44 @@
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow">
-        <div class="space-y-6">
-            <div class="bg-white rounded-2xl border border-slate-200/80 p-3 shadow-sm no-print">
-                <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-1.5" id="category-tabs">
-                    <button onclick="switchTab('imoveis')" id="tab-imoveis" class="cat-btn py-2 px-1 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-lg text-xs text-slate-700 transition shadow-sm flex items-center justify-center gap-1.5 !border-brand-600 !text-brand-600 !bg-brand-50 shadow-inner">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 w-full flex-1 min-h-0 flex flex-col overflow-hidden">
+        <div class="flex-1 min-h-0 flex flex-col gap-2">
+            <div class="shrink-0 bg-white rounded-xl border border-slate-200/80 p-1.5 shadow-sm no-print">
+                <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-1" id="category-tabs">
+                    <button onclick="switchTab('imoveis')" id="tab-imoveis" class="cat-btn py-1.5 px-1 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-lg text-xs text-slate-700 transition shadow-sm flex items-center justify-center gap-1.5 !border-brand-600 !text-brand-600 !bg-brand-50 shadow-inner">
                         <i class="fa-solid fa-house"></i> Imóveis
                     </button>
-                    <button onclick="switchTab('matriculas')" id="tab-matriculas" class="cat-btn py-2 px-1 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-lg text-xs text-slate-700 transition shadow-sm flex items-center justify-center gap-1.5">
+                    <button onclick="switchTab('matriculas')" id="tab-matriculas" class="cat-btn py-1.5 px-1 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-lg text-xs text-slate-700 transition shadow-sm flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-scroll"></i> Matrículas
                     </button>
-                    <button onclick="switchTab('condominios')" id="tab-condominios" class="cat-btn py-2 px-1 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-lg text-xs text-slate-700 transition shadow-sm flex items-center justify-center gap-1.5">
+                    <button onclick="switchTab('condominios')" id="tab-condominios" class="cat-btn py-1.5 px-1 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-lg text-xs text-slate-700 transition shadow-sm flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-city"></i> Condomínios
                     </button>
-                    <button onclick="switchTab('luz')" id="tab-luz" class="cat-btn py-2 px-1 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-lg text-xs text-slate-700 transition shadow-sm flex items-center justify-center gap-1.5">
+                    <button onclick="switchTab('luz')" id="tab-luz" class="cat-btn py-1.5 px-1 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-lg text-xs text-slate-700 transition shadow-sm flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-bolt"></i> Luz
                     </button>
-                    <button onclick="switchTab('agua')" id="tab-agua" class="cat-btn py-2 px-1 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-lg text-xs text-slate-700 transition shadow-sm flex items-center justify-center gap-1.5">
+                    <button onclick="switchTab('agua')" id="tab-agua" class="cat-btn py-1.5 px-1 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-lg text-xs text-slate-700 transition shadow-sm flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-droplet"></i> Água
                     </button>
-                    <button onclick="switchTab('telefone')" id="tab-telefone" class="cat-btn py-2 px-1 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-lg text-xs text-slate-700 transition shadow-sm flex items-center justify-center gap-1.5">
+                    <button onclick="switchTab('telefone')" id="tab-telefone" class="cat-btn py-1.5 px-1 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-lg text-xs text-slate-700 transition shadow-sm flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-phone"></i> Telefone
                     </button>
-                    <button onclick="switchTab('gas')" id="tab-gas" class="cat-btn py-2 px-1 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-lg text-xs text-slate-700 transition shadow-sm flex items-center justify-center gap-1.5">
+                    <button onclick="switchTab('gas')" id="tab-gas" class="cat-btn py-1.5 px-1 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-lg text-xs text-slate-700 transition shadow-sm flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-fire"></i> Gás
                     </button>
-                    <button onclick="switchTab('saude')" id="tab-saude" class="cat-btn py-2 px-1 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-lg text-xs text-slate-700 transition shadow-sm flex items-center justify-center gap-1.5">
+                    <button onclick="switchTab('saude')" id="tab-saude" class="cat-btn py-1.5 px-1 text-center border border-slate-200 bg-slate-50 hover:bg-slate-100 font-bold rounded-lg text-xs text-slate-700 transition shadow-sm flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-notes-medical"></i> Saúde
                     </button>
                 </div>
             </div>
 
-            <div id="main-content"></div>
+            <div id="main-content" class="flex-1 min-h-0 flex flex-col"></div>
         </div>
     </main>
 
-    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500 no-print">
+    <footer class="shrink-0 bg-white border-t border-slate-200 py-1.5 text-center text-[11px] text-slate-500 no-print">
         <div class="max-w-7xl mx-auto px-4">
-            <p>Sistema Integrado de Gestão Patrimonial e Utilitários.</p>
-            <p class="mt-1 text-slate-400">&copy; Gestão Patrimonial - Todos os direitos reservados.</p>
+            <p>Sistema Integrado de Gestão Patrimonial e Utilitários. &copy; Gestão Patrimonial - Todos os direitos reservados.</p>
         </div>
     </footer>
 
@@ -179,7 +190,7 @@
                 const cfg = categoryConfig[cat];
                 const section = document.createElement('div');
                 section.id = `section-${cat}`;
-                section.className = `view-section ${cat === 'imoveis' ? 'block' : 'hidden'}`;
+                section.className = `view-section flex-1 min-h-0 flex-col ${cat === 'imoveis' ? 'flex' : 'hidden'}`;
 
                 const inputs = cfg.fields.map((placeholder, i) => {
                     const extra = (cat === 'telefone' && i === 2) ? 'oninput="maskTel(this)" maxlength="15"' : '';
@@ -189,20 +200,20 @@
                 const headers = cfg.fields.map(f => `<th class="py-3 px-3 text-left">${f}</th>`).join('');
 
                 section.innerHTML = `
-                    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm space-y-4">
-                        <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+                    <div class="flex-1 min-h-0 flex flex-col gap-2 bg-white rounded-2xl border border-slate-200/80 p-3 shadow-sm">
+                        <div class="shrink-0 flex items-center gap-2 border-b border-slate-100 pb-2">
                             <i class="fa-solid ${cfg.icon} text-brand-600 text-lg"></i>
                             <h2 class="text-base font-bold text-slate-900">${cfg.label}</h2>
                         </div>
 
-                        <div class="no-print bg-slate-50 p-3.5 rounded-xl border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5">
+                        <div class="shrink-0 no-print bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2">
                             ${inputs}
                             <button class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-sm flex items-center justify-center gap-1.5" onclick="addItem('${cat}')">
                                 <i class="fa-solid fa-plus-circle"></i> Adicionar
                             </button>
                         </div>
 
-                        <div class="table-container overflow-x-auto rounded-xl border border-slate-200">
+                        <div class="table-container flex-1 min-h-0 overflow-auto rounded-xl border border-slate-200">
                             <table class="w-full text-left text-xs border-collapse">
                                 <thead>
                                     <tr class="bg-slate-900 text-white font-bold uppercase tracking-wider text-[11px]">
@@ -229,14 +240,14 @@
 
         function switchTab(tab) {
             document.querySelectorAll('.view-section').forEach(s => {
-                s.classList.remove('block');
+                s.classList.remove('flex');
                 s.classList.add('hidden');
             });
             document.querySelectorAll('.cat-btn').forEach(n => {
                 n.classList.remove('!border-brand-600', '!text-brand-600', '!bg-brand-50', 'shadow-inner');
             });
             const target = document.getElementById('section-' + tab);
-            if (target) { target.classList.remove('hidden'); target.classList.add('block'); }
+            if (target) { target.classList.remove('hidden'); target.classList.add('flex'); }
             const targetTab = document.getElementById('tab-' + tab);
             if (targetTab) targetTab.classList.add('!border-brand-600', '!text-brand-600', '!bg-brand-50', 'shadow-inner');
         }
