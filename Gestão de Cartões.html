@@ -49,8 +49,34 @@
             background: #94a3b8;
         }
 
+        /* Cabeçalho da tabela fixo ao rolar a lista de itens */
+        .table-container thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #0f172a;
+        }
+
+        /* Linha de total fixa na parte inferior da lista */
+        .table-container tfoot td {
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+            background: #f1f5f9;
+        }
+
         /* Estilos de Impressão */
         @media print {
+            html, body {
+                height: auto !important;
+                overflow: visible !important;
+            }
+            main, .panel-card, .table-container {
+                flex: none !important;
+                height: auto !important;
+                min-height: 0 !important;
+                overflow: visible !important;
+            }
             header, .no-print, button, input[type="file"], .add-form {
                 display: none !important;
             }
@@ -89,10 +115,10 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
+<body class="bg-slate-50 text-slate-800 font-sans antialiased h-screen overflow-hidden flex flex-col">
 
-    <!-- Header Navbar Sticky -->
-    <header class="bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 text-white shadow-lg sticky top-0 z-50">
+    <!-- Header Navbar -->
+    <header class="shrink-0 bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 text-white shadow-lg z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
                 <div class="p-2 bg-indigo-500/20 rounded-xl border border-indigo-500/30">
@@ -123,76 +149,76 @@
     </header>
 
     <!-- Conteúdo Principal -->
-    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow space-y-6">
+    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 w-full flex-1 min-h-0 flex flex-col overflow-hidden">
 
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-6">
+        <!-- Painel fixo; somente os itens rolam -->
+        <div class="panel-card flex-1 min-h-0 flex flex-col gap-3 bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4">
             
             <!-- Form de Cadastro e Edição -->
-            <div class="add-form bg-slate-50 border border-slate-200/80 p-4 rounded-xl space-y-3 no-print" id="compraForm">
-                <div class="border-b border-slate-200 pb-2">
-                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+            <div class="add-form shrink-0 bg-slate-50 border border-slate-200/80 p-2.5 rounded-xl space-y-2 no-print" id="compraForm">
+                <div class="border-b border-slate-200 pb-1.5">
+                    <h2 class="text-[11px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
                         <i class="fa-solid fa-plus-circle text-brand-600"></i> Cadastrar / Editar Compra Parcelada
                     </h2>
                 </div>
                 
                 <input type="hidden" id="editId">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-2 items-end">
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Cartão</label>
-                        <input type="text" id="cartaoNome" placeholder="Ex: Visa Itaú" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Cartão</label>
+                        <input type="text" id="cartaoNome" placeholder="Ex: Visa Itaú" class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Descrição</label>
-                        <input type="text" id="descricao" placeholder="O que comprou?" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Descrição</label>
+                        <input type="text" id="descricao" placeholder="O que comprou?" class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Valor Total (R$)</label>
-                        <input type="number" id="valorTotal" step="0.01" placeholder="0.00" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Valor Total (R$)</label>
+                        <input type="number" id="valorTotal" step="0.01" placeholder="0.00" class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Nº Parcelas</label>
-                        <input type="number" id="parcelas" placeholder="Ex: 10" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Nº Parcelas</label>
+                        <input type="number" id="parcelas" placeholder="Ex: 10" class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Data da Compra</label>
-                        <input type="date" id="dataInicio" title="Data da Compra" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Data da Compra</label>
+                        <input type="date" id="dataInicio" title="Data da Compra" class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Dia Vencimento</label>
-                        <input type="number" id="diaVencimento" placeholder="Ex: 15" min="1" max="31" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+                        <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Dia Vencimento</label>
+                        <input type="number" id="diaVencimento" placeholder="Ex: 15" min="1" max="31" class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
                     </div>
-                </div>
-
-                <div class="flex justify-end gap-2 pt-2">
-                    <button id="btnAdd" class="bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs px-5 py-2 rounded-lg shadow-sm transition flex items-center gap-2" onclick="adicionarCompra()">
-                        <i class="fa-solid fa-plus"></i> Adicionar
-                    </button>
-                    <button id="btnUpdate" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-5 py-2 rounded-lg shadow-sm transition hidden flex items-center gap-2" onclick="salvarEdicao()">
-                        <i class="fa-solid fa-floppy-disk"></i> Salvar Alteração
-                    </button>
+                    <div class="flex gap-2">
+                        <button id="btnAdd" class="bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg shadow-sm transition flex items-center gap-2 whitespace-nowrap" onclick="adicionarCompra()">
+                            <i class="fa-solid fa-plus"></i> Adicionar
+                        </button>
+                        <button id="btnUpdate" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg shadow-sm transition hidden items-center gap-2 whitespace-nowrap" onclick="salvarEdicao()">
+                            <i class="fa-solid fa-floppy-disk"></i> Salvar Alteração
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Tabela Responsiva -->
-            <div class="table-container overflow-x-auto">
+            <!-- Tabela com rolagem vertical -->
+            <div class="table-container flex-1 min-h-0 overflow-auto">
                 <table class="w-full text-left border-collapse text-xs">
                     <thead>
                         <tr class="bg-slate-900 text-white uppercase tracking-wider font-semibold">
-                            <th class="no-print py-3 px-3 rounded-l-lg text-center" style="width: 70px;">Ordem</th>
-                            <th class="py-3 px-3">Cartão</th>
-                            <th class="py-3 px-3">Descrição</th>
-                            <th class="py-3 px-3">Progresso</th>
-                            <th class="py-3 px-3">Valor Parcela</th>
-                            <th class="py-3 px-3">Saldo Devedor</th>
-                            <th class="py-3 px-3">Finaliza em</th>
-                            <th class="no-print py-3 px-3 text-center rounded-r-lg">Ações</th>
+                            <th class="no-print py-2 px-3 rounded-l-lg text-center" style="width: 70px;">Ordem</th>
+                            <th class="py-2 px-3">Cartão</th>
+                            <th class="py-2 px-3">Descrição</th>
+                            <th class="py-2 px-3">Progresso</th>
+                            <th class="py-2 px-3">Valor Parcela</th>
+                            <th class="py-2 px-3">Saldo Devedor</th>
+                            <th class="py-2 px-3">Finaliza em</th>
+                            <th class="no-print py-2 px-3 text-center rounded-r-lg">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="listaCompras" class="divide-y divide-slate-100 font-medium"></tbody>
                     <tfoot>
-                        <tr class="bg-slate-100 font-bold text-slate-800 border-t-2 border-slate-200">
-                            <td colspan="5" class="py-3 px-4 text-right uppercase tracking-wider text-[11px]">TOTAL DE DÉBITO RESTANTE:</td>
-                            <td id="valorDebitoTotal" class="py-3 px-3 text-rose-600 font-extrabold text-sm">R$ 0,00</td>
+                        <tr class="font-bold text-slate-800 border-t-2 border-slate-200">
+                            <td colspan="5" class="py-2 px-4 text-right uppercase tracking-wider text-[11px]">TOTAL DE DÉBITO RESTANTE:</td>
+                            <td id="valorDebitoTotal" class="py-2 px-3 text-rose-600 font-extrabold text-sm">R$ 0,00</td>
                             <td colspan="2" class="no-print"></td>
                         </tr>
                     </tfoot>
@@ -203,10 +229,9 @@
     </main>
 
     <!-- Rodapé -->
-    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+    <footer class="shrink-0 bg-white border-t border-slate-200 py-2 text-center text-xs text-slate-500">
         <div class="max-w-7xl mx-auto px-4">
-            <p>Controle de Compras Parceladas e Débitos Pendentes.</p>
-            <p class="mt-1 text-slate-400">&copy; Todos os direitos reservados.</p>
+            <p>Controle de Compras Parceladas e Débitos Pendentes. <span class="text-slate-400">&copy; Todos os direitos reservados.</span></p>
         </div>
     </footer>
 
